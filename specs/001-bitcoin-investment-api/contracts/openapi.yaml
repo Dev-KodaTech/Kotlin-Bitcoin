@@ -426,12 +426,17 @@ components:
             - INVALID_AMOUNT
             - INVALID_CREDENTIALS
             - UNAUTHORIZED
+            - NOT_FOUND
             - EMAIL_ALREADY_IN_USE
             - INSUFFICIENT_BALANCE
             - REDEMPTION_EXCEEDS_AVAILABLE
             - INVALID_DATE_RANGE
             - QUOTE_UNAVAILABLE
             - SERVICE_UNAVAILABLE
+            - INTERNAL_ERROR
+          description: >-
+            NOT_FOUND (404) só para rota inexistente e INTERNAL_ERROR (500) só para falha inesperada;
+            nenhum dos dois é erro de negócio. Rotas de framework com 405/406/415 usam VALIDATION_ERROR com o status original.
         detail: { type: string, description: Mensagem em português, sem detalhes internos }
         instance: { type: string }
         correlationId: { type: string }

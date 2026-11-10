@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- JSON logs on stdout with the request correlation id (R-11). Secrets are masked, never logged (FR-007). -->
+<configuration>
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="kotlin-bitcoins"/>
+
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>correlationId</includeMdcKeyName>
+            <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+                <defaultMask>****</defaultMask>
+                <!-- Field names at any depth (structured arguments, MDC, markers). -->
+                <path>password</path>
+                <path>token</path>
+                <path>accessToken</path>
+                <path>Authorization</path>
+                <path>authorization</path>
+                <!-- Values inside free text, e.g. a header echoed in a message. -->
+                <value>(?i)bearer\s+[A-Za-z0-9._~+/=-]+</value>
+                <value>eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*</value>
+                <!-- key=value rendered into the message (e.g. StructuredArguments.kv) and "key":"value" in text. -->
+                <value>(?i)(?&lt;=\b(password|token|accesstoken|authorization)=)\S+</value>
+                <value>(?i)(?&lt;="(password|token|accesstoken|authorization)"\s?:\s?")[^"]+</value>
+            </jsonGeneratorDecorator>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="JSON"/>
+    </root>
+</configuration>

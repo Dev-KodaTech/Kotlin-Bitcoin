@@ -1,0 +1,7 @@
+server:
+  # Behind Nginx: trust X-Forwarded-* headers.
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    root: INFO

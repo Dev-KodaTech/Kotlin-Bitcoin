@@ -15,6 +15,8 @@ dependencies {
     implementation(libs.spring.boot.starter.security)
     implementation(libs.spring.boot.starter.oauth2.resource.server)
     implementation(libs.spring.boot.starter.actuator)
+    // Only for @EnableJpaRepositories/@EntityScan and PlatformTransactionManager when wiring the adapters.
+    implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.logstash.logback.encoder)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.kotlin.reflect)

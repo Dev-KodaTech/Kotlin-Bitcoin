@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: kotlin-bitcoins
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+
+server:
+  shutdown: graceful
+
+app:
+  jwt:
+    # HS256 secret, at least 32 bytes. Only ever provided by the environment.
+    secret: ${JWT_SECRET}
+    ttl: 1h
+  business-zone: America/Sao_Paulo
+
+quote:
+  provider:
+    url: ${QUOTE_PROVIDER_URL:https://www.mercadobitcoin.net/api/BTC/ticker/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true

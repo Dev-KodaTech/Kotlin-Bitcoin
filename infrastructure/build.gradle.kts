@@ -28,3 +28,10 @@ dependencies {
     testImplementation(libs.wiremock)
     testImplementation(libs.mockk)
 }
+
+// JPA entities must be open for Hibernate proxies; kotlin("plugin.jpa") only adds the no-arg constructor.
+allOpen {
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
+}
