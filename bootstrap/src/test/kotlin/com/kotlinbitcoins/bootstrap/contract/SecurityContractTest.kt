@@ -40,9 +40,11 @@ class SecurityContractTest : ApplicationTestBase() {
     fun `token expiry is checked against the application clock`() {
         val token = JwtTestTokens.valid(accountId, clock.now())
 
-        assertThat(statusOf(mockMvc.get(BALANCE) { bearer(token) })).isNotEqualTo(UNAUTHORIZED)
+        // The quote route needs a valid token but not an existing account (the balance route answers 401 for an
+        // unknown account), so a non-401 here can only mean the token itself was accepted.
+        assertThat(statusOf(mockMvc.get(QUOTE) { bearer(token) })).isNotEqualTo(UNAUTHORIZED)
         clock.advance(Duration.ofHours(2))
-        mockMvc.get(BALANCE) { bearer(token) }.andExpectUnauthorized()
+        mockMvc.get(QUOTE) { bearer(token) }.andExpectUnauthorized()
     }
 
     @Test
@@ -90,6 +92,7 @@ class SecurityContractTest : ApplicationTestBase() {
 
     private companion object {
         const val BALANCE = "/api/v1/me/balance"
+        const val QUOTE = "/api/v1/quotes/current"
         const val UNAUTHORIZED = 401
     }
 }

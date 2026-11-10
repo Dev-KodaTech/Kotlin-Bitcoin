@@ -20,6 +20,8 @@ dependencies {
     implementation(libs.spring.boot.starter.mail)
     // Only for @EnableJpaRepositories/@EntityScan and PlatformTransactionManager when wiring the adapters.
     implementation(libs.spring.boot.starter.data.jpa)
+    // Only for StringRedisTemplate when wiring the quote cache.
+    implementation(libs.spring.boot.starter.data.redis)
     implementation(libs.logstash.logback.encoder)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.kotlin.reflect)

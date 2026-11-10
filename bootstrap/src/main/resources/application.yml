@@ -15,6 +15,9 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      # The quote cache is best-effort (R-06): a slow Redis must behave as a missing one, not stall requests.
+      connect-timeout: 1s
+      timeout: 500ms
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
@@ -48,6 +51,8 @@ app:
 quote:
   provider:
     url: ${QUOTE_PROVIDER_URL:https://www.mercadobitcoin.net/api/BTC/ticker/}
+    connect-timeout: 1s
+    read-timeout: 2s
 
 management:
   endpoints:

@@ -8,6 +8,7 @@ import com.kotlinbitcoins.application.account.LoginError
 import com.kotlinbitcoins.application.account.RegisterAccountError
 import com.kotlinbitcoins.application.account.Violation
 import com.kotlinbitcoins.application.port.InfrastructureUnavailable
+import com.kotlinbitcoins.application.quote.QuoteError
 import org.slf4j.MDC
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatusCode
@@ -93,6 +94,11 @@ class ProblemDetailsMapper {
         when (error) {
             GetBalanceError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
             is GetBalanceError.ServiceUnavailable -> serviceUnavailable(error)
+        }
+
+    fun quoteError(error: QuoteError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            QuoteError.QuoteUnavailable -> response(ProblemCode.QUOTE_UNAVAILABLE)
         }
 
     private fun FieldError.message(): String =

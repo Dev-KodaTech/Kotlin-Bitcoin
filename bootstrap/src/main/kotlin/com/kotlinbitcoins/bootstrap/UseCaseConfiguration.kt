@@ -10,9 +10,13 @@ import com.kotlinbitcoins.application.port.Clock
 import com.kotlinbitcoins.application.port.EmailSender
 import com.kotlinbitcoins.application.port.NotificationPublisher
 import com.kotlinbitcoins.application.port.PasswordHasher
+import com.kotlinbitcoins.application.port.QuoteCache
+import com.kotlinbitcoins.application.port.QuoteProvider
 import com.kotlinbitcoins.application.port.TokenIssuer
 import com.kotlinbitcoins.application.port.TransactionRepository
 import com.kotlinbitcoins.application.port.TransactionRunner
+import com.kotlinbitcoins.application.quote.GetCurrentQuote
+import com.kotlinbitcoins.application.quote.QuoteService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -56,4 +60,16 @@ class UseCaseConfiguration {
 
     @Bean
     fun getBalance(accounts: AccountRepository): GetBalance = GetBalance(accounts)
+
+    // US4 — current quote
+
+    @Bean
+    fun quoteService(
+        provider: QuoteProvider,
+        cache: QuoteCache,
+        clock: Clock,
+    ): QuoteService = QuoteService(provider, cache, clock)
+
+    @Bean
+    fun getCurrentQuote(quoteService: QuoteService): GetCurrentQuote = GetCurrentQuote(quoteService)
 }

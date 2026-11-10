@@ -7,6 +7,8 @@ import com.kotlinbitcoins.application.port.Clock
 import com.kotlinbitcoins.application.port.EmailSender
 import com.kotlinbitcoins.application.port.NotificationPublisher
 import com.kotlinbitcoins.application.port.PasswordHasher
+import com.kotlinbitcoins.application.port.QuoteCache
+import com.kotlinbitcoins.application.port.QuoteProvider
 import com.kotlinbitcoins.application.port.TokenIssuer
 import com.kotlinbitcoins.application.port.TransactionRepository
 import com.kotlinbitcoins.application.port.TransactionRunner
@@ -22,6 +24,9 @@ import com.kotlinbitcoins.infrastructure.persistence.account.AccountRepositoryAd
 import com.kotlinbitcoins.infrastructure.persistence.account.SpringDataAccountRepository
 import com.kotlinbitcoins.infrastructure.persistence.ledger.SpringDataTransactionRepository
 import com.kotlinbitcoins.infrastructure.persistence.ledger.TransactionRepositoryAdapter
+import com.kotlinbitcoins.infrastructure.quote.MercadoBitcoinQuoteProvider
+import com.kotlinbitcoins.infrastructure.quote.QuoteProviderProperties
+import com.kotlinbitcoins.infrastructure.quote.RedisQuoteCache
 import com.kotlinbitcoins.infrastructure.security.BCryptPasswordHasher
 import com.kotlinbitcoins.infrastructure.security.JwtTokenIssuer
 import com.kotlinbitcoins.infrastructure.time.SystemClock
@@ -31,6 +36,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.transaction.PlatformTransactionManager
 import java.time.Duration
@@ -43,6 +49,8 @@ import javax.crypto.SecretKey
  */
 @Configuration
 @Import(RabbitConfig::class)
+// Composition root: one @Bean per adapter, so the function count grows with the ports, not with complexity.
+@Suppress("TooManyFunctions")
 class AdapterConfiguration {
     @Bean
     fun clock(): Clock = SystemClock()
@@ -80,6 +88,25 @@ class AdapterConfiguration {
         repository: SpringDataOutboxEventRepository,
         objectMapper: ObjectMapper,
     ): NotificationPublisher = OutboxNotificationPublisher(repository, objectMapper)
+
+    @Bean
+    fun quoteProviderProperties(
+        @Value("\${quote.provider.url}") url: String,
+        @Value("\${quote.provider.connect-timeout}") connectTimeout: Duration,
+        @Value("\${quote.provider.read-timeout}") readTimeout: Duration,
+    ): QuoteProviderProperties = QuoteProviderProperties(url, connectTimeout, readTimeout)
+
+    @Bean
+    fun quoteProvider(
+        properties: QuoteProviderProperties,
+        clock: Clock,
+    ): QuoteProvider = MercadoBitcoinQuoteProvider(properties, clock)
+
+    @Bean
+    fun quoteCache(
+        redis: StringRedisTemplate,
+        objectMapper: ObjectMapper,
+    ): QuoteCache = RedisQuoteCache(redis, objectMapper)
 
     @Bean
     @Profile("prod")
