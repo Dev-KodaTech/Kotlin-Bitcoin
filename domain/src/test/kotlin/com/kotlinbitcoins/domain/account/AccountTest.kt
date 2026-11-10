@@ -62,6 +62,37 @@ class AccountTest {
         assertThat(account.balance).isEqualTo(money("50.00"))
     }
 
+    @Test
+    fun `debit subtracts the amount from the balance`() {
+        val account = Account(id, "Ana Souza", email, "hash", money("1000.00"), createdAt)
+
+        val result = account.debit(positive("100.00"))
+
+        val debited = (result as Outcome.Success).value
+        assertThat(debited.balance).isEqualTo(money("900.00"))
+        assertThat(debited.id).isEqualTo(id)
+        assertThat(account.balance).isEqualTo(money("1000.00"))
+    }
+
+    @Test
+    fun `debit of the whole balance leaves zero`() {
+        val account = Account(id, "Ana Souza", email, "hash", money("100.00"), createdAt)
+
+        val result = account.debit(positive("100.00"))
+
+        assertThat((result as Outcome.Success).value.balance).isEqualTo(Money.ZERO)
+    }
+
+    @Test
+    fun `debit above the balance is InsufficientBalance`() {
+        val account = Account(id, "Ana Souza", email, "hash", money("100.00"), createdAt)
+
+        val result = account.debit(positive("100.01"))
+
+        assertThat(result).isEqualTo(Outcome.Failure(InsufficientBalance))
+        assertThat(account.balance).isEqualTo(money("100.00"))
+    }
+
     private fun money(value: String): Money = (Money.of(BigDecimal(value)) as Outcome.Success).value
 
     private fun positive(value: String): PositiveMoney = (PositiveMoney.of(BigDecimal(value)) as Outcome.Success).value

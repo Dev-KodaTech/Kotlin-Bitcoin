@@ -5,6 +5,7 @@ import com.kotlinbitcoins.application.notification.SendEmailNotification
 import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.Clock
 import com.kotlinbitcoins.application.port.EmailSender
+import com.kotlinbitcoins.application.port.InvestmentRepository
 import com.kotlinbitcoins.application.port.NotificationPublisher
 import com.kotlinbitcoins.application.port.PasswordHasher
 import com.kotlinbitcoins.application.port.QuoteCache
@@ -22,6 +23,8 @@ import com.kotlinbitcoins.infrastructure.messaging.SpringDataOutboxEventReposito
 import com.kotlinbitcoins.infrastructure.persistence.JpaTransactionRunner
 import com.kotlinbitcoins.infrastructure.persistence.account.AccountRepositoryAdapter
 import com.kotlinbitcoins.infrastructure.persistence.account.SpringDataAccountRepository
+import com.kotlinbitcoins.infrastructure.persistence.investment.InvestmentRepositoryAdapter
+import com.kotlinbitcoins.infrastructure.persistence.investment.SpringDataInvestmentRepository
 import com.kotlinbitcoins.infrastructure.persistence.ledger.SpringDataTransactionRepository
 import com.kotlinbitcoins.infrastructure.persistence.ledger.TransactionRepositoryAdapter
 import com.kotlinbitcoins.infrastructure.quote.MercadoBitcoinQuoteProvider
@@ -82,6 +85,10 @@ class AdapterConfiguration {
     @Bean
     fun transactionRepository(repository: SpringDataTransactionRepository): TransactionRepository =
         TransactionRepositoryAdapter(repository)
+
+    @Bean
+    fun investmentRepository(repository: SpringDataInvestmentRepository): InvestmentRepository =
+        InvestmentRepositoryAdapter(repository)
 
     @Bean
     fun notificationPublisher(

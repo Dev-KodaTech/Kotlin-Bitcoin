@@ -6,6 +6,7 @@ import com.kotlinbitcoins.application.port.EmailSendError
 import com.kotlinbitcoins.application.port.EmailSender
 import com.kotlinbitcoins.domain.account.Email
 import com.kotlinbitcoins.domain.shared.AccountId
+import com.kotlinbitcoins.domain.shared.BtcAmount
 import com.kotlinbitcoins.domain.shared.Money
 import com.kotlinbitcoins.domain.shared.Outcome
 import io.mockk.every
@@ -32,6 +33,25 @@ class SendEmailNotificationTest {
         assertThat(message.captured.recipientEmail.value).isEqualTo("ana@example.com")
         assertThat(message.captured.recipientName).isEqualTo("Ana Souza")
         assertThat(message.captured.content).isEqualTo(EmailContent.DepositConfirmed(money("100.00")))
+    }
+
+    @Test
+    fun `PURCHASE_CONFIRMED becomes a purchase e-mail with the amount in reais and the bitcoin bought`() {
+        val message = slot<EmailMessage>()
+        every { emailSender.send(capture(message)) } returns Outcome.Success(Unit)
+
+        val result =
+            sendEmailNotification.execute(
+                event().copy(
+                    type = NotificationType.PURCHASE_CONFIRMED,
+                    amount = money("400.00"),
+                    btcAmount = BtcAmount(100_000),
+                ),
+            )
+
+        assertThat(result).isEqualTo(Outcome.Success(Unit))
+        assertThat(message.captured.content)
+            .isEqualTo(EmailContent.PurchaseConfirmed(money("400.00"), BtcAmount(100_000)))
     }
 
     @Test

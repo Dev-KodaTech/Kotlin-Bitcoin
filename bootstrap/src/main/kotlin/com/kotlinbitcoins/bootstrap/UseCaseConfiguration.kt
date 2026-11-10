@@ -4,10 +4,12 @@ import com.kotlinbitcoins.application.account.AuthenticateAccount
 import com.kotlinbitcoins.application.account.DepositFunds
 import com.kotlinbitcoins.application.account.GetBalance
 import com.kotlinbitcoins.application.account.RegisterAccount
+import com.kotlinbitcoins.application.investment.PurchaseBitcoin
 import com.kotlinbitcoins.application.notification.SendEmailNotification
 import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.Clock
 import com.kotlinbitcoins.application.port.EmailSender
+import com.kotlinbitcoins.application.port.InvestmentRepository
 import com.kotlinbitcoins.application.port.NotificationPublisher
 import com.kotlinbitcoins.application.port.PasswordHasher
 import com.kotlinbitcoins.application.port.QuoteCache
@@ -72,4 +74,19 @@ class UseCaseConfiguration {
 
     @Bean
     fun getCurrentQuote(quoteService: QuoteService): GetCurrentQuote = GetCurrentQuote(quoteService)
+
+    // US5 — purchase of bitcoin
+
+    @Bean
+    @Suppress("LongParameterList")
+    fun purchaseBitcoin(
+        accounts: AccountRepository,
+        investments: InvestmentRepository,
+        transactions: TransactionRepository,
+        notifications: NotificationPublisher,
+        quoteService: QuoteService,
+        transactionRunner: TransactionRunner,
+        clock: Clock,
+    ): PurchaseBitcoin =
+        PurchaseBitcoin(accounts, investments, transactions, notifications, quoteService, transactionRunner, clock)
 }

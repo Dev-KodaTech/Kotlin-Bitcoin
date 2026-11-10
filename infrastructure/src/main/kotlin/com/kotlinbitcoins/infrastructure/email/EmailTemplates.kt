@@ -2,6 +2,7 @@ package com.kotlinbitcoins.infrastructure.email
 
 import com.kotlinbitcoins.application.port.EmailContent
 import com.kotlinbitcoins.application.port.EmailMessage
+import com.kotlinbitcoins.domain.shared.BtcAmount
 import com.kotlinbitcoins.domain.shared.Money
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -28,7 +29,23 @@ object EmailTemplates {
                             "Equipe KotlinBitcoins",
                 )
             }
+
+            is EmailContent.PurchaseConfirmed -> {
+                val amount = reais(content.amount)
+                val btc = btc(content.btcAmount)
+                RenderedEmail(
+                    subject = "Compra confirmada: $amount",
+                    body =
+                        "Olá, ${message.recipientName}!\n\n" +
+                            "Você investiu $amount e comprou $btc BTC.\n\n" +
+                            "Equipe KotlinBitcoins",
+                )
+            }
         }
+
+    /** Bitcoin with 8 decimals and a decimal comma, e.g. `0,00100000`, from the exact satoshi count. */
+    private fun btc(value: BtcAmount): String =
+        DecimalFormat("0.00000000", DecimalFormatSymbols(PT_BR)).format(value.toBtcDecimal())
 
     /** Formats without going through `double`, so the cents are exactly the ones in [value]. */
     private fun reais(value: Money): String =

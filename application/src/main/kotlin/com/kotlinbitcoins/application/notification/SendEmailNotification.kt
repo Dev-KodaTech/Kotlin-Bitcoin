@@ -24,6 +24,13 @@ class SendEmailNotification(
 
     private fun contentOf(event: NotificationEvent): EmailContent =
         when (event.type) {
-            NotificationType.DEPOSIT_CONFIRMED -> EmailContent.DepositConfirmed(event.amount)
+            NotificationType.DEPOSIT_CONFIRMED -> {
+                EmailContent.DepositConfirmed(event.amount)
+            }
+
+            NotificationType.PURCHASE_CONFIRMED -> {
+                // NotificationEvent guarantees the bitcoin amount is present in a purchase event.
+                EmailContent.PurchaseConfirmed(event.amount, checkNotNull(event.btcAmount))
+            }
         }
 }

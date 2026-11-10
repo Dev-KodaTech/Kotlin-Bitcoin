@@ -8,6 +8,9 @@ import java.time.Instant
 
 data object InvalidName
 
+/** The balance does not cover the amount to debit (FR-010, FR-015). */
+data object InsufficientBalance
+
 /**
  * Client account. The balance starts at zero and is never negative (FR-001, FR-010).
  * Client input goes through [open], which reports an invalid name as a value; the constructor only rebuilds
@@ -29,6 +32,14 @@ data class Account(
 
     /** Credits [amount] to the balance (FR-008, FR-009). */
     fun deposit(amount: PositiveMoney): Account = copy(balance = balance + amount.money)
+
+    /** Debits [amount] from the balance; a balance that would go negative is [InsufficientBalance] (FR-010, FR-015). */
+    fun debit(amount: PositiveMoney): Outcome<InsufficientBalance, Account> =
+        if (balance >= amount.money) {
+            Outcome.Success(copy(balance = balance - amount.money))
+        } else {
+            Outcome.Failure(InsufficientBalance)
+        }
 
     companion object {
         const val MAX_NAME_LENGTH = 200

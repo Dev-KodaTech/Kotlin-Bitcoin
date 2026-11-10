@@ -7,6 +7,7 @@ import com.kotlinbitcoins.application.account.GetBalanceError
 import com.kotlinbitcoins.application.account.LoginError
 import com.kotlinbitcoins.application.account.RegisterAccountError
 import com.kotlinbitcoins.application.account.Violation
+import com.kotlinbitcoins.application.investment.PurchaseError
 import com.kotlinbitcoins.application.port.InfrastructureUnavailable
 import com.kotlinbitcoins.application.quote.QuoteError
 import org.slf4j.MDC
@@ -94,6 +95,15 @@ class ProblemDetailsMapper {
         when (error) {
             GetBalanceError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
             is GetBalanceError.ServiceUnavailable -> serviceUnavailable(error)
+        }
+
+    fun purchaseError(error: PurchaseError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            PurchaseError.InvalidAmount -> invalidAmount()
+            PurchaseError.InsufficientBalance -> response(ProblemCode.INSUFFICIENT_BALANCE)
+            PurchaseError.QuoteUnavailable -> response(ProblemCode.QUOTE_UNAVAILABLE)
+            PurchaseError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
+            is PurchaseError.ServiceUnavailable -> serviceUnavailable(error)
         }
 
     fun quoteError(error: QuoteError): ResponseEntity<ProblemDetail> =

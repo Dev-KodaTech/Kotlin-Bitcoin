@@ -1,6 +1,7 @@
 package com.kotlinbitcoins.application.port
 
 import com.kotlinbitcoins.domain.account.Email
+import com.kotlinbitcoins.domain.shared.BtcAmount
 import com.kotlinbitcoins.domain.shared.Money
 import com.kotlinbitcoins.domain.shared.Outcome
 
@@ -8,6 +9,11 @@ import com.kotlinbitcoins.domain.shared.Outcome
 sealed interface EmailContent {
     data class DepositConfirmed(
         val amount: Money,
+    ) : EmailContent
+
+    data class PurchaseConfirmed(
+        val amount: Money,
+        val btcAmount: BtcAmount,
     ) : EmailContent
 }
 

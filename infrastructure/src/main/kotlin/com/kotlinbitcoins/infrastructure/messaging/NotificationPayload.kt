@@ -4,6 +4,7 @@ import com.kotlinbitcoins.application.notification.NotificationEvent
 import com.kotlinbitcoins.application.notification.NotificationType
 import com.kotlinbitcoins.domain.account.Email
 import com.kotlinbitcoins.domain.shared.AccountId
+import com.kotlinbitcoins.domain.shared.BtcAmount
 import com.kotlinbitcoins.domain.shared.Money
 import com.kotlinbitcoins.domain.shared.Outcome
 import java.math.BigDecimal
@@ -22,6 +23,7 @@ data class NotificationPayload(
     val recipientName: String,
     val amount: String,
     val createdAt: String,
+    val btcAmount: String? = null,
 ) {
     /** Returns null when the payload does not describe a valid event (corrupt or foreign message). */
     @Suppress("ReturnCount", "SwallowedException")
@@ -37,6 +39,12 @@ data class NotificationPayload(
                 recipientName = recipientName,
                 amount = money.value,
                 createdAt = Instant.parse(createdAt),
+                btcAmount =
+                    btcAmount?.let {
+                        BtcAmount(
+                            BigDecimal(it).movePointRight(BtcAmount.BTC_SCALE).longValueExact(),
+                        )
+                    },
             )
         }.getOrNull()
     }
@@ -51,6 +59,7 @@ data class NotificationPayload(
                 recipientName = event.recipientName,
                 amount = event.amount.amount.toPlainString(),
                 createdAt = event.createdAt.toString(),
+                btcAmount = event.btcAmount?.toBtcDecimal()?.toPlainString(),
             )
     }
 }
