@@ -1,0 +1,502 @@
+openapi: 3.1.0
+info:
+  title: KotlinBitcoins — API de Investimento em Bitcoins
+  version: 1.0.0
+  description: |
+    Contrato-fonte da feature 001-bitcoin-investment-api.
+
+    Convenções:
+    - Valores em R$ são strings com exatamente 2 casas decimais (ex.: "100.50").
+    - Quantidades de BTC são strings com exatamente 8 casas decimais (ex.: "0.00100000").
+    - Cotações são strings com a escala recebida da fonte (até 8 casas).
+    - Instantes são ISO-8601 com offset de America/Sao_Paulo (ex.: "2026-11-09T08:10:00-03:00").
+    - Erros seguem RFC 9457 (`application/problem+json`) com campo `code` estável; `detail` em português.
+    - Toda rota exige `Authorization: Bearer <token>`, exceto cadastro e login.
+    - Qualquer rota pode responder `503 SERVICE_UNAVAILABLE` em falha de infraestrutura (banco, cache, broker).
+    - Rotas sob `/me` operam sempre sobre a conta do token; não há identificador de outro cliente em nenhuma rota (FR-033).
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Contas
+  - name: Saldo
+  - name: Cotação
+  - name: Investimentos
+  - name: Extrato
+  - name: Mercado
+
+paths:
+  /accounts:
+    post:
+      tags: [Contas]
+      summary: Cadastrar conta (US1, FR-001..FR-003)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterAccountRequest' }
+      responses:
+        '201':
+          description: Conta criada com saldo 0.00
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409': { $ref: '#/components/responses/EmailAlreadyInUse' }
+
+  /auth/login:
+    post:
+      tags: [Contas]
+      summary: Autenticar e obter token de acesso (US1, FR-004, FR-005)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Token emitido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/InvalidCredentials' }
+
+  /me/balance:
+    get:
+      tags: [Saldo]
+      summary: Consultar saldo disponível em R$ (US3, FR-009)
+      responses:
+        '200':
+          description: Saldo atual
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BalanceResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /me/deposits:
+    post:
+      tags: [Saldo]
+      summary: Depositar reais (US2, FR-008)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AmountRequest' }
+      responses:
+        '201':
+          description: Depósito creditado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DepositResponse' }
+        '400': { $ref: '#/components/responses/InvalidAmount' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /quotes/current:
+    get:
+      tags: [Cotação]
+      summary: Cotação atual do BTC em R$ (US4, FR-011, FR-012, FR-012a)
+      responses:
+        '200':
+          description: Cotação com até 60 s de idade
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Quote' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '503': { $ref: '#/components/responses/QuoteUnavailable' }
+
+  /quotes/history:
+    get:
+      tags: [Cotação]
+      summary: Histórico das últimas 24 h em pontos de 10 min (US10, FR-027..FR-029)
+      responses:
+        '200':
+          description: Até 144 pontos em ordem cronológica; pontos não registrados são omitidos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuoteHistoryResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /me/purchases:
+    post:
+      tags: [Investimentos]
+      summary: Comprar BTC com um valor em R$ (US5, FR-013..FR-015)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AmountRequest' }
+      responses:
+        '201':
+          description: Investimento registrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchaseResponse' }
+        '400': { $ref: '#/components/responses/InvalidAmount' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/InsufficientBalance' }
+        '503': { $ref: '#/components/responses/QuoteUnavailable' }
+
+  /me/investments:
+    get:
+      tags: [Investimentos]
+      summary: Posição dos investimentos ativos (US6, FR-016, FR-017)
+      responses:
+        '200':
+          description: Investimentos ativos em ordem FIFO
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PositionResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '503': { $ref: '#/components/responses/QuoteUnavailable' }
+
+  /me/redemptions:
+    post:
+      tags: [Investimentos]
+      summary: Resgatar um valor em R$ (US7, FR-018..FR-022)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AmountRequest' }
+      responses:
+        '201':
+          description: Resgate efetuado; valor creditado exatamente igual ao pedido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RedemptionResponse' }
+        '400': { $ref: '#/components/responses/InvalidAmount' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/RedemptionExceedsAvailable' }
+        '503': { $ref: '#/components/responses/QuoteUnavailable' }
+
+  /me/statement:
+    get:
+      tags: [Extrato]
+      summary: Extrato de depósitos, compras, resgates e reinvestimentos (US8, FR-023..FR-025)
+      description: |
+        Sem parâmetros: de 00:00:00 (Brasília) de hoje − 90 dias até agora.
+        Com `from` e `to` (ambos obrigatórios juntos): de `from` 00:00:00 a `to` 23:59:59, horário de Brasília, inclusivo.
+        Só um dos dois, datas malformadas ou `from` > `to` → INVALID_DATE_RANGE.
+      parameters:
+        - in: query
+          name: from
+          schema: { type: string, format: date, example: '2026-10-01' }
+        - in: query
+          name: to
+          schema: { type: string, format: date, example: '2026-11-09' }
+      responses:
+        '200':
+          description: Lançamentos do mais recente para o mais antigo
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatementResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/InvalidDateRange' }
+
+  /market/daily-volume:
+    get:
+      tags: [Mercado]
+      summary: Volume de BTC comprado e vendido hoje, todos os clientes (US9, FR-026)
+      responses:
+        '200':
+          description: Totais agregados do dia corrente (America/Sao_Paulo)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DailyVolumeResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Money:
+      type: string
+      pattern: '^\d+\.\d{2}$'
+      example: '100.50'
+    MoneyInput:
+      type: string
+      description: Valor positivo com no máximo 2 casas decimais; sem sinal, sem notação científica.
+      pattern: '^\d+(\.\d{1,2})?$'
+      example: '100.50'
+    Btc:
+      type: string
+      pattern: '^\d+\.\d{8}$'
+      example: '0.00100000'
+    QuotePrice:
+      type: string
+      pattern: '^\d+(\.\d{1,8})?$'
+      example: '400000.00'
+    Instant:
+      type: string
+      format: date-time
+      example: '2026-11-09T08:10:00-03:00'
+
+    RegisterAccountRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        email: { type: string, format: email, maxLength: 320 }
+        password: { type: string, minLength: 8, writeOnly: true, description: 'Mínimo de 8 caracteres e máximo de 72 bytes em UTF-8 (FR-003).' }
+    AccountResponse:
+      type: object
+      required: [id, name, email, balance, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        balance: { $ref: '#/components/schemas/Money' }
+        createdAt: { $ref: '#/components/schemas/Instant' }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string }
+        password: { type: string, writeOnly: true }
+    LoginResponse:
+      type: object
+      required: [accessToken, tokenType, expiresIn]
+      properties:
+        accessToken: { type: string }
+        tokenType: { type: string, enum: [Bearer] }
+        expiresIn: { type: integer, description: segundos, example: 3600 }
+
+    AmountRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: { $ref: '#/components/schemas/MoneyInput' }
+    BalanceResponse:
+      type: object
+      required: [balance]
+      properties:
+        balance: { $ref: '#/components/schemas/Money' }
+    DepositResponse:
+      type: object
+      required: [transactionId, amount, balance, occurredAt]
+      properties:
+        transactionId: { type: string, format: uuid }
+        amount: { $ref: '#/components/schemas/Money' }
+        balance: { $ref: '#/components/schemas/Money' }
+        occurredAt: { $ref: '#/components/schemas/Instant' }
+
+    Quote:
+      type: object
+      required: [buyPrice, sellPrice, quotedAt]
+      properties:
+        buyPrice:
+          allOf: [{ $ref: '#/components/schemas/QuotePrice' }]
+          description: Cotação de compra (a plataforma compra do cliente) — usada em resgates e posição.
+        sellPrice:
+          allOf: [{ $ref: '#/components/schemas/QuotePrice' }]
+          description: Cotação de venda (a plataforma vende ao cliente) — usada em compras.
+        quotedAt:
+          allOf: [{ $ref: '#/components/schemas/Instant' }]
+          description: Instante em que a cotação foi obtida da fonte.
+    QuoteHistoryResponse:
+      type: object
+      required: [points]
+      properties:
+        points:
+          type: array
+          maxItems: 144
+          items:
+            type: object
+            required: [slotAt, buyPrice, sellPrice]
+            properties:
+              slotAt: { $ref: '#/components/schemas/Instant' }
+              buyPrice: { $ref: '#/components/schemas/QuotePrice' }
+              sellPrice: { $ref: '#/components/schemas/QuotePrice' }
+
+    PurchaseResponse:
+      type: object
+      required: [investmentId, transactionId, amount, btcAmount, quote, purchasedAt, balance]
+      properties:
+        investmentId: { type: string, format: uuid }
+        transactionId: { type: string, format: uuid }
+        amount: { $ref: '#/components/schemas/Money' }
+        btcAmount: { $ref: '#/components/schemas/Btc' }
+        quote: { $ref: '#/components/schemas/QuotePrice' }
+        purchasedAt: { $ref: '#/components/schemas/Instant' }
+        balance: { $ref: '#/components/schemas/Money' }
+
+    InvestmentPosition:
+      type: object
+      required: [id, purchasedAt, investedAmount, purchaseQuote, btcAmount, variationPercent, currentValue]
+      properties:
+        id: { type: string, format: uuid }
+        purchasedAt: { $ref: '#/components/schemas/Instant' }
+        investedAmount: { $ref: '#/components/schemas/Money' }
+        purchaseQuote: { $ref: '#/components/schemas/QuotePrice' }
+        btcAmount: { $ref: '#/components/schemas/Btc' }
+        variationPercent: { type: string, pattern: '^-?\d+\.\d{2}$', example: '10.00' }
+        currentValue: { $ref: '#/components/schemas/Money' }
+    PositionResponse:
+      type: object
+      required: [quote, totalCurrentValue, investments]
+      properties:
+        quote: { $ref: '#/components/schemas/Quote' }
+        totalCurrentValue: { $ref: '#/components/schemas/Money' }
+        investments:
+          type: array
+          items: { $ref: '#/components/schemas/InvestmentPosition' }
+
+    RedemptionResponse:
+      type: object
+      required: [requestId, amount, btcSold, quote, balance, liquidations, occurredAt]
+      properties:
+        requestId: { type: string, format: uuid }
+        amount: { $ref: '#/components/schemas/Money' }
+        btcSold: { $ref: '#/components/schemas/Btc' }
+        quote: { $ref: '#/components/schemas/QuotePrice' }
+        balance: { $ref: '#/components/schemas/Money' }
+        occurredAt: { $ref: '#/components/schemas/Instant' }
+        liquidations:
+          type: array
+          items:
+            type: object
+            required: [investmentId, amount, btcAmount, isPartial]
+            properties:
+              investmentId: { type: string, format: uuid }
+              amount: { $ref: '#/components/schemas/Money' }
+              btcAmount: { $ref: '#/components/schemas/Btc' }
+              isPartial: { type: boolean }
+        reinvestment:
+          type: [object, 'null']
+          required: [investmentId, btcAmount, investedAmount, purchaseQuote, purchasedAt]
+          properties:
+            investmentId: { type: string, format: uuid }
+            btcAmount: { $ref: '#/components/schemas/Btc' }
+            investedAmount: { $ref: '#/components/schemas/Money' }
+            purchaseQuote: { $ref: '#/components/schemas/QuotePrice' }
+            purchasedAt: { $ref: '#/components/schemas/Instant' }
+
+    StatementEntry:
+      type: object
+      required: [id, type, amount, occurredAt]
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string, enum: [DEPOSIT, PURCHASE, REDEMPTION, REINVESTMENT] }
+        amount: { $ref: '#/components/schemas/Money' }
+        btcAmount:
+          oneOf: [{ $ref: '#/components/schemas/Btc' }, { type: 'null' }]
+        quote:
+          oneOf: [{ $ref: '#/components/schemas/QuotePrice' }, { type: 'null' }]
+        investmentId: { type: [string, 'null'], format: uuid }
+        requestId: { type: [string, 'null'], format: uuid }
+        occurredAt: { $ref: '#/components/schemas/Instant' }
+    StatementResponse:
+      type: object
+      required: [from, to, entries]
+      properties:
+        from: { $ref: '#/components/schemas/Instant' }
+        to: { $ref: '#/components/schemas/Instant' }
+        entries:
+          type: array
+          items: { $ref: '#/components/schemas/StatementEntry' }
+
+    DailyVolumeResponse:
+      type: object
+      required: [date, boughtBtc, soldBtc]
+      properties:
+        date: { type: string, format: date, example: '2026-11-09' }
+        boughtBtc: { $ref: '#/components/schemas/Btc' }
+        soldBtc: { $ref: '#/components/schemas/Btc' }
+
+    Problem:
+      type: object
+      description: RFC 9457 Problem Details
+      required: [type, title, status, code, detail]
+      properties:
+        type: { type: string, format: uri-reference, example: 'about:blank' }
+        title: { type: string }
+        status: { type: integer }
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - INVALID_AMOUNT
+            - INVALID_CREDENTIALS
+            - UNAUTHORIZED
+            - EMAIL_ALREADY_IN_USE
+            - INSUFFICIENT_BALANCE
+            - REDEMPTION_EXCEEDS_AVAILABLE
+            - INVALID_DATE_RANGE
+            - QUOTE_UNAVAILABLE
+            - SERVICE_UNAVAILABLE
+        detail: { type: string, description: Mensagem em português, sem detalhes internos }
+        instance: { type: string }
+        correlationId: { type: string }
+        errors:
+          type: array
+          description: Só em VALIDATION_ERROR
+          items:
+            type: object
+            required: [field, message]
+            properties:
+              field: { type: string }
+              message: { type: string }
+
+  responses:
+    ValidationError:
+      description: Entrada com formato inválido
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          example: { type: about:blank, title: Bad Request, status: 400, code: VALIDATION_ERROR, detail: Dados de entrada inválidos., errors: [{ field: email, message: E-mail em formato inválido. }] }
+    InvalidAmount:
+      description: Valor inválido
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          example: { type: about:blank, title: Bad Request, status: 400, code: INVALID_AMOUNT, detail: O valor deve ser positivo e ter no máximo 2 casas decimais. }
+    InvalidCredentials:
+      description: E-mail inexistente ou senha incorreta (mesma resposta)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          example: { type: about:blank, title: Unauthorized, status: 401, code: INVALID_CREDENTIALS, detail: E-mail ou senha inválidos. }
+    Unauthorized:
+      description: Token ausente, malformado, adulterado ou expirado
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          example: { type: about:blank, title: Unauthorized, status: 401, code: UNAUTHORIZED, detail: Autenticação necessária. }
+    EmailAlreadyInUse:
+      description: E-mail já cadastrado
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          example: { type: about:blank, title: Conflict, status: 409, code: EMAIL_ALREADY_IN_USE, detail: Este e-mail já está em uso. }
+    InsufficientBalance:
+      description: Saldo insuficiente
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          example: { type: about:blank, title: Unprocessable Content, status: 422, code: INSUFFICIENT_BALANCE, detail: Saldo insuficiente para esta compra. }
+    RedemptionExceedsAvailable:
+      description: Resgate acima do valor atual total dos investimentos
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          example: { type: about:blank, title: Unprocessable Content, status: 422, code: REDEMPTION_EXCEEDS_AVAILABLE, detail: O valor solicitado excede o valor atual dos seus investimentos. }
+    InvalidDateRange:
+      description: Intervalo de datas inválido
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          example: { type: about:blank, title: Unprocessable Content, status: 422, code: INVALID_DATE_RANGE, detail: Intervalo de datas inválido. }
+    QuoteUnavailable:
+      description: Sem cotação válida com até 60 s
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          example: { type: about:blank, title: Service Unavailable, status: 503, code: QUOTE_UNAVAILABLE, detail: Cotação indisponível no momento. Tente novamente em instantes. }
