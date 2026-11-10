@@ -241,15 +241,15 @@ Projeto Gradle multi-módulo (plan.md → Project Structure). Pacote raiz `com.k
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T114 [P] [US3] Teste do caso de uso `GetBalance` em application/src/test/kotlin/com/kotlinbitcoins/application/account/GetBalanceTest.kt: devolve `account.balance`; conta inexistente → `Failure(AccountNotFound)`. Falha de infraestrutura (porta devolve `Failure(InfrastructureFailure)`) → `Failure(ServiceUnavailable)`, sem gravação parcial nem evento
-- [ ] T115 [P] [US3] Teste do `BalanceController` em api/src/test/kotlin/com/kotlinbitcoins/api/account/BalanceControllerTest.kt: `GET /api/v1/me/balance` → `200 {"balance":"0.00"}`
-- [ ] T116 [P] [US3] Teste de contrato em bootstrap/src/test/kotlin/com/kotlinbitcoins/bootstrap/contract/BalanceContractTest.kt: cadastrar, fazer login pelo endpoint real, `GET /me/balance` com o token → `"0.00"`; depois de depósitos de `100.00` e `50.50` → `"150.50"` (US3 cenários 1–2 no que depende só de depósitos)
+- [X] T114 [P] [US3] Teste do caso de uso `GetBalance` em application/src/test/kotlin/com/kotlinbitcoins/application/account/GetBalanceTest.kt: devolve `account.balance`; conta inexistente → `Failure(AccountNotFound)`. Falha de infraestrutura (porta devolve `Failure(InfrastructureFailure)`) → `Failure(ServiceUnavailable)`, sem gravação parcial nem evento
+- [X] T115 [P] [US3] Teste do `BalanceController` em api/src/test/kotlin/com/kotlinbitcoins/api/account/BalanceControllerTest.kt: `GET /api/v1/me/balance` → `200 {"balance":"0.00"}`
+- [X] T116 [P] [US3] Teste de contrato em bootstrap/src/test/kotlin/com/kotlinbitcoins/bootstrap/contract/BalanceContractTest.kt: cadastrar, fazer login pelo endpoint real, `GET /me/balance` com o token → `"0.00"`; depois de depósitos de `100.00` e `50.50` → `"150.50"` (US3 cenários 1–2 no que depende só de depósitos)
 
 ### Implementation for User Story 3
 
-- [ ] T117 [US3] Implementar `GetBalanceError` (`AccountNotFound`, `ServiceUnavailable`) e o caso de uso `GetBalance` em application/src/main/kotlin/com/kotlinbitcoins/application/account/GetBalance.kt
-- [ ] T118 [US3] Implementar `BalanceResponse` e o `BalanceController` (`GET /api/v1/me/balance`) em api/src/main/kotlin/com/kotlinbitcoins/api/account/BalanceController.kt
-- [ ] T119 [US3] Mapear `GetBalanceError.AccountNotFound` → `UNAUTHORIZED` em api/src/main/kotlin/com/kotlinbitcoins/api/error/ProblemDetailsMapper.kt e registrar `GetBalance` em bootstrap/src/main/kotlin/com/kotlinbitcoins/bootstrap/UseCaseConfiguration.kt
+- [X] T117 [US3] Implementar `GetBalanceError` (`AccountNotFound`, `ServiceUnavailable`) e o caso de uso `GetBalance` em application/src/main/kotlin/com/kotlinbitcoins/application/account/GetBalance.kt
+- [X] T118 [US3] Implementar `BalanceResponse` e o `BalanceController` (`GET /api/v1/me/balance`) em api/src/main/kotlin/com/kotlinbitcoins/api/account/BalanceController.kt
+- [X] T119 [US3] Mapear `GetBalanceError.AccountNotFound` → `UNAUTHORIZED` em api/src/main/kotlin/com/kotlinbitcoins/api/error/ProblemDetailsMapper.kt e registrar `GetBalance` em bootstrap/src/main/kotlin/com/kotlinbitcoins/bootstrap/UseCaseConfiguration.kt
 
 **Checkpoint**: US1–US3 completas.
 

@@ -2,6 +2,7 @@ package com.kotlinbitcoins.bootstrap
 
 import com.kotlinbitcoins.application.account.AuthenticateAccount
 import com.kotlinbitcoins.application.account.DepositFunds
+import com.kotlinbitcoins.application.account.GetBalance
 import com.kotlinbitcoins.application.account.RegisterAccount
 import com.kotlinbitcoins.application.notification.SendEmailNotification
 import com.kotlinbitcoins.application.port.AccountRepository
@@ -50,4 +51,9 @@ class UseCaseConfiguration {
 
     @Bean
     fun sendEmailNotification(emailSender: EmailSender): SendEmailNotification = SendEmailNotification(emailSender)
+
+    // US3 — balance
+
+    @Bean
+    fun getBalance(accounts: AccountRepository): GetBalance = GetBalance(accounts)
 }

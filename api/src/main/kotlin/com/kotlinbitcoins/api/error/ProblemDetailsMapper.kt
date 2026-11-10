@@ -3,6 +3,7 @@ package com.kotlinbitcoins.api.error
 import com.kotlinbitcoins.api.web.CorrelationIdFilter
 import com.kotlinbitcoins.application.account.DepositError
 import com.kotlinbitcoins.application.account.FieldError
+import com.kotlinbitcoins.application.account.GetBalanceError
 import com.kotlinbitcoins.application.account.LoginError
 import com.kotlinbitcoins.application.account.RegisterAccountError
 import com.kotlinbitcoins.application.account.Violation
@@ -86,6 +87,12 @@ class ProblemDetailsMapper {
         when (error) {
             DepositError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
             is DepositError.ServiceUnavailable -> serviceUnavailable(error)
+        }
+
+    fun getBalanceError(error: GetBalanceError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            GetBalanceError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
+            is GetBalanceError.ServiceUnavailable -> serviceUnavailable(error)
         }
 
     private fun FieldError.message(): String =
