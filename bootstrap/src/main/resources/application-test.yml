@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    hikari:
+      # Tests that pause the database (T038, T220) must fail in seconds, not after the 30 s default.
+      connection-timeout: 2000
+      validation-timeout: 1000
+
+management:
+  health:
+    # No SMTP server in automated tests; mail delivery is covered by its own adapter tests.
+    mail:
+      enabled: false

@@ -77,3 +77,15 @@ Conferências finais:
 ```bash
 docker compose --profile stub down -v
 ```
+
+## 6. Divergências encontradas na execução manual (2026-11-10)
+
+Roteiro executado com `docker compose --profile stub up -d --build` (2 réplicas de `app` atrás do Nginx, todos os serviços `healthy`). Passos 1–19 e as conferências finais bateram com os resultados esperados; o passo 20 foi verificado só até o primeiro slot (o ponto de 15:50 apareceu, alinhado e sem pontos inventados) e a completude de 24 h é coberta por `QuoteHistoryCompletenessTest`.
+
+| # | Divergência | Situação |
+|---|-------------|----------|
+| 1 | O mapping do stub (`docker/quote-stub/mappings/ticker.json`) respondia `500` no WireMock (`{{now format='unix'}}}}` não é template válido), então a aplicação com o perfil `stub` ficava sem cotação. | Corrigido (`{{now format='unix'}} }}`). |
+| 2 | O `.env` precisa de `MAIL_FROM`, além das variáveis listadas na seção 1 (ver `.env.example`). Em dev, `DB_USER`, `DB_PASSWORD`, `RABBITMQ_USER` e `RABBITMQ_PASSWORD` também têm de ser preenchidos; `JWT_SECRET` e `QUOTE_PROVIDER_URL=http://quote-stub:8080/api/BTC/ticker/` para o perfil `stub`. | Documentação. |
+| 3 | "Logs: JSON com `correlationId`": o log é JSON e sem senha ou token, mas a aplicação não registra uma linha por requisição, então o `correlationId` só aparece em linhas emitidas durante a requisição (por exemplo, erros). | Sem alteração; log de acesso não está na spec. |
+| 4 | FR-031 com o Mailpit parado: o depósito responde `201`; a mensagem passa pela fila de retry (falhas 1 a 5, com 1, 2, 4, 8 e 16 s) e vai à DLQ na 6ª falha (R-08 diz "5ª falha"). Com o Mailpit de volta durante o retry, o e-mail é entregue. | Comportamento conforme T092/T107; texto de R-08 impreciso. |
+| 5 | Passo 11: o `quotedAt` devolvido é o da data que o stub informa (hora atual), então depois de mudar o preço é preciso esperar os 10 s do cache, como o roteiro já diz. | Sem divergência de comportamento. |

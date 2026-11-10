@@ -1,0 +1,16 @@
+.git/
+.gradle/
+**/build/
+.idea/
+.vscode/
+*.iml
+*.log
+.env
+.env.*
+!.env.example
+specs/
+.specify/
+.claude/
+docker-compose.yml
+Dockerfile*
+.dockerignore

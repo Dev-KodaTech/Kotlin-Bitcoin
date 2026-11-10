@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: kotlin-bitcoins
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      # The quote cache is best-effort (R-06): a slow Redis must behave as a missing one, not stall requests.
+      connect-timeout: 1s
+      timeout: 500ms
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+    # The outbox relay waits for the broker's confirm before marking an event as published (R-08).
+    publisher-confirm-type: correlated
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    properties:
+      mail.smtp.connectiontimeout: 2000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
+
+server:
+  shutdown: graceful
+
+app:
+  jwt:
+    # HS256 secret, at least 32 bytes. Only ever provided by the environment.
+    secret: ${JWT_SECRET}
+    ttl: 1h
+  business-zone: America/Sao_Paulo
+  mail:
+    from: no-reply@kotlinbitcoins.local
+    sender-name: KotlinBitcoins
+  brevo:
+    base-url: https://api.brevo.com
+
+quote:
+  provider:
+    url: ${QUOTE_PROVIDER_URL:https://www.mercadobitcoin.net/api/BTC/ticker/}
+    connect-timeout: 1s
+    read-timeout: 2s
+
+springdoc:
+  api-docs:
+    # The contract (contracts/openapi.yaml) is OpenAPI 3.1.
+    version: openapi_3_1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true

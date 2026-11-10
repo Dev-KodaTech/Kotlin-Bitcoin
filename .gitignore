@@ -1,0 +1,23 @@
+# Gradle / build
+build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+out/
+*.class
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Secrets (copy .env.example to .env)
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp

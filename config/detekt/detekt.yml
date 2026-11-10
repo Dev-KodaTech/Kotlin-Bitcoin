@@ -1,0 +1,81 @@
+# Overrides on top of detekt's default configuration (buildUponDefaultConfig = true in build.gradle.kts).
+# Any rule not listed here keeps its default setting.
+
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+processors:
+  active: true
+
+console-reports:
+  active: true
+
+complexity:
+  active: true
+  ComplexCondition:
+    active: true
+    threshold: 4
+  ComplexInterface:
+    active: true
+    threshold: 10
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 15
+    ignoreSimpleWhenEntries: true
+  LargeClass:
+    active: true
+    threshold: 600
+  LongMethod:
+    active: true
+    threshold: 60
+  LongParameterList:
+    active: true
+    functionThreshold: 6
+    constructorThreshold: 8
+    ignoreDefaultParameters: true
+    ignoreAnnotatedParameter: ['Value']
+  NestedBlockDepth:
+    active: true
+    threshold: 4
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 15
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
+    thresholdInObjects: 15
+    thresholdInEnums: 15
+    ignorePrivate: true
+    ignoreOverridden: true
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: true
+    # Adapters are the only place allowed to catch, and they convert to InfrastructureFailure (R-03).
+    excludes: ['**/infrastructure/**', '**/test/**']
+
+style:
+  active: true
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+  MagicNumber:
+    active: true
+    excludes: ['**/test/**', '**/*.kts']
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotation: true
+  WildcardImport:
+    active: true
+  ForbiddenComment:
+    active: true
+    comments:
+      - reason: 'Resolve or turn into a task in tasks.md.'
+        value: 'FIXME:'
+      - reason: 'Resolve or turn into a task in tasks.md.'
+        value: 'STOPSHIP:'

@@ -1,0 +1,14 @@
+server:
+  # Behind Nginx: trust X-Forwarded-* headers.
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    root: INFO
+
+app:
+  brevo:
+    # Transactional e-mail provider; the key only ever comes from the environment.
+    api-key: ${BREVO_API_KEY}
+  mail:
+    from: ${MAIL_FROM:no-reply@kotlinbitcoins.local}
