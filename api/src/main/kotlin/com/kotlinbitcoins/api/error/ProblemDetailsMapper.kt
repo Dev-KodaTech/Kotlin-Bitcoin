@@ -1,6 +1,10 @@
 package com.kotlinbitcoins.api.error
 
 import com.kotlinbitcoins.api.web.CorrelationIdFilter
+import com.kotlinbitcoins.application.account.FieldError
+import com.kotlinbitcoins.application.account.LoginError
+import com.kotlinbitcoins.application.account.RegisterAccountError
+import com.kotlinbitcoins.application.account.Violation
 import com.kotlinbitcoins.application.port.InfrastructureUnavailable
 import org.slf4j.MDC
 import org.springframework.http.HttpHeaders
@@ -52,7 +56,51 @@ class ProblemDetailsMapper {
     fun serviceUnavailable(error: InfrastructureUnavailable): ResponseEntity<ProblemDetail> =
         response(ProblemCode.SERVICE_UNAVAILABLE)
 
+    fun registerAccountError(error: RegisterAccountError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            is RegisterAccountError.InvalidInput -> {
+                val errors = error.fields.map { FieldViolation(it.field, it.message()) }
+                response(ProblemCode.VALIDATION_ERROR, errors = errors)
+            }
+
+            RegisterAccountError.EmailAlreadyInUse -> {
+                response(ProblemCode.EMAIL_ALREADY_IN_USE)
+            }
+
+            is RegisterAccountError.ServiceUnavailable -> {
+                serviceUnavailable(error)
+            }
+        }
+
+    fun loginError(error: LoginError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            LoginError.InvalidCredentials -> response(ProblemCode.INVALID_CREDENTIALS)
+            is LoginError.ServiceUnavailable -> serviceUnavailable(error)
+        }
+
+    private fun FieldError.message(): String =
+        FIELD_MESSAGES[field to violation] ?: GENERIC_MESSAGES.getValue(violation)
+
     companion object {
         private val ABOUT_BLANK = URI.create("about:blank")
+
+        private val FIELD_MESSAGES: Map<Pair<String, Violation>, String> =
+            mapOf(
+                ("name" to Violation.REQUIRED) to "Nome é obrigatório.",
+                ("name" to Violation.TOO_LONG) to "Nome deve ter no máximo 200 caracteres.",
+                ("email" to Violation.REQUIRED) to "E-mail é obrigatório.",
+                ("email" to Violation.INVALID_FORMAT) to "E-mail em formato inválido.",
+                ("password" to Violation.REQUIRED) to "Senha é obrigatória.",
+                ("password" to Violation.TOO_SHORT) to "A senha deve ter no mínimo 8 caracteres.",
+                ("password" to Violation.TOO_LONG) to "A senha deve ter no máximo 72 bytes.",
+            )
+
+        private val GENERIC_MESSAGES: Map<Violation, String> =
+            mapOf(
+                Violation.REQUIRED to "Campo obrigatório.",
+                Violation.INVALID_FORMAT to "Formato inválido.",
+                Violation.TOO_SHORT to "Valor abaixo do tamanho mínimo.",
+                Violation.TOO_LONG to "Valor acima do tamanho máximo.",
+            )
     }
 }
