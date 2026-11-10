@@ -4,8 +4,12 @@ import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.InfrastructureFailure
 import com.kotlinbitcoins.application.port.TransactionRepository
 import com.kotlinbitcoins.domain.ledger.Transaction
+import com.kotlinbitcoins.domain.shared.AccountId
+import com.kotlinbitcoins.domain.shared.BtcAmount
+import com.kotlinbitcoins.domain.shared.InvestmentId
 import com.kotlinbitcoins.domain.shared.Outcome
 import com.kotlinbitcoins.domain.shared.PositiveMoney
+import com.kotlinbitcoins.domain.shared.QuotePrice
 import com.kotlinbitcoins.infrastructure.support.AccountFixtures
 import com.kotlinbitcoins.infrastructure.support.PostgresIntegrationTest
 import org.assertj.core.api.Assertions.assertThat
@@ -67,6 +71,110 @@ class TransactionRepositoryAdapterIT : PostgresIntegrationTest() {
         val result = withDatabasePaused { transactions.saveAll(listOf(deposit)) }
 
         assertThat(result).isInstanceOf(Outcome.Failure::class.java)
+    }
+
+    @Test
+    fun `findByAccountBetween returns the lines newest first`() {
+        val account = AccountFixtures.account()
+        accounts.save(account)
+        val oldest = Transaction.deposit(account.id, positive("1.00"), Instant.parse("2026-11-01T10:00:00Z"))
+        val newest = Transaction.deposit(account.id, positive("3.00"), Instant.parse("2026-11-03T10:00:00Z"))
+        val middle = Transaction.deposit(account.id, positive("2.00"), Instant.parse("2026-11-02T10:00:00Z"))
+        transactions.saveAll(listOf(oldest, newest, middle))
+
+        val result =
+            transactions.findByAccountBetween(
+                account.id,
+                Instant.parse("2026-10-01T00:00:00Z"),
+                Instant.parse("2026-12-01T00:00:00Z"),
+            )
+
+        assertThat((result as Outcome.Success).value.map { it.id }).containsExactly(newest.id, middle.id, oldest.id)
+    }
+
+    @Test
+    fun `findByAccountBetween rebuilds every field of a purchase line`() {
+        val account = AccountFixtures.account()
+        accounts.save(account)
+        val investmentId = InvestmentId.random()
+        val occurredAt = Instant.parse("2026-11-02T10:00:00Z")
+        val purchase =
+            Transaction.purchase(
+                account.id,
+                positive("400.00"),
+                BtcAmount(100_000),
+                (QuotePrice.of(BigDecimal("400000.00")) as Outcome.Success).value,
+                investmentId,
+                occurredAt,
+            )
+        insertInvestment(account.id, investmentId)
+        transactions.saveAll(listOf(purchase))
+
+        val result =
+            transactions.findByAccountBetween(
+                account.id,
+                occurredAt.minusSeconds(1),
+                occurredAt.plusSeconds(1),
+            )
+
+        assertThat((result as Outcome.Success).value).containsExactly(purchase)
+    }
+
+    @Test
+    fun `findByAccountBetween includes the lower bound and excludes the upper one`() {
+        val account = AccountFixtures.account()
+        accounts.save(account)
+        val from = Instant.parse("2026-11-01T03:00:00Z")
+        val to = Instant.parse("2026-11-02T03:00:00Z")
+        val before = Transaction.deposit(account.id, positive("1.00"), from.minusSeconds(1))
+        val atFrom = Transaction.deposit(account.id, positive("2.00"), from)
+        val justInside = Transaction.deposit(account.id, positive("3.00"), to.minusSeconds(1))
+        val atTo = Transaction.deposit(account.id, positive("4.00"), to)
+        transactions.saveAll(listOf(before, atFrom, justInside, atTo))
+
+        val result = transactions.findByAccountBetween(account.id, from, to)
+
+        assertThat((result as Outcome.Success).value.map { it.id }).containsExactly(justInside.id, atFrom.id)
+    }
+
+    @Test
+    fun `findByAccountBetween never returns the lines of another account`() {
+        val mine = AccountFixtures.account()
+        val other = AccountFixtures.account(email = "outra@example.com")
+        accounts.save(mine)
+        accounts.save(other)
+        val at = Instant.parse("2026-11-02T10:00:00Z")
+        val myLine = Transaction.deposit(mine.id, positive("1.00"), at)
+        transactions.saveAll(listOf(myLine, Transaction.deposit(other.id, positive("9.00"), at)))
+
+        val result = transactions.findByAccountBetween(mine.id, at.minusSeconds(60), at.plusSeconds(60))
+
+        assertThat((result as Outcome.Success).value).containsExactly(myLine)
+    }
+
+    @Test
+    fun `findByAccountBetween with the database down is a failure value`() {
+        val result =
+            withDatabasePaused {
+                transactions.findByAccountBetween(AccountFixtures.account().id, Instant.now(), Instant.now())
+            }
+
+        assertThat(result).isInstanceOf(Outcome.Failure::class.java)
+    }
+
+    private fun insertInvestment(
+        accountId: AccountId,
+        investmentId: InvestmentId,
+    ) {
+        jdbcTemplate.update(
+            """
+            INSERT INTO investments (id, account_id, purchased_at, fifo_sequence, invested_amount, purchase_quote,
+                                     btc_amount_sats, status, origin)
+            VALUES (?, ?, now(), nextval('investments_fifo_seq'), 400.00, 400000.00, 100000, 'ACTIVE', 'PURCHASE')
+            """.trimIndent(),
+            investmentId.value,
+            accountId.value,
+        )
     }
 
     private fun count() = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM transactions", Int::class.java)

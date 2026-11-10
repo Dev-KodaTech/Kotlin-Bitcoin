@@ -10,6 +10,7 @@ import com.kotlinbitcoins.application.account.Violation
 import com.kotlinbitcoins.application.investment.GetInvestmentPositionError
 import com.kotlinbitcoins.application.investment.PurchaseError
 import com.kotlinbitcoins.application.investment.RedemptionError
+import com.kotlinbitcoins.application.ledger.StatementError
 import com.kotlinbitcoins.application.port.InfrastructureUnavailable
 import com.kotlinbitcoins.application.quote.QuoteError
 import org.slf4j.MDC
@@ -120,6 +121,12 @@ class ProblemDetailsMapper {
         when (error) {
             GetInvestmentPositionError.QuoteUnavailable -> response(ProblemCode.QUOTE_UNAVAILABLE)
             is GetInvestmentPositionError.ServiceUnavailable -> serviceUnavailable(error)
+        }
+
+    fun statementError(error: StatementError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            StatementError.InvalidDateRange -> response(ProblemCode.INVALID_DATE_RANGE)
+            is StatementError.ServiceUnavailable -> serviceUnavailable(error)
         }
 
     fun quoteError(error: QuoteError): ResponseEntity<ProblemDetail> =

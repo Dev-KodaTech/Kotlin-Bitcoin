@@ -7,6 +7,7 @@ import com.kotlinbitcoins.application.account.RegisterAccount
 import com.kotlinbitcoins.application.investment.GetInvestmentPosition
 import com.kotlinbitcoins.application.investment.PurchaseBitcoin
 import com.kotlinbitcoins.application.investment.RedeemInvestments
+import com.kotlinbitcoins.application.ledger.GetStatement
 import com.kotlinbitcoins.application.notification.SendEmailNotification
 import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.Clock
@@ -23,6 +24,7 @@ import com.kotlinbitcoins.application.quote.GetCurrentQuote
 import com.kotlinbitcoins.application.quote.QuoteService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.time.ZoneId
 
 /**
  * Registers each use case as a `@Bean`, built from its ports. Use cases are plain Kotlin classes from the
@@ -114,4 +116,13 @@ class UseCaseConfiguration {
         clock: Clock,
     ): RedeemInvestments =
         RedeemInvestments(accounts, investments, transactions, notifications, quoteService, transactionRunner, clock)
+
+    // US8 — statement
+
+    @Bean
+    fun getStatement(
+        transactions: TransactionRepository,
+        clock: Clock,
+        businessZone: ZoneId,
+    ): GetStatement = GetStatement(transactions, clock, businessZone)
 }

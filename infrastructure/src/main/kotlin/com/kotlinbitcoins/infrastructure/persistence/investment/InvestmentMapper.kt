@@ -8,13 +8,10 @@ import com.kotlinbitcoins.domain.shared.BtcAmount
 import com.kotlinbitcoins.domain.shared.InvestmentId
 import com.kotlinbitcoins.domain.shared.Money
 import com.kotlinbitcoins.domain.shared.Outcome
-import com.kotlinbitcoins.domain.shared.QuotePrice
-import java.math.BigDecimal
+import com.kotlinbitcoins.infrastructure.persistence.quoteFromColumn
 
 /** Converts between [Investment] and its table row. Money keeps its scale; satoshis are plain integers. */
 object InvestmentMapper {
-    private const val MIN_QUOTE_SCALE = 2
-
     fun toEntity(investment: Investment): InvestmentJpaEntity =
         InvestmentJpaEntity(
             id = investment.id.value,
@@ -38,21 +35,11 @@ object InvestmentMapper {
             purchasedAt = entity.purchasedAt,
             fifoSequence = entity.fifoSequence,
             investedAmount = (Money.of(entity.investedAmount) as Outcome.Success).value,
-            purchaseQuote = quote(entity.purchaseQuote),
+            purchaseQuote = quoteFromColumn(entity.purchaseQuote),
             btcAmount = BtcAmount(entity.btcAmountSats),
             status = InvestmentStatus.valueOf(entity.status),
             origin = InvestmentOrigin.valueOf(entity.origin),
             originInvestmentId = entity.originInvestmentId?.let(::InvestmentId),
             closedAt = entity.closedAt,
         )
-
-    /**
-     * `NUMERIC(19,8)` pads every quote to 8 decimals. Trailing zeros are dropped again, keeping at least two
-     * decimals, so a quote of `400000.00` reads back as `400000.00` and not `400000.00000000`. The value is the same.
-     */
-    private fun quote(stored: BigDecimal): QuotePrice {
-        val stripped = stored.stripTrailingZeros()
-        val normalised = if (stripped.scale() < MIN_QUOTE_SCALE) stripped.setScale(MIN_QUOTE_SCALE) else stripped
-        return (QuotePrice.of(normalised) as Outcome.Success).value
-    }
 }
