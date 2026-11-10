@@ -1,6 +1,7 @@
 package com.kotlinbitcoins.api.error
 
 import com.kotlinbitcoins.api.web.CorrelationIdFilter
+import com.kotlinbitcoins.application.account.DepositError
 import com.kotlinbitcoins.application.account.FieldError
 import com.kotlinbitcoins.application.account.LoginError
 import com.kotlinbitcoins.application.account.RegisterAccountError
@@ -76,6 +77,15 @@ class ProblemDetailsMapper {
         when (error) {
             LoginError.InvalidCredentials -> response(ProblemCode.INVALID_CREDENTIALS)
             is LoginError.ServiceUnavailable -> serviceUnavailable(error)
+        }
+
+    /** Amount that is not positive, not numeric or has more than 2 decimals (FR-008, R-10). */
+    fun invalidAmount(): ResponseEntity<ProblemDetail> = response(ProblemCode.INVALID_AMOUNT)
+
+    fun depositError(error: DepositError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            DepositError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
+            is DepositError.ServiceUnavailable -> serviceUnavailable(error)
         }
 
     private fun FieldError.message(): String =

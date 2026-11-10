@@ -3,10 +3,12 @@ package com.kotlinbitcoins.domain.account
 import com.kotlinbitcoins.domain.shared.AccountId
 import com.kotlinbitcoins.domain.shared.Money
 import com.kotlinbitcoins.domain.shared.Outcome
+import com.kotlinbitcoins.domain.shared.PositiveMoney
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.math.BigDecimal
 import java.time.Instant
 
 class AccountTest {
@@ -48,4 +50,19 @@ class AccountTest {
         assertThat(Account.open(id, "a".repeat(201), email, "hash", createdAt))
             .isEqualTo(Outcome.Failure(InvalidName))
     }
+
+    @Test
+    fun `deposit adds the amount to the balance`() {
+        val account = Account(id, "Ana Souza", email, "hash", money("50.00"), createdAt)
+
+        val deposited = account.deposit(positive("100.00"))
+
+        assertThat(deposited.balance).isEqualTo(money("150.00"))
+        assertThat(deposited.id).isEqualTo(id)
+        assertThat(account.balance).isEqualTo(money("50.00"))
+    }
+
+    private fun money(value: String): Money = (Money.of(BigDecimal(value)) as Outcome.Success).value
+
+    private fun positive(value: String): PositiveMoney = (PositiveMoney.of(BigDecimal(value)) as Outcome.Success).value
 }

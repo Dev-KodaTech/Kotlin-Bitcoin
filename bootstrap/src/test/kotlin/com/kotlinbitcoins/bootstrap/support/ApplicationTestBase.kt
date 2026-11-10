@@ -3,6 +3,7 @@ package com.kotlinbitcoins.bootstrap.support
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import org.junit.jupiter.api.BeforeEach
+import org.springframework.amqp.rabbit.core.RabbitAdmin
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -25,7 +26,8 @@ import java.time.Instant
 /**
  * Base for tests over the fully assembled application: `@SpringBootTest` + MockMvc, singleton `postgres:16`,
  * `redis:7` and `rabbitmq:3` containers, a WireMock server standing in for the quote source, and a [MutableClock].
- * Every test starts with empty tables, an empty cache, no WireMock stubs and the clock at [DEFAULT_NOW].
+ * Every test starts with empty tables, an empty cache and queues, no WireMock stubs, a [RecordingEmailSender] that
+ * accepts mail and the clock at [DEFAULT_NOW].
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -41,6 +43,12 @@ abstract class ApplicationTestBase {
     @Autowired
     protected lateinit var clock: MutableClock
 
+    @Autowired
+    protected lateinit var emailSender: RecordingEmailSender
+
+    @Autowired
+    private lateinit var rabbitAdmin: RabbitAdmin
+
     @BeforeEach
     fun resetState() {
         jdbcTemplate.execute(
@@ -49,6 +57,10 @@ abstract class ApplicationTestBase {
         redis.execInContainer("redis-cli", "FLUSHALL")
         quoteSource.resetAll()
         clock.set(DEFAULT_NOW)
+        emailSender.reset()
+        // Leftover retries from a previous test must not reach the sender of the next one.
+        listOf("notifications.email", "notifications.email.retry", "notifications.email.dlq")
+            .forEach(rabbitAdmin::purgeQueue)
     }
 
     @TestConfiguration
@@ -56,6 +68,10 @@ abstract class ApplicationTestBase {
         @Bean
         @Primary
         fun mutableClock(): MutableClock = MutableClock(DEFAULT_NOW)
+
+        @Bean
+        @Primary
+        fun recordingEmailSender(): RecordingEmailSender = RecordingEmailSender()
     }
 
     companion object {

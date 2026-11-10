@@ -3,6 +3,7 @@ package com.kotlinbitcoins.domain.account
 import com.kotlinbitcoins.domain.shared.AccountId
 import com.kotlinbitcoins.domain.shared.Money
 import com.kotlinbitcoins.domain.shared.Outcome
+import com.kotlinbitcoins.domain.shared.PositiveMoney
 import java.time.Instant
 
 data object InvalidName
@@ -25,6 +26,9 @@ data class Account(
     }
 
     override fun toString(): String = "Account(id=$id, email=$email, balance=$balance, createdAt=$createdAt)"
+
+    /** Credits [amount] to the balance (FR-008, FR-009). */
+    fun deposit(amount: PositiveMoney): Account = copy(balance = balance + amount.money)
 
     companion object {
         const val MAX_NAME_LENGTH = 200

@@ -15,6 +15,9 @@ dependencies {
     implementation(libs.spring.boot.starter.security)
     implementation(libs.spring.boot.starter.oauth2.resource.server)
     implementation(libs.spring.boot.starter.actuator)
+    // Only for @EnableRabbit, RabbitTemplate and JavaMailSender when wiring the messaging and e-mail adapters.
+    implementation(libs.spring.boot.starter.amqp)
+    implementation(libs.spring.boot.starter.mail)
     // Only for @EnableJpaRepositories/@EntityScan and PlatformTransactionManager when wiring the adapters.
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.logstash.logback.encoder)

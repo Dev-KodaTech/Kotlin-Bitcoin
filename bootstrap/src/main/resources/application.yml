@@ -20,9 +20,15 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER}
     password: ${RABBITMQ_PASSWORD}
+    # The outbox relay waits for the broker's confirm before marking an event as published (R-08).
+    publisher-confirm-type: correlated
   mail:
     host: ${SMTP_HOST:localhost}
     port: ${SMTP_PORT:1025}
+    properties:
+      mail.smtp.connectiontimeout: 2000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
 
 server:
   shutdown: graceful
@@ -33,6 +39,11 @@ app:
     secret: ${JWT_SECRET}
     ttl: 1h
   business-zone: America/Sao_Paulo
+  mail:
+    from: no-reply@kotlinbitcoins.local
+    sender-name: KotlinBitcoins
+  brevo:
+    base-url: https://api.brevo.com
 
 quote:
   provider:
