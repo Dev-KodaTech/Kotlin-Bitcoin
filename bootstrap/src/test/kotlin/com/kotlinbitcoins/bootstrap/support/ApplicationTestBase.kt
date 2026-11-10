@@ -52,8 +52,11 @@ abstract class ApplicationTestBase {
     @BeforeEach
     fun resetState() {
         jdbcTemplate.execute(
-            "TRUNCATE TABLE transactions, investments, accounts, quote_history, outbox_events, shedlock CASCADE",
+            "TRUNCATE TABLE transactions, investments, accounts, quote_history, outbox_events CASCADE",
         )
+        // Release the scheduler locks but keep the rows: the lock provider remembers which rows it has created, so a
+        // truncated `shedlock` table would make it fail to acquire any lock from then on.
+        jdbcTemplate.update("UPDATE shedlock SET lock_until = TIMESTAMP WITH TIME ZONE 'epoch'")
         redis.execInContainer("redis-cli", "FLUSHALL")
         quoteSource.resetAll()
         clock.set(DEFAULT_NOW)

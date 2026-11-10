@@ -17,11 +17,15 @@ import com.kotlinbitcoins.application.port.InvestmentRepository
 import com.kotlinbitcoins.application.port.NotificationPublisher
 import com.kotlinbitcoins.application.port.PasswordHasher
 import com.kotlinbitcoins.application.port.QuoteCache
+import com.kotlinbitcoins.application.port.QuoteHistoryRepository
 import com.kotlinbitcoins.application.port.QuoteProvider
 import com.kotlinbitcoins.application.port.TokenIssuer
 import com.kotlinbitcoins.application.port.TransactionRepository
 import com.kotlinbitcoins.application.port.TransactionRunner
+import com.kotlinbitcoins.application.quote.CaptureQuoteSnapshot
 import com.kotlinbitcoins.application.quote.GetCurrentQuote
+import com.kotlinbitcoins.application.quote.GetQuoteHistory
+import com.kotlinbitcoins.application.quote.PurgeQuoteHistory
 import com.kotlinbitcoins.application.quote.QuoteService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -32,6 +36,8 @@ import java.time.ZoneId
  * `application` module and are never component-scanned. Each user story adds its use cases here.
  */
 @Configuration
+// Composition root: one @Bean per use case, so the function count grows with the use cases, not with complexity.
+@Suppress("TooManyFunctions")
 class UseCaseConfiguration {
     // US1 — registration and login
 
@@ -135,4 +141,26 @@ class UseCaseConfiguration {
         clock: Clock,
         businessZone: ZoneId,
     ): GetDailyVolume = GetDailyVolume(transactions, clock, businessZone)
+
+    // US10 — quote history
+
+    @Bean
+    fun captureQuoteSnapshot(
+        provider: QuoteProvider,
+        history: QuoteHistoryRepository,
+        cache: QuoteCache,
+        clock: Clock,
+    ): CaptureQuoteSnapshot = CaptureQuoteSnapshot(provider, history, cache, clock)
+
+    @Bean
+    fun purgeQuoteHistory(
+        history: QuoteHistoryRepository,
+        clock: Clock,
+    ): PurgeQuoteHistory = PurgeQuoteHistory(history, clock)
+
+    @Bean
+    fun getQuoteHistory(
+        history: QuoteHistoryRepository,
+        clock: Clock,
+    ): GetQuoteHistory = GetQuoteHistory(history, clock)
 }

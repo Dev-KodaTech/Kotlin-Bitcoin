@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.InvestmentRepository
 import com.kotlinbitcoins.application.port.NotificationPublisher
+import com.kotlinbitcoins.application.port.QuoteHistoryRepository
 import com.kotlinbitcoins.application.port.TransactionRepository
 import com.kotlinbitcoins.application.port.TransactionRunner
 import com.kotlinbitcoins.infrastructure.messaging.OutboxNotificationPublisher
@@ -15,6 +16,8 @@ import com.kotlinbitcoins.infrastructure.persistence.investment.InvestmentReposi
 import com.kotlinbitcoins.infrastructure.persistence.investment.SpringDataInvestmentRepository
 import com.kotlinbitcoins.infrastructure.persistence.ledger.SpringDataTransactionRepository
 import com.kotlinbitcoins.infrastructure.persistence.ledger.TransactionRepositoryAdapter
+import com.kotlinbitcoins.infrastructure.persistence.quote.QuoteHistoryRepositoryAdapter
+import com.kotlinbitcoins.infrastructure.persistence.quote.SpringDataQuoteHistoryRepository
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.context.annotation.Bean
@@ -51,4 +54,8 @@ class InfrastructureTestApplication {
         repository: SpringDataOutboxEventRepository,
         objectMapper: ObjectMapper,
     ): NotificationPublisher = OutboxNotificationPublisher(repository, objectMapper)
+
+    @Bean
+    fun quoteHistoryRepository(repository: SpringDataQuoteHistoryRepository): QuoteHistoryRepository =
+        QuoteHistoryRepositoryAdapter(repository)
 }

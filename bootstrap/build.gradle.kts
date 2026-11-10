@@ -22,6 +22,9 @@ dependencies {
     implementation(libs.spring.boot.starter.data.jpa)
     // Only for StringRedisTemplate when wiring the quote cache.
     implementation(libs.spring.boot.starter.data.redis)
+    // Only for @EnableSchedulerLock and the JDBC LockProvider when wiring the scheduled jobs.
+    implementation(libs.shedlock.spring)
+    implementation(libs.shedlock.provider.jdbc.template)
     implementation(libs.logstash.logback.encoder)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.kotlin.reflect)

@@ -14,6 +14,7 @@ import com.kotlinbitcoins.application.ledger.DailyVolumeError
 import com.kotlinbitcoins.application.ledger.StatementError
 import com.kotlinbitcoins.application.port.InfrastructureUnavailable
 import com.kotlinbitcoins.application.quote.QuoteError
+import com.kotlinbitcoins.application.quote.QuoteHistoryError
 import org.slf4j.MDC
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatusCode
@@ -31,6 +32,8 @@ data class FieldViolation(
 
 /** Builds RFC 9457 responses (`application/problem+json`) with a stable `code` and the request's correlation id. */
 @Component
+// One mapping function per operation error, so the count grows with the API, not with complexity.
+@Suppress("TooManyFunctions")
 class ProblemDetailsMapper {
     fun problem(
         code: ProblemCode,
@@ -138,6 +141,12 @@ class ProblemDetailsMapper {
     fun quoteError(error: QuoteError): ResponseEntity<ProblemDetail> =
         when (error) {
             QuoteError.QuoteUnavailable -> response(ProblemCode.QUOTE_UNAVAILABLE)
+        }
+
+    fun quoteHistoryError(error: QuoteHistoryError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            QuoteHistoryError.SourceUnavailable -> response(ProblemCode.QUOTE_UNAVAILABLE)
+            is QuoteHistoryError.ServiceUnavailable -> serviceUnavailable(error)
         }
 
     private fun FieldError.message(): String =

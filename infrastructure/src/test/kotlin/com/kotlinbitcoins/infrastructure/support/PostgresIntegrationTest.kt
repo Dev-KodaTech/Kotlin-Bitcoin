@@ -22,8 +22,17 @@ abstract class PostgresIntegrationTest {
     @BeforeEach
     fun cleanTables() {
         jdbcTemplate.execute(
-            "TRUNCATE TABLE transactions, investments, accounts, quote_history, outbox_events, shedlock CASCADE",
+            "TRUNCATE TABLE transactions, investments, accounts, quote_history, outbox_events CASCADE",
         )
+        releaseSchedulerLocks()
+    }
+
+    /**
+     * Releases every ShedLock lock without deleting the rows: the lock provider remembers which rows it has created,
+     * so a truncated `shedlock` table would make it fail to acquire any lock from then on.
+     */
+    private fun releaseSchedulerLocks() {
+        jdbcTemplate.update("UPDATE shedlock SET lock_until = TIMESTAMP WITH TIME ZONE 'epoch'")
     }
 
     /** Pauses the database container while [block] runs, so adapters see an unreachable database. */

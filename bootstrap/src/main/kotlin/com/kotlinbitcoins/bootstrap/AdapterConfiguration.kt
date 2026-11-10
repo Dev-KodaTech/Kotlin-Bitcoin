@@ -9,10 +9,13 @@ import com.kotlinbitcoins.application.port.InvestmentRepository
 import com.kotlinbitcoins.application.port.NotificationPublisher
 import com.kotlinbitcoins.application.port.PasswordHasher
 import com.kotlinbitcoins.application.port.QuoteCache
+import com.kotlinbitcoins.application.port.QuoteHistoryRepository
 import com.kotlinbitcoins.application.port.QuoteProvider
 import com.kotlinbitcoins.application.port.TokenIssuer
 import com.kotlinbitcoins.application.port.TransactionRepository
 import com.kotlinbitcoins.application.port.TransactionRunner
+import com.kotlinbitcoins.application.quote.CaptureQuoteSnapshot
+import com.kotlinbitcoins.application.quote.PurgeQuoteHistory
 import com.kotlinbitcoins.infrastructure.email.BrevoEmailSender
 import com.kotlinbitcoins.infrastructure.email.SmtpEmailSender
 import com.kotlinbitcoins.infrastructure.messaging.EmailNotificationListener
@@ -27,9 +30,13 @@ import com.kotlinbitcoins.infrastructure.persistence.investment.InvestmentReposi
 import com.kotlinbitcoins.infrastructure.persistence.investment.SpringDataInvestmentRepository
 import com.kotlinbitcoins.infrastructure.persistence.ledger.SpringDataTransactionRepository
 import com.kotlinbitcoins.infrastructure.persistence.ledger.TransactionRepositoryAdapter
+import com.kotlinbitcoins.infrastructure.persistence.quote.QuoteHistoryRepositoryAdapter
+import com.kotlinbitcoins.infrastructure.persistence.quote.SpringDataQuoteHistoryRepository
 import com.kotlinbitcoins.infrastructure.quote.MercadoBitcoinQuoteProvider
 import com.kotlinbitcoins.infrastructure.quote.QuoteProviderProperties
 import com.kotlinbitcoins.infrastructure.quote.RedisQuoteCache
+import com.kotlinbitcoins.infrastructure.scheduling.CaptureQuoteSnapshotJob
+import com.kotlinbitcoins.infrastructure.scheduling.PurgeQuoteHistoryJob
 import com.kotlinbitcoins.infrastructure.security.BCryptPasswordHasher
 import com.kotlinbitcoins.infrastructure.security.JwtTokenIssuer
 import com.kotlinbitcoins.infrastructure.time.SystemClock
@@ -114,6 +121,18 @@ class AdapterConfiguration {
         redis: StringRedisTemplate,
         objectMapper: ObjectMapper,
     ): QuoteCache = RedisQuoteCache(redis, objectMapper)
+
+    @Bean
+    fun quoteHistoryRepository(repository: SpringDataQuoteHistoryRepository): QuoteHistoryRepository =
+        QuoteHistoryRepositoryAdapter(repository)
+
+    @Bean
+    fun captureQuoteSnapshotJob(captureQuoteSnapshot: CaptureQuoteSnapshot): CaptureQuoteSnapshotJob =
+        CaptureQuoteSnapshotJob(captureQuoteSnapshot)
+
+    @Bean
+    fun purgeQuoteHistoryJob(purgeQuoteHistory: PurgeQuoteHistory): PurgeQuoteHistoryJob =
+        PurgeQuoteHistoryJob(purgeQuoteHistory)
 
     @Bean
     @Profile("prod")
