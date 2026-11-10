@@ -3,7 +3,9 @@ package com.kotlinbitcoins.infrastructure.persistence.ledger
 import com.kotlinbitcoins.application.port.InfrastructureFailure
 import com.kotlinbitcoins.application.port.TransactionRepository
 import com.kotlinbitcoins.domain.ledger.Transaction
+import com.kotlinbitcoins.domain.ledger.TransactionType
 import com.kotlinbitcoins.domain.shared.AccountId
+import com.kotlinbitcoins.domain.shared.BtcAmount
 import com.kotlinbitcoins.domain.shared.Outcome
 import com.kotlinbitcoins.infrastructure.persistence.persistenceCall
 import java.time.Instant
@@ -26,5 +28,14 @@ class TransactionRepositoryAdapter(
     ): Outcome<InfrastructureFailure, List<Transaction>> =
         persistenceCall("transaction.findByAccountBetween") {
             repository.findBetween(accountId.value, fromInclusive, toExclusive).map(TransactionMapper::toDomain)
+        }
+
+    override fun sumBtcByTypeBetween(
+        type: TransactionType,
+        fromInclusive: Instant,
+        toExclusive: Instant,
+    ): Outcome<InfrastructureFailure, BtcAmount> =
+        persistenceCall("transaction.sumBtcByTypeBetween") {
+            BtcAmount(repository.sumSatsBetween(type.name, fromInclusive, toExclusive))
         }
 }

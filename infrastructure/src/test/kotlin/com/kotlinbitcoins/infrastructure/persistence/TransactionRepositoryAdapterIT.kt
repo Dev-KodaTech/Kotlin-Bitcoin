@@ -4,12 +4,16 @@ import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.InfrastructureFailure
 import com.kotlinbitcoins.application.port.TransactionRepository
 import com.kotlinbitcoins.domain.ledger.Transaction
+import com.kotlinbitcoins.domain.ledger.TransactionType
 import com.kotlinbitcoins.domain.shared.AccountId
 import com.kotlinbitcoins.domain.shared.BtcAmount
 import com.kotlinbitcoins.domain.shared.InvestmentId
+import com.kotlinbitcoins.domain.shared.Money
 import com.kotlinbitcoins.domain.shared.Outcome
 import com.kotlinbitcoins.domain.shared.PositiveMoney
 import com.kotlinbitcoins.domain.shared.QuotePrice
+import com.kotlinbitcoins.domain.shared.RedemptionRequestId
+import com.kotlinbitcoins.domain.shared.TransactionId
 import com.kotlinbitcoins.infrastructure.support.AccountFixtures
 import com.kotlinbitcoins.infrastructure.support.PostgresIntegrationTest
 import org.assertj.core.api.Assertions.assertThat
@@ -161,6 +165,111 @@ class TransactionRepositoryAdapterIT : PostgresIntegrationTest() {
 
         assertThat(result).isInstanceOf(Outcome.Failure::class.java)
     }
+
+    @Test
+    fun `sumBtcByTypeBetween adds purchases and redemptions of every account, each type apart`() {
+        val ana = AccountFixtures.account()
+        val bia = AccountFixtures.account(email = "bia@example.com")
+        accounts.save(ana)
+        accounts.save(bia)
+        val at = Instant.parse("2026-11-09T12:00:00Z")
+        transactions.saveAll(
+            listOf(
+                btcLine(TransactionType.PURCHASE, ana.id, 100_000, at),
+                btcLine(TransactionType.PURCHASE, bia.id, 200_000, at.plusSeconds(60)),
+                btcLine(TransactionType.REDEMPTION, ana.id, 50_000, at.plusSeconds(120)),
+            ),
+        )
+
+        val bought = transactions.sumBtcByTypeBetween(TransactionType.PURCHASE, at.minusSeconds(1), at.plusSeconds(600))
+        val sold = transactions.sumBtcByTypeBetween(TransactionType.REDEMPTION, at.minusSeconds(1), at.plusSeconds(600))
+
+        assertThat(bought).isEqualTo(Outcome.Success(BtcAmount(300_000)))
+        assertThat(sold).isEqualTo(Outcome.Success(BtcAmount(50_000)))
+    }
+
+    @Test
+    fun `sumBtcByTypeBetween ignores reinvestments and deposits`() {
+        val account = AccountFixtures.account()
+        accounts.save(account)
+        val at = Instant.parse("2026-11-09T12:00:00Z")
+        transactions.saveAll(
+            listOf(
+                btcLine(TransactionType.PURCHASE, account.id, 100_000, at),
+                btcLine(TransactionType.REINVESTMENT, account.id, 25_000, at),
+                Transaction.deposit(account.id, positive("500.00"), at),
+            ),
+        )
+        val from = at.minusSeconds(1)
+        val to = at.plusSeconds(1)
+
+        assertThat(transactions.sumBtcByTypeBetween(TransactionType.PURCHASE, from, to))
+            .isEqualTo(Outcome.Success(BtcAmount(100_000)))
+        assertThat(transactions.sumBtcByTypeBetween(TransactionType.REDEMPTION, from, to))
+            .isEqualTo(Outcome.Success(BtcAmount.ZERO))
+    }
+
+    @Test
+    fun `sumBtcByTypeBetween without rows is zero`() {
+        val result =
+            transactions.sumBtcByTypeBetween(
+                TransactionType.PURCHASE,
+                Instant.parse("2026-11-09T03:00:00Z"),
+                Instant.parse("2026-11-10T03:00:00Z"),
+            )
+
+        assertThat(result).isEqualTo(Outcome.Success(BtcAmount.ZERO))
+    }
+
+    @Test
+    fun `sumBtcByTypeBetween respects the local day bounds`() {
+        val account = AccountFixtures.account()
+        accounts.save(account)
+        val from = Instant.parse("2026-11-09T03:00:00Z") // 00:00 of 09/11 in São Paulo
+        val to = Instant.parse("2026-11-10T03:00:00Z") // 00:00 of 10/11 in São Paulo
+        transactions.saveAll(
+            listOf(
+                btcLine(TransactionType.PURCHASE, account.id, 1, from.minusSeconds(1)), // 23:59:59 of 08/11 → out
+                btcLine(TransactionType.PURCHASE, account.id, 10, from), // 00:00 of 09/11 → in
+                btcLine(TransactionType.PURCHASE, account.id, 100, to.minusSeconds(1)), // 23:59:59 of 09/11 → in
+                btcLine(TransactionType.PURCHASE, account.id, 1_000, to), // 00:00 of 10/11 → out
+            ),
+        )
+
+        val result = transactions.sumBtcByTypeBetween(TransactionType.PURCHASE, from, to)
+
+        assertThat(result).isEqualTo(Outcome.Success(BtcAmount(110)))
+    }
+
+    @Test
+    fun `sumBtcByTypeBetween with the database down is a failure value`() {
+        val result =
+            withDatabasePaused {
+                transactions.sumBtcByTypeBetween(TransactionType.PURCHASE, Instant.now(), Instant.now())
+            }
+
+        assertThat(result).isInstanceOf(Outcome.Failure::class.java)
+    }
+
+    private fun btcLine(
+        type: TransactionType,
+        accountId: AccountId,
+        sats: Long,
+        at: Instant,
+    ) = Transaction(
+        id = TransactionId.random(),
+        accountId = accountId,
+        type = type,
+        amount = (Money.of(BigDecimal("10.00")) as Outcome.Success).value,
+        btcAmount = BtcAmount(sats),
+        quote = (QuotePrice.of(BigDecimal("400000.00")) as Outcome.Success).value,
+        investmentId = null,
+        requestId =
+            RedemptionRequestId
+                .random()
+                .takeIf { type == TransactionType.REDEMPTION || type == TransactionType.REINVESTMENT },
+        occurredAt = at,
+    )
 
     private fun insertInvestment(
         accountId: AccountId,

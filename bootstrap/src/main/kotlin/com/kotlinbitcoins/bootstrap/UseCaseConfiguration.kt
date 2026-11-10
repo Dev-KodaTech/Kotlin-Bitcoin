@@ -7,6 +7,7 @@ import com.kotlinbitcoins.application.account.RegisterAccount
 import com.kotlinbitcoins.application.investment.GetInvestmentPosition
 import com.kotlinbitcoins.application.investment.PurchaseBitcoin
 import com.kotlinbitcoins.application.investment.RedeemInvestments
+import com.kotlinbitcoins.application.ledger.GetDailyVolume
 import com.kotlinbitcoins.application.ledger.GetStatement
 import com.kotlinbitcoins.application.notification.SendEmailNotification
 import com.kotlinbitcoins.application.port.AccountRepository
@@ -125,4 +126,13 @@ class UseCaseConfiguration {
         clock: Clock,
         businessZone: ZoneId,
     ): GetStatement = GetStatement(transactions, clock, businessZone)
+
+    // US9 — daily volume
+
+    @Bean
+    fun getDailyVolume(
+        transactions: TransactionRepository,
+        clock: Clock,
+        businessZone: ZoneId,
+    ): GetDailyVolume = GetDailyVolume(transactions, clock, businessZone)
 }

@@ -10,6 +10,7 @@ import com.kotlinbitcoins.application.account.Violation
 import com.kotlinbitcoins.application.investment.GetInvestmentPositionError
 import com.kotlinbitcoins.application.investment.PurchaseError
 import com.kotlinbitcoins.application.investment.RedemptionError
+import com.kotlinbitcoins.application.ledger.DailyVolumeError
 import com.kotlinbitcoins.application.ledger.StatementError
 import com.kotlinbitcoins.application.port.InfrastructureUnavailable
 import com.kotlinbitcoins.application.quote.QuoteError
@@ -127,6 +128,11 @@ class ProblemDetailsMapper {
         when (error) {
             StatementError.InvalidDateRange -> response(ProblemCode.INVALID_DATE_RANGE)
             is StatementError.ServiceUnavailable -> serviceUnavailable(error)
+        }
+
+    fun dailyVolumeError(error: DailyVolumeError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            is DailyVolumeError.ServiceUnavailable -> serviceUnavailable(error)
         }
 
     fun quoteError(error: QuoteError): ResponseEntity<ProblemDetail> =

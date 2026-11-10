@@ -16,4 +16,14 @@ interface SpringDataTransactionRepository : JpaRepository<TransactionJpaEntity, 
         @Param("from") from: Instant,
         @Param("to") to: Instant,
     ): List<TransactionJpaEntity>
+
+    @Query(
+        "SELECT COALESCE(SUM(t.btcAmountSats), 0) FROM TransactionJpaEntity t " +
+            "WHERE t.type = :type AND t.occurredAt >= :from AND t.occurredAt < :to",
+    )
+    fun sumSatsBetween(
+        @Param("type") type: String,
+        @Param("from") from: Instant,
+        @Param("to") to: Instant,
+    ): Long
 }
