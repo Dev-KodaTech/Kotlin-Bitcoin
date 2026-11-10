@@ -25,6 +25,8 @@ dependencies {
     // Only for @EnableSchedulerLock and the JDBC LockProvider when wiring the scheduled jobs.
     implementation(libs.shedlock.spring)
     implementation(libs.shedlock.provider.jdbc.template)
+    // Only for the OpenAPI/SecurityScheme model types used by OpenApiConfiguration.
+    implementation(libs.springdoc.openapi.starter.webmvc.ui)
     implementation(libs.logstash.logback.encoder)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.kotlin.reflect)

@@ -2,11 +2,16 @@ package com.kotlinbitcoins.api.ledger
 
 import com.kotlinbitcoins.api.error.ProblemDetailsMapper
 import com.kotlinbitcoins.api.format.ApiFormats
+import com.kotlinbitcoins.api.openapi.PROBLEM_JSON
+import com.kotlinbitcoins.api.openapi.ProblemBody
 import com.kotlinbitcoins.api.web.CurrentAccount
 import com.kotlinbitcoins.application.ledger.GetStatement
 import com.kotlinbitcoins.application.ledger.StatementError
 import com.kotlinbitcoins.domain.shared.AccountId
 import com.kotlinbitcoins.domain.shared.fold
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -25,6 +30,21 @@ class StatementController(
      * The dates arrive as text so that a malformed one is an `INVALID_DATE_RANGE` (422) and not Spring's generic
      * type-mismatch `400`.
      */
+    @ApiResponse(
+        responseCode = "200",
+        description = "Lançamentos do mais recente para o mais antigo",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = StatementResponse::class))],
+    )
+    @ApiResponse(
+        responseCode = "401",
+        description = "Token ausente, malformado, adulterado ou expirado",
+        content = [Content(mediaType = PROBLEM_JSON, schema = Schema(implementation = ProblemBody::class))],
+    )
+    @ApiResponse(
+        responseCode = "422",
+        description = "Intervalo de datas inválido",
+        content = [Content(mediaType = PROBLEM_JSON, schema = Schema(implementation = ProblemBody::class))],
+    )
     @GetMapping("/api/v1/me/statement")
     fun statement(
         @CurrentAccount accountId: AccountId,

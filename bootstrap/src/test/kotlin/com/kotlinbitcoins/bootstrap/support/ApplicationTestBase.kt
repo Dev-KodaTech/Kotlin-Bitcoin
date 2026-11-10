@@ -1,6 +1,10 @@
 package com.kotlinbitcoins.bootstrap.support
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.amqp.rabbit.core.RabbitAdmin
@@ -49,6 +53,31 @@ abstract class ApplicationTestBase {
     @Autowired
     private lateinit var rabbitAdmin: RabbitAdmin
 
+    @Autowired
+    protected lateinit var jsonMapper: ObjectMapper
+
+    /** HTTP client over the assembled application (see [ApiClient]). */
+    protected val api: ApiClient by lazy { ApiClient(mockMvc, jsonMapper, clock) }
+
+    /** Makes the quote source answer with these prices. The cache (10 s) still has to expire to see them. */
+    protected fun stubQuote(
+        buy: String,
+        sell: String,
+    ) {
+        quoteSource.stubFor(
+            get(urlEqualTo(QUOTE_SOURCE_PATH)).willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("""{"ticker":{"buy":"$buy","sell":"$sell","date":${clock.now().epochSecond}}}"""),
+            ),
+        )
+    }
+
+    /** Makes the quote source fail, like the Mercado Bitcoin API answering 521. */
+    protected fun quoteSourceDown() {
+        quoteSource.stubFor(get(urlEqualTo(QUOTE_SOURCE_PATH)).willReturn(aResponse().withStatus(521)))
+    }
+
     @BeforeEach
     fun resetState() {
         jdbcTemplate.execute(
@@ -81,6 +110,7 @@ abstract class ApplicationTestBase {
         val DEFAULT_NOW: Instant = Instant.parse("2026-11-09T11:10:00Z")
 
         private const val REDIS_PORT = 6379
+        private const val QUOTE_SOURCE_PATH = "/api/BTC/ticker/"
 
         val postgres: PostgreSQLContainer<*> = PostgreSQLContainer(DockerImageName.parse("postgres:16"))
         val redis: GenericContainer<*> =

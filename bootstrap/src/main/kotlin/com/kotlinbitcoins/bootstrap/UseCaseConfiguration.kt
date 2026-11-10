@@ -105,9 +105,10 @@ class UseCaseConfiguration {
 
     @Bean
     fun getInvestmentPosition(
+        accounts: AccountRepository,
         investments: InvestmentRepository,
         quoteService: QuoteService,
-    ): GetInvestmentPosition = GetInvestmentPosition(investments, quoteService)
+    ): GetInvestmentPosition = GetInvestmentPosition(accounts, investments, quoteService)
 
     // US7 — redemption of bitcoin
 
@@ -128,10 +129,11 @@ class UseCaseConfiguration {
 
     @Bean
     fun getStatement(
+        accounts: AccountRepository,
         transactions: TransactionRepository,
         clock: Clock,
         businessZone: ZoneId,
-    ): GetStatement = GetStatement(transactions, clock, businessZone)
+    ): GetStatement = GetStatement(accounts, transactions, clock, businessZone)
 
     // US9 — daily volume
 

@@ -8,7 +8,7 @@
     "headers": {
       "Content-Type": "application/json"
     },
-    "body": "{\"ticker\":{\"high\":\"410000.00\",\"low\":\"390000.00\",\"vol\":\"12.34567890\",\"last\":\"400000.00\",\"buy\":\"400000.00\",\"sell\":\"400000.00\",\"open\":\"395000.00\",\"date\":{{now format='unix'}}}}",
+    "body": "{\"ticker\":{\"high\":\"410000.00\",\"low\":\"390000.00\",\"vol\":\"12.34567890\",\"last\":\"400000.00\",\"buy\":\"400000.00\",\"sell\":\"400000.00\",\"open\":\"395000.00\",\"date\":{{now format='unix'}} }}",
     "transformers": ["response-template"]
   }
 }

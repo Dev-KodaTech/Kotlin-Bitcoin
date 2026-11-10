@@ -1,5 +1,6 @@
 package com.kotlinbitcoins.application.ledger
 
+import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.Clock
 import com.kotlinbitcoins.application.port.TransactionRepository
 import com.kotlinbitcoins.domain.ledger.Transaction
@@ -24,6 +25,7 @@ data class Statement(
  * A read has no side effect, so it needs neither a transaction nor the account lock.
  */
 class GetStatement(
+    private val accounts: AccountRepository,
     private val transactions: TransactionRepository,
     private val clock: Clock,
     private val businessZone: ZoneId,
@@ -33,8 +35,18 @@ class GetStatement(
         from: LocalDate?,
         to: LocalDate?,
     ): Outcome<StatementError, Statement> =
-        StatementPeriod
-            .resolve(from, to, businessZone, clock.now())
+        accounts
+            .findById(accountId)
+            .mapError<_, _, StatementError> { StatementError.ServiceUnavailable }
+            .flatMap { account ->
+                if (account ==
+                    null
+                ) {
+                    Outcome.Failure(StatementError.AccountNotFound)
+                } else {
+                    Outcome.Success(account)
+                }
+            }.flatMap { StatementPeriod.resolve(from, to, businessZone, clock.now()) }
             .flatMap<StatementError, StatementPeriod, Statement> { period ->
                 transactions
                     .findByAccountBetween(accountId, period.from, period.to)

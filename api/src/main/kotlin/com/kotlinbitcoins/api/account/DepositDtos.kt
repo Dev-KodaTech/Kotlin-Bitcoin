@@ -2,12 +2,14 @@ package com.kotlinbitcoins.api.account
 
 import com.kotlinbitcoins.api.format.ApiFormats
 import com.kotlinbitcoins.application.account.DepositReceipt
+import io.swagger.v3.oas.annotations.media.Schema
 
 /**
  * Body of a request that carries one money amount. The amount is a JSON string, parsed strictly by
  * `MoneyInputParser` (R-10), so Bean Validation is not used here.
  */
 data class AmountRequest(
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     val amount: String?,
 )
 

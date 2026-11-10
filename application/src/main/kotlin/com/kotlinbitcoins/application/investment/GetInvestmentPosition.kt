@@ -1,5 +1,6 @@
 package com.kotlinbitcoins.application.investment
 
+import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.InfrastructureUnavailable
 import com.kotlinbitcoins.application.port.InvestmentRepository
 import com.kotlinbitcoins.application.quote.QuoteService
@@ -18,6 +19,9 @@ sealed interface GetInvestmentPositionError {
     /** No quote from the source and none of 60 s or less in the cache (FR-012). */
     data object QuoteUnavailable : GetInvestmentPositionError
 
+    /** The authenticated account no longer exists, so the token no longer stands for anyone. */
+    data object AccountNotFound : GetInvestmentPositionError
+
     data object ServiceUnavailable : GetInvestmentPositionError, InfrastructureUnavailable
 }
 
@@ -27,14 +31,27 @@ sealed interface GetInvestmentPositionError {
  * effect, so it needs neither a transaction nor the account lock.
  */
 class GetInvestmentPosition(
+    private val accounts: AccountRepository,
     private val investments: InvestmentRepository,
     private val quoteService: QuoteService,
 ) {
     fun execute(accountId: AccountId): Outcome<GetInvestmentPositionError, InvestmentPosition> =
-        investments
-            .findActiveByAccountInFifoOrder(accountId)
+        accounts
+            .findById(accountId)
             .mapError<_, _, GetInvestmentPositionError> { GetInvestmentPositionError.ServiceUnavailable }
-            .flatMap { active ->
+            .flatMap { account ->
+                if (account ==
+                    null
+                ) {
+                    Outcome.Failure(GetInvestmentPositionError.AccountNotFound)
+                } else {
+                    Outcome.Success(account)
+                }
+            }.flatMap {
+                investments.findActiveByAccountInFifoOrder(accountId).mapError<_, _, GetInvestmentPositionError> {
+                    GetInvestmentPositionError.ServiceUnavailable
+                }
+            }.flatMap { active ->
                 quoteService
                     .currentQuote()
                     .mapError<_, _, GetInvestmentPositionError> { GetInvestmentPositionError.QuoteUnavailable }

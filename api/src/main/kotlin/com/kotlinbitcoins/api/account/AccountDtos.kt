@@ -14,13 +14,15 @@ import jakarta.validation.constraints.Size
 data class RegisterAccountRequest(
     @field:NotBlank(message = "Nome é obrigatório.")
     @field:Size(max = 200, message = "Nome deve ter no máximo 200 caracteres.")
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     val name: String?,
     @field:NotBlank(message = "E-mail é obrigatório.")
     @field:Size(max = 320, message = "E-mail deve ter no máximo 320 caracteres.")
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     val email: String?,
     @field:NotBlank(message = "Senha é obrigatória.")
     @field:Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres.")
-    @field:Schema(accessMode = Schema.AccessMode.WRITE_ONLY)
+    @field:Schema(accessMode = Schema.AccessMode.WRITE_ONLY, requiredMode = Schema.RequiredMode.REQUIRED)
     val password: String?,
 ) {
     override fun toString(): String = "RegisterAccountRequest(name=$name, email=$email, password=****)"
@@ -49,9 +51,10 @@ data class AccountResponse(
 
 data class LoginRequest(
     @field:NotBlank(message = "E-mail é obrigatório.")
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     val email: String?,
     @field:NotBlank(message = "Senha é obrigatória.")
-    @field:Schema(accessMode = Schema.AccessMode.WRITE_ONLY)
+    @field:Schema(accessMode = Schema.AccessMode.WRITE_ONLY, requiredMode = Schema.RequiredMode.REQUIRED)
     val password: String?,
 ) {
     override fun toString(): String = "LoginRequest(email=$email, password=****)"

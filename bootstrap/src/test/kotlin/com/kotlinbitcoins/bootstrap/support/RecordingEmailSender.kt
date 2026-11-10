@@ -4,6 +4,7 @@ import com.kotlinbitcoins.application.port.EmailMessage
 import com.kotlinbitcoins.application.port.EmailSendError
 import com.kotlinbitcoins.application.port.EmailSender
 import com.kotlinbitcoins.domain.shared.Outcome
+import java.time.Duration
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -16,6 +17,10 @@ class RecordingEmailSender : EmailSender {
 
     private val accepted = CopyOnWriteArrayList<EmailMessage>()
 
+    /** Time each [send] takes, to simulate a slow provider. */
+    @Volatile
+    var delay: Duration = Duration.ZERO
+
     @Volatile
     var attempts = 0
         private set
@@ -24,6 +29,7 @@ class RecordingEmailSender : EmailSender {
 
     override fun send(message: EmailMessage): Outcome<EmailSendError, Unit> {
         attempts++
+        if (!delay.isZero) Thread.sleep(delay.toMillis())
         if (isFailing) return Outcome.Failure(EmailSendError("recording sender is failing"))
         accepted += message
         return Outcome.Success(Unit)
@@ -31,6 +37,7 @@ class RecordingEmailSender : EmailSender {
 
     fun reset() {
         isFailing = false
+        delay = Duration.ZERO
         attempts = 0
         accepted.clear()
     }

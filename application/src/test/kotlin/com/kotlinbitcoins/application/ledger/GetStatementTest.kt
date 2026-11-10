@@ -1,8 +1,10 @@
 package com.kotlinbitcoins.application.ledger
 
+import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.Clock
 import com.kotlinbitcoins.application.port.InfrastructureFailure
 import com.kotlinbitcoins.application.port.TransactionRepository
+import com.kotlinbitcoins.domain.account.Account
 import com.kotlinbitcoins.domain.ledger.Transaction
 import com.kotlinbitcoins.domain.shared.AccountId
 import com.kotlinbitcoins.domain.shared.Outcome
@@ -11,6 +13,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
@@ -21,10 +24,16 @@ import java.time.temporal.ChronoUnit
 class GetStatementTest {
     private val now = Instant.parse("2026-11-09T11:10:00Z")
     private val accountId = AccountId.random()
+    private val accounts = mockk<AccountRepository>()
     private val transactions = mockk<TransactionRepository>()
     private val clock = Clock { now }
 
-    private val getStatement = GetStatement(transactions, clock, ZoneId.of("America/Sao_Paulo"))
+    private val getStatement = GetStatement(accounts, transactions, clock, ZoneId.of("America/Sao_Paulo"))
+
+    @BeforeEach
+    fun theAccountExists() {
+        every { accounts.findById(accountId) } returns Outcome.Success(mockk<Account>())
+    }
 
     @Test
     fun `without dates it queries the default period of the authenticated account only`() {
@@ -88,6 +97,26 @@ class GetStatementTest {
 
         assertThat(result).isEqualTo(Outcome.Failure(StatementError.ServiceUnavailable))
         verify(exactly = 0) { transactions.saveAll(any()) }
+    }
+
+    @Test
+    fun `an account that does not exist is AccountNotFound and the repository is not queried`() {
+        every { accounts.findById(accountId) } returns Outcome.Success(null)
+
+        val result = getStatement.execute(accountId, null, null)
+
+        assertThat(result).isEqualTo(Outcome.Failure(StatementError.AccountNotFound))
+        verify(exactly = 0) { transactions.findByAccountBetween(any(), any(), any()) }
+    }
+
+    @Test
+    fun `failure loading the account is ServiceUnavailable`() {
+        every { accounts.findById(accountId) } returns Outcome.Failure(InfrastructureFailure("db down"))
+
+        val result = getStatement.execute(accountId, null, null)
+
+        assertThat(result).isEqualTo(Outcome.Failure(StatementError.ServiceUnavailable))
+        verify(exactly = 0) { transactions.findByAccountBetween(any(), any(), any()) }
     }
 
     private fun deposit(at: String): Transaction =

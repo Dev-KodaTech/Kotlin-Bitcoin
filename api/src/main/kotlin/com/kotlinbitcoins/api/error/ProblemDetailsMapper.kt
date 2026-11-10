@@ -123,12 +123,14 @@ class ProblemDetailsMapper {
 
     fun getInvestmentPositionError(error: GetInvestmentPositionError): ResponseEntity<ProblemDetail> =
         when (error) {
+            GetInvestmentPositionError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
             GetInvestmentPositionError.QuoteUnavailable -> response(ProblemCode.QUOTE_UNAVAILABLE)
             is GetInvestmentPositionError.ServiceUnavailable -> serviceUnavailable(error)
         }
 
     fun statementError(error: StatementError): ResponseEntity<ProblemDetail> =
         when (error) {
+            StatementError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
             StatementError.InvalidDateRange -> response(ProblemCode.INVALID_DATE_RANGE)
             is StatementError.ServiceUnavailable -> serviceUnavailable(error)
         }

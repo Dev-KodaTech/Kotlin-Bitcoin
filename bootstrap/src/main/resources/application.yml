@@ -54,6 +54,11 @@ quote:
     connect-timeout: 1s
     read-timeout: 2s
 
+springdoc:
+  api-docs:
+    # The contract (contracts/openapi.yaml) is OpenAPI 3.1.
+    version: openapi_3_1
+
 management:
   endpoints:
     web:

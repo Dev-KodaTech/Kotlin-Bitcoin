@@ -1,9 +1,11 @@
 package com.kotlinbitcoins.application.investment
 
+import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.InfrastructureFailure
 import com.kotlinbitcoins.application.port.InvestmentRepository
 import com.kotlinbitcoins.application.quote.QuoteError
 import com.kotlinbitcoins.application.quote.QuoteService
+import com.kotlinbitcoins.domain.account.Account
 import com.kotlinbitcoins.domain.investment.Investment
 import com.kotlinbitcoins.domain.quote.Quote
 import com.kotlinbitcoins.domain.shared.AccountId
@@ -15,16 +17,23 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
 
 class GetInvestmentPositionTest {
     private val accountId = AccountId.random()
+    private val accounts = mockk<AccountRepository>()
     private val investments = mockk<InvestmentRepository>()
     private val quoteService = mockk<QuoteService>()
 
-    private val getInvestmentPosition = GetInvestmentPosition(investments, quoteService)
+    private val getInvestmentPosition = GetInvestmentPosition(accounts, investments, quoteService)
+
+    @BeforeEach
+    fun theAccountExists() {
+        every { accounts.findById(accountId) } returns Outcome.Success(mockk<Account>())
+    }
 
     private val quote = Quote(price("440000.00"), price("441000.00"), Instant.parse("2026-11-09T11:10:00Z"))
 
@@ -122,6 +131,27 @@ class GetInvestmentPositionTest {
         assertThat(result).isEqualTo(Outcome.Failure(GetInvestmentPositionError.ServiceUnavailable))
         verify(exactly = 0) { investments.save(any()) }
         verify(exactly = 0) { investments.nextFifoSequence() }
+    }
+
+    @Test
+    fun `an account that does not exist is AccountNotFound and nothing else is read`() {
+        every { accounts.findById(accountId) } returns Outcome.Success(null)
+
+        val result = getInvestmentPosition.execute(accountId)
+
+        assertThat(result).isEqualTo(Outcome.Failure(GetInvestmentPositionError.AccountNotFound))
+        verify(exactly = 0) { investments.findActiveByAccountInFifoOrder(any()) }
+        verify(exactly = 0) { quoteService.currentQuote() }
+    }
+
+    @Test
+    fun `failure loading the account is ServiceUnavailable`() {
+        every { accounts.findById(accountId) } returns Outcome.Failure(InfrastructureFailure("db down"))
+
+        val result = getInvestmentPosition.execute(accountId)
+
+        assertThat(result).isEqualTo(Outcome.Failure(GetInvestmentPositionError.ServiceUnavailable))
+        verify(exactly = 0) { investments.findActiveByAccountInFifoOrder(any()) }
     }
 
     private fun investment(
