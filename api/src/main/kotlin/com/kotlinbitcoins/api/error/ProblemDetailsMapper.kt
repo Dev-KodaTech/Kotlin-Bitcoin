@@ -9,6 +9,7 @@ import com.kotlinbitcoins.application.account.RegisterAccountError
 import com.kotlinbitcoins.application.account.Violation
 import com.kotlinbitcoins.application.investment.GetInvestmentPositionError
 import com.kotlinbitcoins.application.investment.PurchaseError
+import com.kotlinbitcoins.application.investment.RedemptionError
 import com.kotlinbitcoins.application.port.InfrastructureUnavailable
 import com.kotlinbitcoins.application.quote.QuoteError
 import org.slf4j.MDC
@@ -105,6 +106,14 @@ class ProblemDetailsMapper {
             PurchaseError.QuoteUnavailable -> response(ProblemCode.QUOTE_UNAVAILABLE)
             PurchaseError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
             is PurchaseError.ServiceUnavailable -> serviceUnavailable(error)
+        }
+
+    fun redemptionError(error: RedemptionError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            RedemptionError.RedemptionExceedsAvailable -> response(ProblemCode.REDEMPTION_EXCEEDS_AVAILABLE)
+            RedemptionError.QuoteUnavailable -> response(ProblemCode.QUOTE_UNAVAILABLE)
+            RedemptionError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
+            is RedemptionError.ServiceUnavailable -> serviceUnavailable(error)
         }
 
     fun getInvestmentPositionError(error: GetInvestmentPositionError): ResponseEntity<ProblemDetail> =

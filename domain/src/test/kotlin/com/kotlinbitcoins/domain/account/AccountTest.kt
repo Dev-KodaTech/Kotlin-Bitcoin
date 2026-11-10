@@ -93,6 +93,24 @@ class AccountTest {
         assertThat(account.balance).isEqualTo(money("100.00"))
     }
 
+    @Test
+    fun `credit adds the amount to the balance`() {
+        val account = Account(id, "Ana Souza", email, "hash", money("100.00"), createdAt)
+
+        val credited = account.credit(money("500.00"))
+
+        assertThat(credited.balance).isEqualTo(money("600.00"))
+        assertThat(credited.id).isEqualTo(id)
+        assertThat(account.balance).isEqualTo(money("100.00"))
+    }
+
+    @Test
+    fun `credit of zero keeps the balance`() {
+        val account = Account(id, "Ana Souza", email, "hash", money("100.00"), createdAt)
+
+        assertThat(account.credit(Money.ZERO).balance).isEqualTo(money("100.00"))
+    }
+
     private fun money(value: String): Money = (Money.of(BigDecimal(value)) as Outcome.Success).value
 
     private fun positive(value: String): PositiveMoney = (PositiveMoney.of(BigDecimal(value)) as Outcome.Success).value

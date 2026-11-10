@@ -55,6 +55,25 @@ class SendEmailNotificationTest {
     }
 
     @Test
+    fun `REDEMPTION_CONFIRMED becomes a redemption e-mail with the amount in reais and the bitcoin sold`() {
+        val message = slot<EmailMessage>()
+        every { emailSender.send(capture(message)) } returns Outcome.Success(Unit)
+
+        val result =
+            sendEmailNotification.execute(
+                event().copy(
+                    type = NotificationType.REDEMPTION_CONFIRMED,
+                    amount = money("250.00"),
+                    btcAmount = BtcAmount(125_000),
+                ),
+            )
+
+        assertThat(result).isEqualTo(Outcome.Success(Unit))
+        assertThat(message.captured.content)
+            .isEqualTo(EmailContent.RedemptionConfirmed(money("250.00"), BtcAmount(125_000)))
+    }
+
+    @Test
     fun `a sender failure comes back as a value, never as an exception`() {
         every { emailSender.send(any()) } returns Outcome.Failure(EmailSendError("provider rejected"))
 

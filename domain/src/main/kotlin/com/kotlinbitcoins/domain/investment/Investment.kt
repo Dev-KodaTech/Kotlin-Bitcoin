@@ -36,6 +36,12 @@ data class Investment(
         }
     }
 
+    /** Closes an active investment: it was fully liquidated, or partially and its residue was reinvested (FR-020). */
+    fun close(closedAt: Instant): Investment {
+        check(status == InvestmentStatus.ACTIVE) { "Only an active investment can be closed" }
+        return copy(status = InvestmentStatus.CLOSED, closedAt = closedAt)
+    }
+
     companion object {
         /** A new investment created by a purchase (FR-014): active, no origin investment. */
         fun purchase(
@@ -57,6 +63,29 @@ data class Investment(
                 status = InvestmentStatus.ACTIVE,
                 origin = InvestmentOrigin.PURCHASE,
                 originInvestmentId = null,
+                closedAt = null,
+            )
+
+        /**
+         * Investment created from the [residualSats] left by a partial redemption of [origin] (FR-020, FR-021). It
+         * keeps the purchase date, FIFO sequence and quote of [origin], so it stays at the same place in the queue
+         * and keeps the same variation. Its invested amount is the residue valued at that quote, rounded down.
+         */
+        fun reinvestmentOf(
+            origin: Investment,
+            residualSats: BtcAmount,
+        ): Investment =
+            Investment(
+                id = InvestmentId.random(),
+                accountId = origin.accountId,
+                purchasedAt = origin.purchasedAt,
+                fifoSequence = origin.fifoSequence,
+                investedAmount = BtcConversion.currentValue(residualSats, origin.purchaseQuote),
+                purchaseQuote = origin.purchaseQuote,
+                btcAmount = residualSats,
+                status = InvestmentStatus.ACTIVE,
+                origin = InvestmentOrigin.REINVESTMENT,
+                originInvestmentId = origin.id,
                 closedAt = null,
             )
     }

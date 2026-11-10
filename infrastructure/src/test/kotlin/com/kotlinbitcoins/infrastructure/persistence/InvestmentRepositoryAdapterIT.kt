@@ -109,6 +109,75 @@ class InvestmentRepositoryAdapterIT : PostgresIntegrationTest() {
     }
 
     @Test
+    fun `close stores the CLOSED status and the closing instant and the investment leaves the active list`() {
+        val investment = investment(ana.id, "2026-11-09T11:10:00Z", 5, "400.00", "400000.00", 100_000)
+        investments.save(investment)
+        val closed = investment.close(Instant.parse("2026-11-10T09:30:00Z"))
+
+        assertThat(investments.close(closed)).isEqualTo(Outcome.Success(closed))
+
+        val row = jdbcTemplate.queryForMap("SELECT * FROM investments")
+        assertThat(row["status"]).isEqualTo("CLOSED")
+        val closedUtc =
+            jdbcTemplate.queryForObject(
+                "SELECT to_char(closed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS') FROM investments",
+                String::class.java,
+            )
+        assertThat(closedUtc).isEqualTo("2026-11-10T09:30:00")
+        assertThat((investments.findActiveByAccountInFifoOrder(ana.id) as Outcome.Success).value).isEmpty()
+    }
+
+    @Test
+    fun `closing an investment that is not active is a failure value and changes nothing`() {
+        val investment = investment(ana.id, "2026-11-09T11:10:00Z", 5, "400.00", "400000.00", 100_000)
+        investments.save(investment)
+        val closed = investment.close(Instant.parse("2026-11-10T09:30:00Z"))
+        investments.close(closed)
+
+        val again = investments.close(investment.close(Instant.parse("2026-11-11T09:30:00Z")))
+
+        assertThat(again).isInstanceOf(Outcome.Failure::class.java)
+        val closedUtc =
+            jdbcTemplate.queryForObject(
+                "SELECT to_char(closed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS') FROM investments",
+                String::class.java,
+            )
+        assertThat(closedUtc).isEqualTo("2026-11-10T09:30:00")
+    }
+
+    @Test
+    fun `closing an unknown investment is a failure value`() {
+        val ghost = investment(ana.id, "2026-11-09T11:10:00Z", 5, "400.00", "400000.00", 100_000)
+
+        val result = investments.close(ghost.close(Instant.parse("2026-11-10T09:30:00Z")))
+
+        assertThat(result).isInstanceOf(Outcome.Failure::class.java)
+    }
+
+    @Test
+    fun `a reinvestment keeps the original place in the queue and comes before later purchases`() {
+        val original = investment(ana.id, "2026-11-01T12:00:00Z", 1, "400.00", "400000.00", 100_000)
+        val later = investment(ana.id, "2026-11-05T12:00:00Z", 2, "400.00", "400000.00", 100_000)
+        investments.save(original)
+        investments.save(later)
+        val reinvestment = Investment.reinvestmentOf(original, BtcAmount(25_000))
+
+        investments.close(original.close(Instant.parse("2026-11-09T12:00:00Z")))
+        assertThat(investments.save(reinvestment)).isEqualTo(Outcome.Success(reinvestment))
+
+        val active = (investments.findActiveByAccountInFifoOrder(ana.id) as Outcome.Success).value
+        assertThat(active.map { it.id }).containsExactly(reinvestment.id, later.id)
+        val stored = active.first()
+        assertThat(stored).isEqualTo(reinvestment)
+        assertThat(stored.originInvestmentId).isEqualTo(original.id)
+        assertThat(stored.purchasedAt).isEqualTo(original.purchasedAt)
+        assertThat(stored.fifoSequence).isEqualTo(1)
+        val row = jdbcTemplate.queryForMap("SELECT * FROM investments WHERE id = ?", reinvestment.id.value)
+        assertThat(row["origin"]).isEqualTo("REINVESTMENT")
+        assertThat(row["origin_investment_id"].toString()).isEqualTo(original.id.toString())
+    }
+
+    @Test
     fun `an investment for an unknown account is a failure value, not an exception`() {
         val orphan = investment(AccountId.random(), "2026-11-09T11:10:00Z", 1, "10.00", "400000.00", 2_500)
 
@@ -125,6 +194,7 @@ class InvestmentRepositoryAdapterIT : PostgresIntegrationTest() {
         withDatabasePaused {
             assertThat(investments.save(investment)).isInstanceOf(Outcome.Failure::class.java)
             assertThat(investments.nextFifoSequence()).isInstanceOf(Outcome.Failure::class.java)
+            assertThat(investments.close(investment.close(Instant.now()))).isInstanceOf(Outcome.Failure::class.java)
             assertThat(investments.findActiveByAccountInFifoOrder(ana.id)).isInstanceOf(Outcome.Failure::class.java)
         }
     }

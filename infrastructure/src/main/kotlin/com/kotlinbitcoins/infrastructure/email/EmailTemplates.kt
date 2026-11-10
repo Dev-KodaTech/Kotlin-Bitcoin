@@ -41,6 +41,18 @@ object EmailTemplates {
                             "Equipe KotlinBitcoins",
                 )
             }
+
+            is EmailContent.RedemptionConfirmed -> {
+                val amount = reais(content.amount)
+                val btc = btc(content.btcSold)
+                RenderedEmail(
+                    subject = "Resgate confirmado: $amount",
+                    body =
+                        "Olá, ${message.recipientName}!\n\n" +
+                            "Você resgatou $amount e vendeu $btc BTC.\n\n" +
+                            "Equipe KotlinBitcoins",
+                )
+            }
         }
 
     /** Bitcoin with 8 decimals and a decimal comma, e.g. `0,00100000`, from the exact satoshi count. */

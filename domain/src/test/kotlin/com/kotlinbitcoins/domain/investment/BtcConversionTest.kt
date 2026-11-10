@@ -88,6 +88,29 @@ class BtcConversionTest {
         assertThat(result).isEqualTo(money("123.45"))
     }
 
+    @Test
+    fun `satsToCover converts the amount into the satoshis that cover it at the buy price`() {
+        // 50000.00 / 200000.00 = 0.25 BTC
+        val result = BtcConversion.satsToCover(money("50000.00"), price("200000.00"))
+
+        assertThat(result).isEqualTo(BtcAmount(25_000_000))
+    }
+
+    @Test
+    fun `satsToCover rounds up to the satoshi so the amount is always covered`() {
+        // 100.00 / 300000.00 = 0.000333333... BTC = 33_333.33 sats
+        val result = BtcConversion.satsToCover(money("100.00"), price("300000.00"))
+
+        assertThat(result).isEqualTo(BtcAmount(33_334))
+    }
+
+    @Test
+    fun `satsToCover of an exact amount is not rounded`() {
+        val result = BtcConversion.satsToCover(money("100.00"), price("400000.00"))
+
+        assertThat(result).isEqualTo(BtcAmount(25_000))
+    }
+
     private fun money(value: String): Money = (Money.of(BigDecimal(value)) as Outcome.Success).value
 
     private fun positive(value: String): PositiveMoney = (PositiveMoney.of(BigDecimal(value)) as Outcome.Success).value

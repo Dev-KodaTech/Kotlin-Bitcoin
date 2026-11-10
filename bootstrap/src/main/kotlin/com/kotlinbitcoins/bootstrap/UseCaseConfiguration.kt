@@ -6,6 +6,7 @@ import com.kotlinbitcoins.application.account.GetBalance
 import com.kotlinbitcoins.application.account.RegisterAccount
 import com.kotlinbitcoins.application.investment.GetInvestmentPosition
 import com.kotlinbitcoins.application.investment.PurchaseBitcoin
+import com.kotlinbitcoins.application.investment.RedeemInvestments
 import com.kotlinbitcoins.application.notification.SendEmailNotification
 import com.kotlinbitcoins.application.port.AccountRepository
 import com.kotlinbitcoins.application.port.Clock
@@ -98,4 +99,19 @@ class UseCaseConfiguration {
         investments: InvestmentRepository,
         quoteService: QuoteService,
     ): GetInvestmentPosition = GetInvestmentPosition(investments, quoteService)
+
+    // US7 — redemption of bitcoin
+
+    @Bean
+    @Suppress("LongParameterList")
+    fun redeemInvestments(
+        accounts: AccountRepository,
+        investments: InvestmentRepository,
+        transactions: TransactionRepository,
+        notifications: NotificationPublisher,
+        quoteService: QuoteService,
+        transactionRunner: TransactionRunner,
+        clock: Clock,
+    ): RedeemInvestments =
+        RedeemInvestments(accounts, investments, transactions, notifications, quoteService, transactionRunner, clock)
 }

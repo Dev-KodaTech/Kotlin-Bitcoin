@@ -15,6 +15,11 @@ sealed interface EmailContent {
         val amount: Money,
         val btcAmount: BtcAmount,
     ) : EmailContent
+
+    data class RedemptionConfirmed(
+        val amount: Money,
+        val btcSold: BtcAmount,
+    ) : EmailContent
 }
 
 data class EmailMessage(

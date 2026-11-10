@@ -43,4 +43,20 @@ object BtcConversion {
                 .multiply(buyPrice.value)
                 .divide(SATS_PER_BTC, Money.SCALE, RoundingMode.FLOOR),
         )
+
+    /**
+     * Satoshis that cover [amount] at the platform's [buyPrice]: `CEILING(amount × 10⁸ ÷ buyPrice)` (FR-019a-2).
+     * Rounding up makes sure the satoshis sold are worth at least the amount credited. The caller passes an amount
+     * the investment can cover, so the result is within the satoshi range of that investment.
+     */
+    fun satsToCover(
+        amount: Money,
+        buyPrice: QuotePrice,
+    ): BtcAmount =
+        BtcAmount(
+            amount.amount
+                .multiply(SATS_PER_BTC)
+                .divide(buyPrice.value, 0, RoundingMode.CEILING)
+                .longValueExact(),
+        )
 }

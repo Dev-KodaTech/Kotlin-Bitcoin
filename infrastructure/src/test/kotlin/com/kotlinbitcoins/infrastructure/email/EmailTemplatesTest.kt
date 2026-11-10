@@ -24,4 +24,21 @@ class EmailTemplatesTest {
             .contains("Ana Souza")
             .contains("Você investiu R$ 400,00 e comprou 0,00100000 BTC.")
     }
+
+    @Test
+    fun `redemption e-mail states the amount redeemed in reais and the bitcoin sold in Portuguese`() {
+        val rendered =
+            EmailTemplates.render(
+                EmailMessage(
+                    recipientEmail = AccountFixtures.email("ana@example.com"),
+                    recipientName = "Ana Souza",
+                    content = EmailContent.RedemptionConfirmed(AccountFixtures.money("1250.00"), BtcAmount(125_000)),
+                ),
+            )
+
+        assertThat(rendered.subject).contains("R$ 1.250,00")
+        assertThat(rendered.body)
+            .contains("Ana Souza")
+            .contains("Você resgatou R$ 1.250,00 e vendeu 0,00125000 BTC.")
+    }
 }

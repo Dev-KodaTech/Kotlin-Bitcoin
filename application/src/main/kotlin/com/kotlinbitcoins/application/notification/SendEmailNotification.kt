@@ -32,5 +32,10 @@ class SendEmailNotification(
                 // NotificationEvent guarantees the bitcoin amount is present in a purchase event.
                 EmailContent.PurchaseConfirmed(event.amount, checkNotNull(event.btcAmount))
             }
+
+            NotificationType.REDEMPTION_CONFIRMED -> {
+                // Same guarantee for a redemption event: the bitcoin sold is always present.
+                EmailContent.RedemptionConfirmed(event.amount, checkNotNull(event.btcAmount))
+            }
         }
 }

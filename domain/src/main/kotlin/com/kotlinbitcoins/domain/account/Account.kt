@@ -41,6 +41,9 @@ data class Account(
             Outcome.Failure(InsufficientBalance)
         }
 
+    /** Credits [amount] to the balance. It may be zero: a few satoshis can be worth less than a cent (FR-017). */
+    fun credit(amount: Money): Account = copy(balance = balance + amount)
+
     companion object {
         const val MAX_NAME_LENGTH = 200
 
