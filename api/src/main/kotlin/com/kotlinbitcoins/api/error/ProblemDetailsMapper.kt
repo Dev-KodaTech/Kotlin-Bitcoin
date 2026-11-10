@@ -7,6 +7,7 @@ import com.kotlinbitcoins.application.account.GetBalanceError
 import com.kotlinbitcoins.application.account.LoginError
 import com.kotlinbitcoins.application.account.RegisterAccountError
 import com.kotlinbitcoins.application.account.Violation
+import com.kotlinbitcoins.application.investment.GetInvestmentPositionError
 import com.kotlinbitcoins.application.investment.PurchaseError
 import com.kotlinbitcoins.application.port.InfrastructureUnavailable
 import com.kotlinbitcoins.application.quote.QuoteError
@@ -104,6 +105,12 @@ class ProblemDetailsMapper {
             PurchaseError.QuoteUnavailable -> response(ProblemCode.QUOTE_UNAVAILABLE)
             PurchaseError.AccountNotFound -> response(ProblemCode.UNAUTHORIZED)
             is PurchaseError.ServiceUnavailable -> serviceUnavailable(error)
+        }
+
+    fun getInvestmentPositionError(error: GetInvestmentPositionError): ResponseEntity<ProblemDetail> =
+        when (error) {
+            GetInvestmentPositionError.QuoteUnavailable -> response(ProblemCode.QUOTE_UNAVAILABLE)
+            is GetInvestmentPositionError.ServiceUnavailable -> serviceUnavailable(error)
         }
 
     fun quoteError(error: QuoteError): ResponseEntity<ProblemDetail> =

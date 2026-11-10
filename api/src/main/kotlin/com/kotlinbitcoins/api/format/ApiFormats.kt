@@ -4,6 +4,7 @@ import com.kotlinbitcoins.domain.shared.BtcAmount
 import com.kotlinbitcoins.domain.shared.Money
 import com.kotlinbitcoins.domain.shared.QuotePrice
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -21,6 +22,9 @@ class ApiFormats(
     fun btc(value: BtcAmount): String = value.toBtcDecimal().toPlainString()
 
     fun quote(value: QuotePrice): String = value.value.toPlainString()
+
+    /** A percentage already rounded to 2 places by the domain, e.g. `10.00` or `-5.50`. */
+    fun percent(value: BigDecimal): String = value.toPlainString()
 
     fun instant(value: Instant): String = INSTANT_FORMAT.format(value.atZone(businessZone))
 

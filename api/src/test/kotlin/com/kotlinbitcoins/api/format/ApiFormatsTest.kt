@@ -37,6 +37,13 @@ class ApiFormatsTest {
     }
 
     @Test
+    fun `formats a percentage with two decimal places`() {
+        assertThat(formats.percent(BigDecimal("10.00"))).isEqualTo("10.00")
+        assertThat(formats.percent(BigDecimal("-10.00"))).isEqualTo("-10.00")
+        assertThat(formats.percent(BigDecimal("0.00"))).isEqualTo("0.00")
+    }
+
+    @Test
     fun `formats instants in America Sao_Paulo with offset`() {
         assertThat(formats.instant(Instant.parse("2026-11-09T11:10:00Z"))).isEqualTo("2026-11-09T08:10:00-03:00")
         assertThat(formats.instant(Instant.parse("2026-11-09T11:10:05.123456Z")))

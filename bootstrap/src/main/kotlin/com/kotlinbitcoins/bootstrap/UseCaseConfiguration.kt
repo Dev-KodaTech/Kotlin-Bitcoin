@@ -4,6 +4,7 @@ import com.kotlinbitcoins.application.account.AuthenticateAccount
 import com.kotlinbitcoins.application.account.DepositFunds
 import com.kotlinbitcoins.application.account.GetBalance
 import com.kotlinbitcoins.application.account.RegisterAccount
+import com.kotlinbitcoins.application.investment.GetInvestmentPosition
 import com.kotlinbitcoins.application.investment.PurchaseBitcoin
 import com.kotlinbitcoins.application.notification.SendEmailNotification
 import com.kotlinbitcoins.application.port.AccountRepository
@@ -89,4 +90,12 @@ class UseCaseConfiguration {
         clock: Clock,
     ): PurchaseBitcoin =
         PurchaseBitcoin(accounts, investments, transactions, notifications, quoteService, transactionRunner, clock)
+
+    // US6 — investment position
+
+    @Bean
+    fun getInvestmentPosition(
+        investments: InvestmentRepository,
+        quoteService: QuoteService,
+    ): GetInvestmentPosition = GetInvestmentPosition(investments, quoteService)
 }
