@@ -6,7 +6,9 @@ import com.kotlinbitcoins.bootstrap.support.ApplicationTestBase
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import org.yaml.snakeyaml.Yaml
 import java.nio.file.Files
 import java.nio.file.Path
@@ -88,6 +90,31 @@ class OpenApiConformanceTest : ApplicationTestBase() {
         assertThat(generated.path("servers").map { it.path("url").asText() }).contains("/api/v1")
         assertThat(generated.at("/info/title").asText()).isNotBlank()
         assertThat(generated.at("/info/version").asText()).isNotBlank()
+    }
+
+    @Test
+    fun `paths are relative to the server so Swagger UI does not call the prefix twice`() {
+        val server = generatedServerUrl()
+        val paths = generatedPaths()
+
+        assertThat(paths).isNotEmpty().noneMatch { it.startsWith(server) }
+        assertThat(paths).contains("/accounts", "/auth/login")
+    }
+
+    @Test
+    fun `server url plus the documented path reaches the public registration route`() {
+        val server = generatedServerUrl()
+        val accountsPath = generatedPaths().single { it.endsWith("/accounts") }
+
+        val status =
+            mockMvc
+                .post(server + accountsPath) {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = "{}"
+                }.andReturn()
+                .response.status
+
+        assertThat(status).isEqualTo(400)
     }
 
     private fun compare(
@@ -203,6 +230,10 @@ class OpenApiConformanceTest : ApplicationTestBase() {
             .toSet()
 
     private fun normalized(path: String): String = path.removePrefix("/api/v1")
+
+    private fun generatedServerUrl(): String = generated.at("/servers/0/url").asText()
+
+    private fun generatedPaths(): List<String> = generated.path("paths").properties().map { it.key }
 
     private fun contractFile(): Path {
         var directory: Path? = Path.of("").toAbsolutePath()
