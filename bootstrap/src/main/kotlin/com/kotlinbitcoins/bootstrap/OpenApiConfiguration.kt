@@ -2,10 +2,12 @@ package com.kotlinbitcoins.bootstrap
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
+import io.swagger.v3.oas.models.Paths
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
+import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -22,7 +24,7 @@ class OpenApiConfiguration {
                     .description(
                         "Cadastro, depósito em reais, compra e resgate de bitcoin, extrato e informações de mercado.",
                     ),
-            ).servers(listOf(Server().url("/api/v1")))
+            ).servers(listOf(Server().url(BASE_PATH)))
             .components(
                 Components().addSecuritySchemes(
                     BEARER_AUTH,
@@ -30,7 +32,21 @@ class OpenApiConfiguration {
                 ),
             ).addSecurityItem(SecurityRequirement().addList(BEARER_AUTH))
 
+    /**
+     * Controllers are mapped under `/api/v1`, which is also the server URL (as in contracts/openapi.yaml).
+     * Paths are made relative to it, otherwise Swagger UI calls `/api/v1/api/v1/...`.
+     */
+    @Bean
+    fun relativePathsCustomizer(): OpenApiCustomizer =
+        OpenApiCustomizer { openApi ->
+            val original = openApi.paths ?: return@OpenApiCustomizer
+            val relative = Paths()
+            original.forEach { (path, item) -> relative.addPathItem(path.removePrefix(BASE_PATH), item) }
+            openApi.paths = relative
+        }
+
     private companion object {
         const val BEARER_AUTH = "bearerAuth"
+        const val BASE_PATH = "/api/v1"
     }
 }
