@@ -53,6 +53,60 @@ Um NO-GO parcial (por exemplo, só A7) MAY ser aceito com a mitigação descrita
 - *Começar direto em Compose HTML*: elimina o risco de a11y, mas contraria a escolha explícita de stack (Compose UI + Material 3) e troca wasmJs por JS. Fica como plano B.
 - *Confiar só no axe*: o axe audita apenas o espelho DOM, não o que o canvas desenha (contraste, foco visível), nem a experiência real com leitor de tela. Insuficiente para SC-007.
 
+### W-00 Resultado (parcial, 2026-11-12) — automatizado concluído; matriz manual (T022) e decisão (T023) pendentes
+
+**Status**: T014–T021 concluídas. O `SpikeA11yE2ETest` passa **21/21** em Chromium, Firefox e WebKit. A matriz manual com leitores de tela (NVDA, VoiceOver macOS/iOS), o teclado virtual (iOS/Android) e o zoom real do navegador **ainda não foram executados**. Sem eles, A3–A6, A11 e A12 continuam sem veredito final e o gate **não está decidido**.
+
+**Ambiente**: Kotlin 2.4.21, CMP 1.12.2, Material 3 1.9.0, navigation-compose 2.10.0, bignum 0.3.10, kotlinx-datetime 0.8.0 + `@js-joda/timezone` 3.2.1. Playwright for Java 1.64.0 (Chrome for Testing 156.0.8078.4, Firefox e WebKit da versão 1.64) e axe-core Playwright 4.14.0, em macOS (Darwin 24.6). O spike roda em `web/spike-a11y/` por `./gradlew :spike-a11y:wasmJsBrowserDevelopmentRun` (porta 8082), com a CSP de W-15 mais o hash descrito abaixo. As evidências (snapshot de acessibilidade `*.aria.yml`, resultado do axe `*.axe.txt`, capturas em 320 px e com zoom de 200%, notas de teclado e de live region) ficam em `web/e2e/build/reports/spike-a11y/<navegador>/`. A URL `?mitigacoes=0` mostra o espelho sem as mitigações, para comparação.
+
+**Como o espelho de acessibilidade da CMP 1.12.2 se comporta (observado nos três motores)**:
+- O espelho fica num shadow root aberto, em `#cmp_a11y_root` (opacidade 0, `pointer-events: none`), atrás de um `<canvas tabindex="0" role="generic">`. Os nós são `div` com `role` (`button`, `textbox` com `contenteditable`, `heading`, `list`, `grid`) e texto, posicionados sobre o desenho do canvas.
+- O foco do DOM fica no `<canvas>`, e o Compose move o foco internamente, sem `aria-activedescendant`. Num campo de texto, o foco do DOM vai para um `<input class="compose-backing-field">` oculto, com o `inputmode` certo (`email`, `decimal`, `text`) e `enterkeyhint`.
+- A raiz do espelho tem `aria-live="polite"`.
+- A CMP injeta um `<style>` no shadow root. Com `style-src 'self'`, ele é bloqueado: o `<input>` de apoio aparece no canto da tela e a página rola.
+
+**Lacunas e mitigações** (M1–M4 em `web/spike-a11y/src/wasmJsMain/kotlin/com/kotlinbitcoins/web/spike/ComposeA11yShim.kt`):
+
+| # | Lacuna (sem mitigação) | Efeito | Mitigação | Verificação |
+|---|---|---|---|---|
+| L1 | O slot `label` do `TextField` não vira nome do `textbox` | campo sem rótulo | **M1**: `contentDescription` = texto do rótulo visível (vira `aria-label`) | ✓ axe e snapshot |
+| L2 | O `<input>` focado não tem nome, `aria-invalid` nem descrição. `semantics { error() }` e o `supportingText` não chegam ao espelho | o leitor anuncia "campo de edição" sem rótulo nem erro; axe `label` (critical) | **M2**: listener `focusin` no shadow root copia o rótulo e o erro do campo Compose focado (`aria-label`, `aria-invalid`, `aria-describedby` → nó oculto no mesmo shadow root) | ✓ E2E nos 3 motores |
+| L3 | `aria-live="polite"` na raiz do espelho | qualquer mudança de texto na tela, inclusive a atualização de 10 s, pode ser anunciada (viola FR-047) | **M3**: remover o atributo e mantê-lo removido (MutationObserver). Anúncios só por `#live-polite`/`#live-assertive` | ✓ E2E (atributo ausente); leitura real pendente (T022) |
+| L4 | `role="heading"` sem `aria-level`; `<canvas role="generic">`; `role="list"` sem `listitem`; `aria-label` em `div` sem papel | axe `aria-required-attr`, `aria-roles`, `aria-required-children`, `aria-prohibited-attr` (critical/serious) | **M4**: 1º título = nível 1, demais = 2; o canvas perde o papel; filhos de lista viram `listitem`, e lista que contém títulos/controles perde o papel; nós rotulados sem papel viram `group` | ✓ axe 0 violações |
+| L5 | `CollectionInfo`/`CollectionItemInfo` viram `role="grid"` só na linha de cabeçalho, sem `row`/`gridcell`/`columnheader` | tabela não navegável; axe `aria-required-children` | nenhuma: usar a variante (b) | ✓ axe |
+| L6 | `semantics { selected }` (navegação) e `RadioButton`/`selectable(role = RadioButton)` viram `role="button"`, sem `aria-current`/`aria-selected`/`aria-checked` | destino atual e opção marcada não são anunciados (FR-009) | **não testada**. Candidatas: incluir o estado no `contentDescription` ("Extrato, página atual") ou estender a M4 | ✗ pendente |
+| L7 | `liveRegion` do Compose não gera `aria-live` próprio | a técnica A só "funcionava" por causa da L3 | usar o `DomAnnouncer` (técnica B, W-09) | ✓ |
+| L8 | Ao sair do último campo de texto com Tab, o foco do DOM vai para `<body>` (parada sem foco visível); o Tab seguinte volta ao canvas no próximo controle. Do último controle, o Tab volta ao primeiro (ciclo dentro do canvas) | uma parada "fantasma" sem foco visível (2.4.7); não há armadilha | nenhuma no spike | ⚠️ avaliar na T022 |
+| L9 | Hash alterado no mesmo documento (link `#/…`, edição na barra de endereço) não troca de tela: o binding só trata as entradas que ele criou | W-04 só lê o fragmento na inicialização | o `:app` ouve `hashchange` e navega por `AppRoute.parse` quando o fragmento diferir da rota atual (a validar) | ⚠️ |
+
+M2, M3 e M4 dependem de detalhes internos da CMP (`#cmp_a11y_root`, `.compose-backing-field`, estrutura do shadow root). Qualquer atualização da CMP MUST repetir o `SpikeA11yE2ETest` (ou o E2E equivalente do app) antes de entrar.
+
+**Critérios A1–A12 (parte automatizada)**:
+
+| # | Resultado automatizado | Falta na T022 |
+|---|---|---|
+| A1 | ✓ com ressalva L8: todos os controles alcançáveis e acionáveis só com Tab/Enter nos 3 motores; sem armadilha | ordem com NVDA/VoiceOver; Safari real |
+| A2 | ✓ visual: indicador de 3 dp em `primary` desenhado no canvas (capturas) | medir contraste nos dois temas (vira `ThemeContrastTest`, W-16) |
+| A3 | ✓ só com M1+M2 (nome, papel e `aria-invalid` no elemento focado); ✗ sem mitigação | anúncio real; estado "obrigatório" não testado |
+| A4 | ✓ com M2 (`aria-describedby` → texto do erro) | leitura real |
+| A5 | ✓ após envio inválido, o foco vai ao primeiro campo inválido nos 3 motores | anúncio real |
+| A6 | ✓ com M3 + `DomAnnouncer`: a região externa recebe um texto por mudança e nada no espelho tem `aria-live`; ✗ sem M3 | confirmar que o contador de 10 s não é lido |
+| A7 | variante (a) ✗ (L5); variante (b) ✓ axe: cartões com `clearAndSetSemantics { contentDescription = frase completa }` | leitura real da lista |
+| A8 | ✓ `document.title` muda por tela; títulos com nível pela M4 | atalho de cabeçalhos do leitor |
+| A9 | ✓ 320 × 640 e 640 × 400 com `deviceScaleFactor` 2: sem rolagem horizontal e com os nós do espelho dentro do viewport | zoom real do navegador em janela de 1280 px |
+| A10 | ✓ com M1–M4: **0 violações** nas três telas e estados (login, login com erro, formulário, formulário com erros, extrato em cartões), nos 3 motores. Sem mitigações: 3 violações críticas por tela (`aria-required-attr`, `aria-roles`, `label`) | — |
+| A11 | ✓ parcial: `inputmode="decimal"`/`"email"` no `<input>` real | teclado virtual iOS/Android, colar, corretor |
+| A12 | ✓ `lang="pt-BR"` no `<html>`, herdado pelo espelho | pronúncia real |
+
+**Decisões que não dependem da T022**:
+- **W-09**: técnica de anúncio = **DOM** (`#live-polite`/`#live-assertive`), porque o `liveRegion` do Compose não gera região própria (L7).
+- **W-14**: variante = **(b) cartões** com `clearAndSetSemantics`, também no desktop. O `LazyColumn` deve conter só os itens da lista; se tiver títulos ou controles, a M4 tira o `role="list"`.
+- **W-17**: seletores `getByRole`/`getByLabel` (atravessam o shadow root aberto). Clique com `force` no nó do espelho (o canvas recebe o evento nas mesmas coordenadas). Foco conferido pelo elemento ativo profundo (`shadowRoot.activeElement`). Digitação pelo teclado do Playwright. Com a M2, enquanto um campo está focado há dois `textbox` com o mesmo nome (o nó do espelho e o `<input>` real), então os seletores usam `.first()`. No WebKit, o screenshot do Playwright injeta um `<style>` que a CSP bloqueia; violações ocorridas durante a captura são descartadas pelo E2E.
+- **W-15**: a CSP precisa do hash do `<style>` da CMP (ver W-15).
+- **FR-048** (textos internos do Material 3): nas três telas, nenhum texto interno do Material 3 em inglês apareceu no espelho (`OutlinedTextField`, `Button`, `TextButton`, `RadioButton`, `Card`). `TopAppBar`, `ModalNavigationDrawer` e menus não fizeram parte do spike e devem ser verificados na T022 ou na primeira tela que os usar.
+
+**Pontos para a decisão da T023**: (1) sem M1–M4, a stack **não** atende A3, A6 e A10; (2) com M1–M4, a parte automatizada atende, mas as mitigações são um shim sobre internos de uma plataforma Beta (risco de quebra a cada atualização, coberto pelo E2E); (3) L6 e L8 seguem abertas; (4) o resultado com leitor de tela real é o que confirma ou derruba as mitigações.
+
 ---
 
 ## W-01 Versões e status da plataforma
@@ -87,6 +141,8 @@ Um NO-GO parcial (por exemplo, só A7) MAY ser aceito com a mitigação descrita
 **Alternatives considered**: CMP 1.13.0-beta02 (descartada por não ser estável); Kotlin 2.5.0-RC (idem).
 
 **Resultado da Phase 1 (T002/T003, 2026-11-12)**: todas as versões acima resolveram no Maven Central. O wrapper de `web/` usa o **Gradle 8.14.3**, igual ao da raiz: é compatível com KGP 2.4.21 e CMP 1.12.2, mas a KGP avisa que ele está depreciado e que a Kotlin 2.5.0 exigirá no mínimo o 8.14.4 (atualizar os dois wrappers juntos quando subir a Kotlin). `@js-joda/timezone` fixado em **3.2.1** (peer `@js-joda/core >= 5.7.0`; chave `jsJodaTimezone` no catálogo). Com `FAIL_ON_PROJECT_REPOS`, as distribuições de Node, Yarn e Binaryen que a KGP baixa vêm de repositórios Ivy declarados em `web/settings.gradle.kts` (`exclusiveContent`), e `web/build.gradle.kts` limpa o `downloadBaseUrl` das specs wasm para a KGP não adicionar repositórios ao projeto. O alvo `wasmJs { }` ainda exige `@OptIn(ExperimentalWasmDsl::class)` nos scripts.
+
+**Resultado da Phase 2 (T014, 2026-11-12)**: o spike compila com Kotlin 2.4.21 + CMP 1.12.2 + Material 3 1.9.0 + navigation-compose 2.10.0, e `./gradlew :spike-a11y:wasmJsBrowserDistribution` gera a distribuição. **Não** foi preciso descer versões. Notas de API: `ComposeViewport(viewportContainerId = …)` exige `@OptIn(ExperimentalComposeUiApi::class)`; `navController.bindToBrowserNavigation(getBackStackEntryRoute)` existe com `@OptIn(ExperimentalBrowserHistoryApi::class)`, e o lambda devolve o fragmento com `#` (ex.: `"#/tabela?filtro=x"`). Voltar, avançar e recarregar preservam rota e parâmetro nos 3 motores (W-04; ver L9 em W-00 Resultado). O webpack de desenvolvimento da KGP adiciona um `EvalSourceMapDevToolPlugin` que viola a CSP (`'unsafe-eval'`); o spike o remove em `webpack.config.d/devServer.js`, junto com o cliente de hot reload (websocket para `0.0.0.0`). A distribuição de produção não usa `eval`. **Tamanho (SC-010)**: a distribuição de produção do spike soma **3.679.712 bytes em brotli -q 11** (Skiko 2.622.336 + app 951.615 + JS 105.761; em gzip -9, 4.725.218), **sem fonte**. Isso já ultrapassa o limite de 3,5 MB de W-15. O Skiko responde por ~71%. Registrado como risco para a T222.
 
 ---
 
@@ -150,6 +206,8 @@ Grafo: `ui → state → core`, `data → state → core`, `app → {ui, data, s
 
 **Risco**: `bindToBrowserNavigation` é Experimental. Mitigação: o mapeamento rota ↔ fragmento está todo em `:core` (testado). Se a API mudar ou falhar no spike, um roteador próprio sobre `hashchange`/`history.replaceState` (cerca de 100 linhas em `:app`) substitui o binding sem tocar em `:ui`/`:state`.
 
+**Resultado do spike (T020/T021)**: o binding funciona nos 3 motores (voltar, avançar, recarregar e parâmetro no fragmento), e a leitura de `window.location.hash` na inicialização resolve a rota inicial. Limitação: um hash alterado no mesmo documento (link interno `#/…` ou edição na barra) não troca de tela (L9 em W-00 Resultado). O `:app` deve tratar `hashchange`.
+
 **Alternatives considered**: rotas por caminho (`/extrato`), descartado porque o binding da CMP usa fragmento e o fallback SPA do nginx precisaria cobrir toda rota (continua configurado por segurança, W-15). `returnTo` em `sessionStorage`, descartado por não sobreviver a uma aba nova e não ser visível/testável na URL. Navigation 3, descartado porque ainda não tem binding de navegador equivalente documentado e não é o pedido.
 
 ---
@@ -196,6 +254,8 @@ Grafo: `ui → state → core`, `data → state → core`, `app → {ui, data, s
 - `checkNoConsoleOutput` (`:app`): `print`/`println`.
 A proibição de `kotlin.text.format` (detekt.yml) também fica inerte em wasmJs. Não há verificação textual para ela, porque `.format(` é legítimo com o kotlinx-datetime (W-07); a revisão de código cobre esse caso.
 
+**Resultado da Phase 2 (T014, 2026-11-12)**: o bignum 0.3.10 funciona em Kotlin 2.4.21/wasmJs. A sonda de runtime `400.00 / 400000.00` com `DecimalMode(30, RoundingMode.FLOOR, scale = 8)` dá `0.00100000` (`toPlainString`) em Chromium, Firefox e WebKit. O plano B (`Long` escalado) não é necessário.
+
 ---
 
 ## W-07 Datas: kotlinx-datetime com America/Sao_Paulo no wasmJs
@@ -214,6 +274,8 @@ A referência fica no `:app` (`main.kt`), que é a borda. Para reduzir o bundle,
 **Formato**: `dd/MM/yyyy HH:mm` e, no instante da cotação, `dd/MM/yyyy HH:mm:ss`, sempre com o rótulo "(horário de Brasília)" uma vez por bloco (FR-037). Formatação via `LocalDateTime.Format { … }` do kotlinx-datetime, sem `Intl`.
 
 **Datas do filtro do extrato**: `LocalDate` digitado como `dd/mm/aaaa`, convertido para ISO (`2026-10-01`) na URL e na query `from`/`to` (o contrato interpreta como calendário de Brasília). "Hoje" (para sugestões e para o período padrão exibido) é calculado com `Clock.System.now().toLocalDateTime(Brasília)`.
+
+**Resultado da Phase 2 (T014, 2026-11-12)**: com `@js-joda/timezone` 3.2.1 referenciado por `@JsModule` no `main.kt`, `TimeZone.of("America/Sao_Paulo")` converte `2026-11-09T11:10:00Z` em `09/11/2026 08:10` nos 3 motores. Nota de API do kotlinx-datetime 0.8.0: o formato usa `day()` (não `dayOfMonth()`) e a formatação é `formato.format(valor)`.
 
 **Rationale**: o Brasil não tem horário de verão desde 2019, mas não usar offset fixo `-03:00` evita erro se a regra mudar e é o que o pedido exige.
 
@@ -357,6 +419,8 @@ A referência fica no `:app` (`main.kt`), que é a borda. Para reduzir o bundle,
   - `location /api/`: `proxy_pass http://nginx:8080;` (mantém `/api/v1/...`), repassando `Authorization` e `X-Correlation-Id`, com `proxy_read_timeout 30s`. Sem `access_log` de query strings sensíveis: o token vai em header e o access log padrão não registra headers (FR-008).
 - **Healthcheck**: `wget -q -O /dev/null http://127.0.0.1:8080/index.html`, com `depends_on: nginx (service_healthy)`.
 - **Orçamento de desempenho (SC-010)**: perfil de rede **"4G típico"** = 9.000 kbps de descida, 1.500 kbps de subida e 60 ms de RTT (CDP `Network.emulateNetworkConditions`). Metas: (a) navegação com o app carregado, com conteúdo ou carregamento em ≤ 1 s e dados em ≤ 3 s (p95); (b) primeira carga sem cache, com `#boot` em ≤ 1 s e app utilizável em ≤ 6 s. **Limite de tamanho do bundle**: ≤ 3,5 MB em brotli somando `*.wasm`, `*.js` e a fonte da primeira carga. A 9 Mbps, isso dá cerca de 3,1 s de download, o que deixa margem para compilar o Wasm e carregar os dados dentro de 6 s. A T222 mede e falha acima do limite. Se o limite for estourado, as alavancas em ordem são: subconjunto de fonte menor, `-Xwasm-opt`/otimização de tamanho da distribuição, remover dependências e só então rever a meta (com registro aqui).
+
+**Resultado do spike (T015/T021, 2026-11-12)**: a CSP acima, sozinha, bloqueia o `<style>` que a CMP 1.12.2 injeta no shadow root do canvas (o `<input>` de apoio do IME fica visível e a página rola). O mínimo necessário é acrescentar o hash desse estilo a `style-src`: `style-src 'self' 'sha256-2DtT88WYuzB8DiHdoLqEYkONEwxf9gqsOdTY44QuLA4='` (igual nos 3 motores; não usar `'unsafe-inline'`). O hash muda quando a CMP mudar esse estilo, e o E2E (0 violações de CSP no console) detecta isso. Com esse acréscimo, o spike roda sem violação de CSP em Chromium, Firefox e WebKit. Nada mais precisou ser liberado (`blob:`/`data:` não foram exigidos pelo Skiko).
 
 **Rationale**: mesma origem elimina CORS e expõe o token a menos superfícies. Imagem não-root, como a da API. Pré-compressão máxima ajuda SC-010 (o bundle Compose/Skiko pesa vários MB).
 
