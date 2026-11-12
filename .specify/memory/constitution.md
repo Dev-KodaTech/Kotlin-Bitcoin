@@ -1,4 +1,57 @@
 <!--
+SYNC IMPACT REPORT (temporário — remover antes do commit)
+=========================================================
+Version change: 1.0.0 → 1.1.0 (MINOR)
+
+Proposta de emenda (conforme Governance › Processo de emendas):
+- Alteração: inclusão de um cliente web que consome a API como segundo componente do
+  produto; extensão dos Princípios I–IV e dos Engineering Standards para cobri-lo.
+- Motivação: o projeto ganha um frontend web, uma alteração arquitetural permanente.
+  A cláusula "Revisão obrigatória" exige revisar a Constitution; os princípios v1.0.0
+  cobriam apenas a API.
+- Classificação: MINOR — novas seções em Engineering Standards e expansão material de
+  orientação existente. Nenhum princípio foi removido ou redefinido de forma incompatível;
+  todas as regras da v1.0.0 permanecem válidas para a API.
+- Impacto: retrocompatível. Spec, Plan e Tasks de specs/001-bitcoin-investment-api
+  continuam válidos sem alteração (escopo exclusivamente de API).
+
+Princípios modificados:
+- (Preâmbulo) → produto com dois componentes: API e cliente web; princípios valem para
+  ambos, salvo indicação
+- I. Arquitetura em Camadas → regra de dependência por componente implantável; camadas do
+  cliente (apresentação, estado/orquestração, acesso a dados); telas não chamam a API
+- II. Lógica de Negócio Isolada → API como única fonte de verdade; cliente não reimplementa
+  regras; estimativas identificadas; validação no cliente só de formato/UX
+- III. Erro como Valor → no cliente, erros da API convertidos em resultados tipados na
+  fronteira HTTP; mapeamento de cada código de erro do contrato para mensagem ao usuário
+- IV. Desenvolvimento Guiado por Testes → cliente com testes unitários de
+  estado/apresentação, testes de consumidor contra o contrato e E2E dos fluxos críticos
+- V. Simplicidade → sem alteração
+- VI. Agnosticismo Tecnológico → sem alteração (nenhuma tecnologia citada na emenda)
+
+Seções adicionadas (Engineering Standards):
+- Contratos entre Componentes
+- Acessibilidade (WCAG 2.1 nível AA)
+
+Seções ampliadas/esclarecidas (Engineering Standards):
+- Semântica HTTP → aplica-se ao componente que expõe a API
+- Segurança e Dados Sensíveis → regras do cliente (tokens fora de URLs/logs, sem segredos
+  embarcados, sessão encerrada na expiração do token)
+- Integridade de Valores Financeiros → exibição no cliente sem perda de precisão e sem
+  aritmética de ponto flutuante binário
+
+Seções removidas: nenhuma
+
+Templates dependentes:
+- .specify/templates/plan-template.md ✅ sem alteração necessária (lê a Constitution em
+  tempo de execução no Constitution Check)
+- .specify/templates/spec-template.md ✅ sem alteração necessária
+- .specify/templates/tasks-template.md ✅ sem alteração necessária
+
+Follow-up TODOs: nenhum.
+-->
+
+<!--
 Essa constituição é a camada de governança do projeto: 
 o conjunto de princípios inegociáveis que toda spec, todo plan, 
 toda lista de tarefas e toda linha de implementação precisam respeitar. 
@@ -20,8 +73,11 @@ MAY / OPTIONAL ("Pode" / "Opcional")
 
 # Investimento em Bitcoins Constitution
 
-API de investimento em bitcoins. O escopo inicial do produto inclui cadastro de usuário
-(nome, e-mail e senha) e autenticação por login com emissão de token JWT. Este documento
+Produto de investimento em bitcoins composto por dois componentes implantáveis: a **API**,
+que concentra as regras de negócio, e um **cliente web**, que consome a API e a apresenta ao
+usuário. O escopo inicial do produto inclui cadastro de usuário (nome, e-mail e senha) e
+autenticação por login com emissão de token JWT. Os princípios e padrões deste documento
+valem para os dois componentes, salvo indicação explícita em contrário. Este documento
 define exclusivamente princípios permanentes de engenharia e arquitetura; decisões de
 tecnologia e implementação pertencem ao Plan.
 
@@ -32,8 +88,10 @@ a RFC 2119.
 
 ### I. Arquitetura em Camadas
 
-- A aplicação MUST ser organizada em camadas com responsabilidades distintas: domínio,
-  aplicação (casos de uso), interface (entrada/saída) e infraestrutura.
+- Cada componente implantável MUST ser organizado em camadas com responsabilidades
+  distintas e MUST seguir a regra de dependência descrita neste princípio.
+- A API MUST ser organizada nas camadas domínio, aplicação (casos de uso), interface
+  (entrada/saída) e infraestrutura.
 - As dependências MUST apontar sempre para o domínio. O domínio MUST NOT depender de
   nenhuma outra camada.
 - A camada de aplicação MUST depender apenas do domínio e de abstrações (contratos) que
@@ -42,10 +100,14 @@ a RFC 2119.
   implementações) MUST ocorrer exclusivamente na borda da aplicação (ponto de entrada).
 - Camadas MUST NOT acessar detalhes internos de camadas não adjacentes, contornando os
   contratos estabelecidos.
+- No cliente web, apresentação (telas), estado/orquestração e acesso a dados (cliente
+  HTTP) MUST ser camadas separadas. Telas MUST NOT chamar a API diretamente; toda
+  comunicação com a API MUST passar pela camada de acesso a dados, acionada pela camada
+  de estado/orquestração.
 
 **Rationale**: evita acoplamento entre regras de negócio e detalhes técnicos, permitindo
 substituir infraestrutura ou interface sem reescrever o núcleo e mantendo o sistema
-testável de forma isolada.
+testável de forma isolada — em cada componente do produto.
 
 ### II. Lógica de Negócio Isolada
 
@@ -58,10 +120,18 @@ testável de forma isolada.
   integra dados conforme contratos definidos pela aplicação.
 - Regras de negócio MUST ser executáveis e testáveis sem interface e sem infraestrutura
   reais.
+- A API MUST ser a única fonte de verdade das regras de negócio. O cliente web MUST NOT
+  reimplementar regras de negócio (ex.: saldo, conversão, FIFO, arredondamento) para
+  decidir resultados; resultados autoritativos MUST vir da API.
+- O cliente web MAY exibir estimativas calculadas localmente, desde que identificadas
+  explicitamente ao usuário como estimativas e nunca usadas como resultado final.
+- Validação no cliente web MUST se limitar a formato e experiência de uso; a API MUST
+  sempre revalidar todas as entradas, independentemente da validação do cliente.
 
 **Rationale**: evita duplicação e divergência de regras espalhadas por controladores,
 adaptadores e repositórios, garantindo uma única fonte de verdade para o comportamento do
-negócio.
+negócio. No produto com múltiplos componentes, impede que cliente e API divirjam sobre o
+resultado de uma operação.
 
 ### III. Erro como Valor
 
@@ -73,8 +143,12 @@ negócio.
   capturadas e convertidas em resultados explícitos antes de cruzar para a aplicação.
 - Os tipos de erro MUST ser parte do contrato público de cada operação e MUST ser
   tratados explicitamente por quem os consome.
-- A camada de interface MUST mapear cada tipo de erro para uma resposta coerente e
+- A camada de interface da API MUST mapear cada tipo de erro para uma resposta coerente e
   previsível ao cliente, sem expor detalhes internos.
+- No cliente web, respostas de erro da API MUST ser convertidas em resultados tipados na
+  fronteira HTTP (camada de acesso a dados), antes de alcançar estado ou telas.
+- Cada código de erro definido no contrato da API MUST ser mapeado no cliente web para
+  uma mensagem compreensível ao usuário, sem detalhes técnicos.
 
 **Rationale**: evita fluxos de erro ocultos, falhas não tratadas e acoplamento implícito
 entre camadas, tornando todos os caminhos de execução visíveis, tipáveis e testáveis.
@@ -88,6 +162,8 @@ entre camadas, tornando todos os caminhos de execução visíveis, tipáveis e t
   infraestrutura.
 - Contratos externos da API (endpoints, formatos de requisição/resposta e códigos de
   status) MUST possuir testes de integração ou de contrato.
+- O cliente web MUST possuir testes unitários da lógica de estado/apresentação, testes de
+  consumidor contra o contrato da API e testes ponta a ponta dos fluxos críticos.
 - Toda correção de defeito MUST ser acompanhada de um teste que reproduza o defeito.
 - Código MUST NOT ser integrado à linha principal com testes falhando.
 
@@ -143,7 +219,7 @@ O projeto adota os seguintes padrões gerais, aplicados em conjunto com os princ
   Adapters), Onion, Clean Architecture ou CQRS, desde que compatíveis com esta
   Constitution. A adoção MUST ser justificada no Plan e SHOULD ser aplicada apenas na
   medida em que o escopo exigir (Princípio V).
-- **Semântica HTTP**: a API MUST usar verbos HTTP conforme sua semântica (GET para leitura
+- **Semântica HTTP**: aplica-se ao componente que expõe a API. A API MUST usar verbos HTTP conforme sua semântica (GET para leitura
   sem efeitos colaterais; POST para criação ou ações; PUT/PATCH para atualização total ou
   parcial; DELETE para remoção) e MUST retornar códigos de status corretos (ex.: 200, 201,
   204, 400, 401, 403, 404, 409, 422, 500). Respostas de erro MUST seguir um formato
@@ -151,9 +227,19 @@ O projeto adota os seguintes padrões gerais, aplicados em conjunto com os princ
 - **Segurança e Dados Sensíveis**: senhas MUST NOT ser armazenadas ou registradas em texto
   plano; credenciais e segredos MUST NOT residir no código-fonte; rotas protegidas MUST
   exigir token válido; respostas e logs MUST NOT expor dados sensíveis ou detalhes
-  internos.
+  internos. No cliente web, tokens MUST NOT aparecer em URLs nem em logs; segredos MUST
+  NOT ser embarcados no código distribuído ao cliente; a sessão MUST ser encerrada quando
+  o token expirar.
 - **Integridade de Valores Financeiros**: valores monetários e quantidades de criptoativos
-  MUST ser representados com precisão exata, sem perdas por arredondamento implícito.
+  MUST ser representados com precisão exata, sem perdas por arredondamento implícito. O
+  cliente web MUST exibir valores monetários e quantidades de BTC sem perda de precisão e
+  MUST NOT usar aritmética de ponto flutuante binário para manipulá-los.
+- **Contratos entre Componentes**: cada interface entre componentes MUST ter um único dono
+  autoritativo. O contrato da API pertence à API; consumidores MUST referenciá-lo
+  diretamente, sem manter cópias divergentes. Mudanças no contrato MUST ser feitas na
+  origem e propagadas aos consumidores.
+- **Acessibilidade**: interfaces de usuário MUST atender às diretrizes WCAG 2.1 no nível
+  AA.
 - **Padronização e Sintaxe do Código**: o projeto MUST definir no Plan convenções de
   nomenclatura, formatação e estrutura de diretórios, e MUST aplicá-las de forma
   automatizada e verificável; todo código MUST segui-las de maneira uniforme.
@@ -197,4 +283,4 @@ Nenhuma etapa SHOULD ser pulada; violações justificadas MUST ser registradas n
 - **Conformidade**: violações de princípios MUST ser justificadas explicitamente no Plan
   (seção de verificação de conformidade) ou corrigidas antes da integração.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-10-27
+**Version**: 1.1.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-11-11
