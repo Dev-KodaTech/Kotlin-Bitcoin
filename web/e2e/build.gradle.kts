@@ -1,0 +1,34 @@
+// :e2e — Playwright for Java + axe-core against the running stack (research.md W-17).
+// Runs only through `./gradlew :e2e:e2eTest`; it is not part of `check`.
+plugins {
+    alias(libs.plugins.kotlin.jvm)
+}
+
+dependencies {
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.playwright)
+    testImplementation(libs.axe.core.playwright)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.named<Test>("test") {
+    enabled = false
+}
+
+tasks.register<Test>("e2eTest") {
+    description = "Runs the end-to-end tests against a running stack (-PbaseUrl, -PapiUrl, -Pbrowsers)."
+    group = "verification"
+    testClassesDirs =
+        sourceSets.test
+            .get()
+            .output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform()
+    systemProperty("e2e.baseUrl", findProperty("baseUrl") ?: "http://localhost:8081")
+    systemProperty("e2e.apiUrl", findProperty("apiUrl") ?: "http://localhost:8081/api/v1")
+    systemProperty("e2e.browsers", findProperty("browsers") ?: "chromium,firefox,webkit")
+    // The result depends on the external stack, never on the inputs alone.
+    outputs.upToDateWhen { false }
+}

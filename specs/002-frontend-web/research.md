@@ -86,6 +86,8 @@ Um NO-GO parcial (por exemplo, só A7) MAY ser aceito com a mitigação descrita
 
 **Alternatives considered**: CMP 1.13.0-beta02 (descartada por não ser estável); Kotlin 2.5.0-RC (idem).
 
+**Resultado da Phase 1 (T002/T003, 2026-11-12)**: todas as versões acima resolveram no Maven Central. O wrapper de `web/` usa o **Gradle 8.14.3**, igual ao da raiz: é compatível com KGP 2.4.21 e CMP 1.12.2, mas a KGP avisa que ele está depreciado e que a Kotlin 2.5.0 exigirá no mínimo o 8.14.4 (atualizar os dois wrappers juntos quando subir a Kotlin). `@js-joda/timezone` fixado em **3.2.1** (peer `@js-joda/core >= 5.7.0`; chave `jsJodaTimezone` no catálogo). Com `FAIL_ON_PROJECT_REPOS`, as distribuições de Node, Yarn e Binaryen que a KGP baixa vêm de repositórios Ivy declarados em `web/settings.gradle.kts` (`exclusiveContent`), e `web/build.gradle.kts` limpa o `downloadBaseUrl` das specs wasm para a KGP não adicionar repositórios ao projeto. O alvo `wasmJs { }` ainda exige `@OptIn(ExperimentalWasmDsl::class)` nos scripts.
+
 ---
 
 ## W-02 Módulos Gradle e regra de dependência
@@ -187,6 +189,12 @@ Grafo: `ui → state → core`, `data → state → core`, `app → {ui, data, s
 **Risco**: o bignum 0.3.10 foi publicado com Kotlin anterior ao 2.4. A Kotlin/Wasm aceita klibs de versões anteriores, mas isso é confirmado na primeira compilação do spike. **Plano B** registrado: value objects sobre `Long` escalado (centavos, satoshis, cotação × 10⁸) para armazenamento e soma, mais uma divisão longa própria em `Estimates` sobre um par de `Long`/`IntArray`. Os limites de faixa cabem (R$ 99.999.999.999,99 = 9,99 × 10¹² centavos). Só a estimativa exige um intermediário maior que `Long`. Como a API dos value objects não muda, o plano B fica restrito a `:core/money`.
 
 **Alternatives considered**: `Long` escalado desde o início, descartado porque a estimativa (valor × 10⁸ ÷ cotação × 10⁸) estoura `Long` e exigiria aritmética própria, que é mais código para testar. `kotlin.js` `BigInt` via interop, descartado porque prende `:core` ao navegador.
+
+**Resultado da Phase 1 (T006, 2026-11-12)**: verificado com arquivo-sonda que o `style.ForbiddenMethodCall` do detekt 1.23.8 **não dispara** em fontes wasmJs: a regra exige resolução de tipos, e o detekt não a executa para alvos JS/Wasm. Por isso `detekt-precision.yml` e `detekt-ui.yml` foram mantidos (documentam a regra e passam a valer se houver resolução de tipos), mas a garantia efetiva vem de verificações textuais em `web/build.gradle.kts`, todas ligadas ao `check`, que ignoram comentários e literais de string/char e varrem só `src/*Main`:
+- `checkNoFloatingPoint` (`:core`, `:state`, `:data`): os padrões de tipo/literal acima, mais chamadas `.toDouble(`/`.toFloat(` (e `OrNull`) e `print`/`println` (FR-008).
+- `checkFloatConversionConfined` (`:ui`): `.toDouble(`/`.toFloat(` proibidos fora de `ui/chart/ChartGeometry.kt`, mais `print`/`println`. `Float` como tipo do Compose segue livre.
+- `checkNoConsoleOutput` (`:app`): `print`/`println`.
+A proibição de `kotlin.text.format` (detekt.yml) também fica inerte em wasmJs. Não há verificação textual para ela, porque `.format(` é legítimo com o kotlinx-datetime (W-07); a revisão de código cobre esse caso.
 
 ---
 
@@ -390,6 +398,8 @@ A referência fica no `:app` (`main.kt`), que é a borda. Para reduzir o bundle,
 - `:data`: `MockEngine` + fixtures (W-12) para cada rota e **cada `code`** (SC-003), mais transporte falho em GET vs POST financeiro (Uncertain), corpo fora do contrato, ausência de log/URL com token (FR-008) e header `Authorization` presente só nas rotas protegidas.
 - `:ui`: `ThemeContrastTest` e `ErrorMessagesTest` (todo `ApiError`/`OperationError` tem mensagem não vazia, sem palavras técnicas como "code", "exception", "null" ou HTTP). Testes de UI do Compose (`runComposeUiTest`) **opcionais** para componentes críticos (campo de valor com erro, botão em processamento), se a infraestrutura de teste wasm da CMP 1.12 for estável. Senão, essa cobertura fica com o E2E.
 - **Execução**: `wasmJs { browser { testTask { … } }; nodejs() }`. Os testes de `:core`/`:state`/`:data` usam Node (rápidos, sem navegador). `:ui` usa o Chrome headless pelo executor de testes de navegador da KGP (`browser { testTask { useKarma { useChromeHeadless() } } }`, T010), porque os testes leem Compose Resources. No CI, o Chrome é instalado pelo job `web` (T100). Alternativa registrada: Node, se a CMP 1.12 suportar Compose Resources nos testes em Node; se a KGP 2.4.21 indicar outro executor para wasmJs no navegador, usar o indicado e registrar aqui.
+
+**Resultado da Phase 1 (T010, 2026-11-12)**: a KGP 2.4.21 aceitou `useKarma { useChromeHeadless() }` sem aviso de depreciação, então o executor foi mantido. O plugin Compose 1.12.2 exige `binaries.executable()` no alvo `wasmJs` do `:ui` (tarefa `checkComposeUiTestConfigurationForWasmJs`, CMP-4906): sem o bundle do webpack, o runtime Skiko não carrega nos testes de UI. O `:data` declara `browser()` com a tarefa de teste do navegador desligada, para que seus testes rodem só em Node.
 
 ---
 

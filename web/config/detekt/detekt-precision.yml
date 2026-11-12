@@ -1,0 +1,21 @@
+# Applied on top of detekt.yml only to :core, :state and :data (research.md W-06, FR-038).
+# Financial values live in Money, BtcAmount, QuotePrice and VariationPercent; floating point is forbidden.
+# The list replaces the one of detekt.yml, so the general entries are repeated here.
+# checkNoFloatingPoint (web/build.gradle.kts) complements this rule: it catches Double/Float types and literals.
+
+style:
+  ForbiddenMethodCall:
+    active: true
+    methods:
+      - reason: 'Locale-dependent formatting; use the pt-BR formatters of :core/format.'
+        value: 'kotlin.text.format'
+      - reason: 'No console output: it could leak the session token (FR-008).'
+        value: 'kotlin.io.println'
+      - reason: 'Floating point is forbidden for values (FR-038); use the :core/money value objects.'
+        value: 'kotlin.Number.toDouble'
+      - reason: 'Floating point is forbidden for values (FR-038); use the :core/money value objects.'
+        value: 'kotlin.Number.toFloat'
+      - reason: 'Floating point is forbidden for values (FR-038); use the :core/money value objects.'
+        value: 'kotlin.text.toDouble'
+      - reason: 'Floating point is forbidden for values (FR-038); use the :core/money value objects.'
+        value: 'kotlin.text.toFloat'

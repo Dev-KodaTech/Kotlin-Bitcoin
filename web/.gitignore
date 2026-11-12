@@ -1,0 +1,4 @@
+build/
+.gradle/
+.kotlin/
+# kotlin-js-store/ (yarn.lock of the wasmJs npm dependencies) is versioned on purpose.
