@@ -25,6 +25,11 @@ kotlin {
             implementation(project(":state"))
             implementation(project(":data"))
             implementation(project(":ui"))
+            // ComposeViewport, the NavController and its browser binding live in this edge module.
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.ui)
+            implementation(libs.navigation.compose)
             // Named time zones for kotlinx-datetime; referenced from main.kt so it stays in the bundle (W-07).
             implementation(npm("@js-joda/timezone", libs.versions.jsJodaTimezone.get()))
         }

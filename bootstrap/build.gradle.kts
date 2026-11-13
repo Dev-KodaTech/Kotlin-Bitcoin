@@ -37,6 +37,14 @@ dependencies {
     testImplementation(libs.bundles.testcontainers)
     testImplementation(libs.wiremock)
     testImplementation(libs.springmockk)
+    // Validates the web client fixtures (web/contract-fixtures) against the OpenAPI contract (002 W-12).
+    testImplementation(libs.swagger.request.validator.core) {
+        // springdoc already brings the jakarta flavour of swagger-core (same packages). Keeping both would let the
+        // classpath order decide which one the application's /v3/api-docs uses.
+        exclude(group = "io.swagger.core.v3", module = "swagger-core")
+        exclude(group = "io.swagger.core.v3", module = "swagger-models")
+        exclude(group = "io.swagger.core.v3", module = "swagger-annotations")
+    }
 }
 
 // Only the executable jar is produced here; the other modules build plain jars.

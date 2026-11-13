@@ -1,0 +1,9 @@
+{
+  "type": "about:blank",
+  "title": "Unprocessable Content",
+  "status": 422,
+  "code": "REDEMPTION_EXCEEDS_AVAILABLE",
+  "detail": "O valor solicitado excede o valor atual dos seus investimentos.",
+  "instance": "/api/v1/me/redemptions",
+  "correlationId": "7f9b1d3e-5a7c-4e9b-b1d3-f5a7c9e1b3d5"
+}

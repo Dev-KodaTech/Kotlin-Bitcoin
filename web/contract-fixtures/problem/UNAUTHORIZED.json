@@ -1,0 +1,8 @@
+{
+  "type": "about:blank",
+  "title": "Unauthorized",
+  "status": 401,
+  "code": "UNAUTHORIZED",
+  "detail": "Autenticação necessária.",
+  "correlationId": "2a7c9e4b-1d3f-4a6c-b8e0-3f5a7c9e1b2d"
+}

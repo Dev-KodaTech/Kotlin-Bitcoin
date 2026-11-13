@@ -1,0 +1,9 @@
+{
+  "type": "about:blank",
+  "title": "Internal Server Error",
+  "status": 500,
+  "code": "INTERNAL_ERROR",
+  "detail": "Erro interno. Tente novamente mais tarde.",
+  "instance": "/api/v1/me/purchases",
+  "correlationId": "1c3e5a7b-9d1f-4b35-b7d9-f1a3c5e7b9d1"
+}

@@ -91,7 +91,7 @@ Repetir a matriz do W-00 sobre o app completo: NVDA + Firefox/Chrome, VoiceOver 
 ## 7. Entrega
 
 ```bash
-docker build -f web/Dockerfile -t kotlinbitcoins-web .
+docker build -t kotlinbitcoins-web web
 curl -sI http://localhost:8081/ | grep -i content-security-policy        # inclui 'wasm-unsafe-eval'
 curl -sI -H 'Accept-Encoding: br' http://localhost:8081/<app>.wasm | grep -iE 'content-type|content-encoding|cache-control'
 # esperado: application/wasm, br, immutable

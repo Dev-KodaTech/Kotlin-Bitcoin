@@ -1,0 +1,94 @@
+/* Static loading screen (W-16): visible in < 1 s, before the Wasm bundle arrives (SC-010). No inline styles (CSP). */
+:root {
+    --boot-background: #fff8f5; /* surface, light scheme of ui/theme/Color.kt */
+    --boot-text: #221a14;       /* onSurface */
+    --boot-accent: #86521a;     /* primary */
+    color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --boot-background: #19120c;
+        --boot-text: #efe0d5;
+        --boot-accent: #feb876;
+    }
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--boot-background);
+    color: var(--boot-text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+#compose-root {
+    width: 100%;
+    height: 100%;
+}
+
+#boot {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px;
+    text-align: center;
+    background: var(--boot-background);
+    z-index: 1;
+}
+
+.boot-brand {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+#boot-message, .boot-noscript {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.boot-spinner {
+    width: 32px;
+    height: 32px;
+    border: 4px solid var(--boot-accent);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: boot-spin 0.8s linear infinite;
+}
+
+#boot.unsupported .boot-spinner {
+    display: none;
+}
+
+@keyframes boot-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* FR-045: no movement for people who asked the system for less motion. */
+@media (prefers-reduced-motion: reduce) {
+    .boot-spinner {
+        animation: none;
+        border-right-color: var(--boot-accent);
+    }
+}
+
+/* Off-canvas live regions (W-09): present for assistive technology, invisible on screen. */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

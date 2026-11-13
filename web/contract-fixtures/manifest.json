@@ -1,0 +1,206 @@
+{
+  "contract": "specs/001-bitcoin-investment-api/contracts/openapi.yaml",
+  "fixtures": [
+    {
+      "file": "problem/VALIDATION_ERROR.json",
+      "method": "POST",
+      "path": "/accounts",
+      "status": 400,
+      "scenario": "validation-error@POST /accounts",
+      "realScenario": "registerInvalidEmail"
+    },
+    {
+      "file": "problem/EMAIL_ALREADY_IN_USE.json",
+      "method": "POST",
+      "path": "/accounts",
+      "status": 409,
+      "scenario": "email-already-in-use@POST /accounts",
+      "realScenario": "registerDuplicateEmail"
+    },
+    {
+      "file": "problem/VALIDATION_ERROR.json",
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 400,
+      "scenario": "validation-error@POST /auth/login",
+      "realScenario": "loginBlankEmail"
+    },
+    {
+      "file": "problem/INVALID_CREDENTIALS.json",
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 401,
+      "scenario": "invalid-credentials@POST /auth/login",
+      "realScenario": "loginWrongPassword"
+    },
+    {
+      "file": "problem/UNAUTHORIZED.json",
+      "method": "GET",
+      "path": "/me/balance",
+      "status": 401,
+      "scenario": "unauthorized@GET /me/balance",
+      "realScenario": "balanceWithoutToken"
+    },
+    {
+      "file": "problem/INVALID_AMOUNT.json",
+      "method": "POST",
+      "path": "/me/deposits",
+      "status": 400,
+      "scenario": "invalid-amount@POST /me/deposits",
+      "realScenario": "depositZero"
+    },
+    {
+      "file": "problem/UNAUTHORIZED.json",
+      "method": "POST",
+      "path": "/me/deposits",
+      "status": 401,
+      "scenario": "unauthorized@POST /me/deposits",
+      "realScenario": "depositWithoutToken"
+    },
+    {
+      "file": "problem/UNAUTHORIZED.json",
+      "method": "GET",
+      "path": "/quotes/current",
+      "status": 401,
+      "scenario": "unauthorized@GET /quotes/current"
+    },
+    {
+      "file": "problem/QUOTE_UNAVAILABLE.json",
+      "method": "GET",
+      "path": "/quotes/current",
+      "status": 503,
+      "scenario": "quote-unavailable@GET /quotes/current",
+      "realScenario": "quoteSourceDown"
+    },
+    {
+      "file": "problem/SERVICE_UNAVAILABLE.json",
+      "method": "GET",
+      "path": "/quotes/current",
+      "status": 503,
+      "scenario": "service-unavailable@GET /quotes/current"
+    },
+    {
+      "file": "problem/UNAUTHORIZED.json",
+      "method": "GET",
+      "path": "/quotes/history",
+      "status": 401,
+      "scenario": "unauthorized@GET /quotes/history"
+    },
+    {
+      "file": "problem/INVALID_AMOUNT.json",
+      "method": "POST",
+      "path": "/me/purchases",
+      "status": 400,
+      "scenario": "invalid-amount@POST /me/purchases",
+      "realScenario": "purchaseBelowOneSatoshi"
+    },
+    {
+      "file": "problem/UNAUTHORIZED.json",
+      "method": "POST",
+      "path": "/me/purchases",
+      "status": 401,
+      "scenario": "unauthorized@POST /me/purchases"
+    },
+    {
+      "file": "problem/INSUFFICIENT_BALANCE.json",
+      "method": "POST",
+      "path": "/me/purchases",
+      "status": 422,
+      "scenario": "insufficient-balance@POST /me/purchases",
+      "realScenario": "purchaseAboveBalance"
+    },
+    {
+      "file": "problem/QUOTE_UNAVAILABLE.json",
+      "method": "POST",
+      "path": "/me/purchases",
+      "status": 503,
+      "scenario": "quote-unavailable@POST /me/purchases"
+    },
+    {
+      "file": "problem/SERVICE_UNAVAILABLE.json",
+      "method": "POST",
+      "path": "/me/purchases",
+      "status": 503,
+      "scenario": "service-unavailable@POST /me/purchases"
+    },
+    {
+      "file": "problem/UNAUTHORIZED.json",
+      "method": "GET",
+      "path": "/me/investments",
+      "status": 401,
+      "scenario": "unauthorized@GET /me/investments"
+    },
+    {
+      "file": "problem/QUOTE_UNAVAILABLE.json",
+      "method": "GET",
+      "path": "/me/investments",
+      "status": 503,
+      "scenario": "quote-unavailable@GET /me/investments"
+    },
+    {
+      "file": "problem/SERVICE_UNAVAILABLE.json",
+      "method": "GET",
+      "path": "/me/investments",
+      "status": 503,
+      "scenario": "service-unavailable@GET /me/investments"
+    },
+    {
+      "file": "problem/INVALID_AMOUNT.json",
+      "method": "POST",
+      "path": "/me/redemptions",
+      "status": 400,
+      "scenario": "invalid-amount@POST /me/redemptions"
+    },
+    {
+      "file": "problem/UNAUTHORIZED.json",
+      "method": "POST",
+      "path": "/me/redemptions",
+      "status": 401,
+      "scenario": "unauthorized@POST /me/redemptions"
+    },
+    {
+      "file": "problem/REDEMPTION_EXCEEDS_AVAILABLE.json",
+      "method": "POST",
+      "path": "/me/redemptions",
+      "status": 422,
+      "scenario": "redemption-exceeds-available@POST /me/redemptions",
+      "realScenario": "redemptionAboveAvailable"
+    },
+    {
+      "file": "problem/QUOTE_UNAVAILABLE.json",
+      "method": "POST",
+      "path": "/me/redemptions",
+      "status": 503,
+      "scenario": "quote-unavailable@POST /me/redemptions"
+    },
+    {
+      "file": "problem/SERVICE_UNAVAILABLE.json",
+      "method": "POST",
+      "path": "/me/redemptions",
+      "status": 503,
+      "scenario": "service-unavailable@POST /me/redemptions"
+    },
+    {
+      "file": "problem/UNAUTHORIZED.json",
+      "method": "GET",
+      "path": "/me/statement",
+      "status": 401,
+      "scenario": "unauthorized@GET /me/statement"
+    },
+    {
+      "file": "problem/INVALID_DATE_RANGE.json",
+      "method": "GET",
+      "path": "/me/statement",
+      "status": 422,
+      "scenario": "invalid-date-range@GET /me/statement",
+      "realScenario": "statementInvalidRange"
+    },
+    {
+      "file": "problem/UNAUTHORIZED.json",
+      "method": "GET",
+      "path": "/market/daily-volume",
+      "status": 401,
+      "scenario": "unauthorized@GET /market/daily-volume"
+    }
+  ]
+}

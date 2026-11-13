@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Every visible or announced text of the client (pt-BR, FR-048). Code stays in English. -->
+<resources>
+    <string name="app_name">Investimento em Bitcoins</string>
+
+    <!-- Navigation (FR-009) -->
+    <string name="nav_dashboard">Painel</string>
+    <string name="nav_deposit">Depositar</string>
+    <string name="nav_purchase">Comprar</string>
+    <string name="nav_investments">Meus investimentos</string>
+    <string name="nav_redemption">Resgatar</string>
+    <string name="nav_statement">Extrato</string>
+    <string name="nav_market">Mercado</string>
+    <string name="nav_logout">Sair</string>
+    <string name="nav_menu">Menu</string>
+    <string name="nav_close_menu">Fechar menu</string>
+    <string name="nav_main">Navegação principal</string>
+    <!-- L6 of W-00: the mirror does not expose the selected state, so it goes into the name. -->
+    <string name="nav_current_page">%1$s, página atual</string>
+
+    <!-- Shared -->
+    <string name="loading">Carregando…</string>
+    <string name="retry">Tentar de novo</string>
+    <string name="processing">Processando…</string>
+    <string name="brasilia_time">(horário de Brasília)</string>
+    <string name="estimate_label">Estimativa</string>
+    <string name="under_construction">Esta página estará disponível em breve.</string>
+    <string name="currency_prefix">R$</string>
+
+    <!-- Page names: h1 and document.title (contracts/ui-routes.md) -->
+    <string name="page_title_format">%1$s · Investimento em Bitcoins</string>
+    <string name="page_login">Entrar</string>
+    <string name="page_register">Criar conta</string>
+    <string name="page_dashboard">Painel</string>
+    <string name="page_deposit">Depositar</string>
+    <string name="page_purchase">Comprar bitcoin</string>
+    <string name="page_investments">Meus investimentos</string>
+    <string name="page_redemption">Resgatar</string>
+    <string name="page_statement">Extrato</string>
+    <string name="page_market">Mercado</string>
+
+    <!-- Login banners (contracts/ui-routes.md) -->
+    <string name="banner_session_expired">Sua sessão expirou. Entre novamente para continuar.</string>
+    <string name="banner_account_created">Conta criada. Entre com seu e-mail e senha.</string>
+
+    <!-- Errors (contracts/error-messages.md, FR-040/FR-041) -->
+    <string name="error_validation_summary">Revise os campos destacados.</string>
+    <string name="error_invalid_amount">Informe um valor maior que zero, com no máximo 2 casas decimais.</string>
+    <string name="error_invalid_amount_satoshi">O valor também pode ser pequeno demais para comprar 1 satoshi (0,00000001 BTC).</string>
+    <string name="error_email_in_use">Este e-mail já está cadastrado.</string>
+    <string name="error_invalid_credentials">E-mail ou senha incorretos.</string>
+    <string name="error_session_expired">Sua sessão expirou. Entre novamente para continuar.</string>
+    <string name="error_insufficient_balance">Saldo insuficiente para esta compra.</string>
+    <string name="error_available_balance">Saldo disponível: %1$s</string>
+    <string name="error_redemption_exceeds">O valor solicitado é maior que o disponível para resgate.</string>
+    <string name="error_available_now">Disponível agora: %1$s</string>
+    <string name="error_invalid_date_range">Intervalo de datas inválido. A data inicial deve ser igual ou anterior à final.</string>
+    <string name="error_quote_unavailable">Cotação indisponível no momento. Tente novamente em instantes.</string>
+    <string name="error_service_unavailable">Serviço temporariamente indisponível.</string>
+    <string name="error_unexpected">Algo deu errado. Tente novamente.</string>
+    <string name="error_no_connection">Não foi possível conectar. Verifique sua internet e tente novamente.</string>
+    <string name="error_uncertain">Não foi possível confirmar se a operação foi concluída. Confira seu saldo e o extrato antes de tentar de novo.</string>
+    <string name="error_uncertain_balance_link">Ver saldo</string>
+    <string name="error_uncertain_statement_link">Ver extrato</string>
+
+    <!-- Local validations (contracts/error-messages.md, W-11) -->
+    <string name="error_name_required">Informe seu nome.</string>
+    <string name="error_name_too_long">O nome pode ter no máximo 200 caracteres.</string>
+    <string name="error_email_invalid">Informe um e-mail válido.</string>
+    <string name="error_password_too_short">A senha deve ter pelo menos 8 caracteres.</string>
+    <string name="error_password_too_long">A senha é longa demais. Use menos caracteres ou caracteres mais simples.</string>
+
+    <!-- Quote (FR-013) -->
+    <string name="quote_title">Cotação do bitcoin</string>
+    <string name="quote_buy">Compra</string>
+    <string name="quote_sell">Venda</string>
+    <string name="quote_at">Atualizada em %1$s %2$s</string>
+    <string name="quote_unavailable">Cotação indisponível no momento</string>
+
+    <!-- Announcements (FR-047, FR-012) -->
+    <string name="announce_quote_unavailable">Cotação indisponível no momento</string>
+    <string name="announce_quote_restored">Cotação restabelecida</string>
+    <string name="announce_refresh_paused">Atualização automática pausada</string>
+    <string name="announce_refresh_resumed">Atualização automática retomada</string>
+
+    <!-- Auto-refresh toggle (FR-012) -->
+    <string name="auto_refresh_active">Atualização automática: ativa</string>
+    <string name="auto_refresh_paused">Atualização automática: pausada</string>
+    <string name="auto_refresh_state_active">ativa</string>
+    <string name="auto_refresh_state_paused">pausada</string>
+</resources>

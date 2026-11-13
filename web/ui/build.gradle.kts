@@ -36,10 +36,16 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }
 
 compose.resources {
     packageOfResClass = "com.kotlinbitcoins.web.ui.resources"
+}
+
+// karma.config.d/composeResources.js serves build/processedResources to the browser tests.
+tasks.matching { it.name == "wasmJsBrowserTest" }.configureEach {
+    dependsOn("wasmJsProcessResources")
 }

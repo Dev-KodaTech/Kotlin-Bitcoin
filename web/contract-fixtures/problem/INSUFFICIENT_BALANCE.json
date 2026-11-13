@@ -1,0 +1,9 @@
+{
+  "type": "about:blank",
+  "title": "Unprocessable Content",
+  "status": 422,
+  "code": "INSUFFICIENT_BALANCE",
+  "detail": "Saldo insuficiente para esta compra.",
+  "instance": "/api/v1/me/purchases",
+  "correlationId": "3b5d7f91-2c4e-4a6b-8d0f-a1c3e5b7d9f2"
+}

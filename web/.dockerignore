@@ -1,0 +1,8 @@
+build/
+**/build/
+.gradle/
+.kotlin/
+e2e/
+spike-a11y/
+Dockerfile
+.dockerignore
