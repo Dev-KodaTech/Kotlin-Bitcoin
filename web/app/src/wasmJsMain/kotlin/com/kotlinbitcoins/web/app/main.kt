@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.kotlinbitcoins.web.core.navigation.AppRoute
 import com.kotlinbitcoins.web.ui.components.LocalFieldAccessibility
 import com.kotlinbitcoins.web.ui.shell.AppNavHost
+import com.kotlinbitcoins.web.ui.shell.ShellPorts
 import com.kotlinbitcoins.web.ui.shell.toAppRoute
 import com.kotlinbitcoins.web.ui.theme.AppTheme
 import kotlinx.coroutines.channels.Channel
@@ -49,7 +50,8 @@ fun main() {
                     navController = navController,
                     startRoute = startRoute,
                     sessionManager = container.sessionManager,
-                    documentTitle = container.documentTitle,
+                    ports = ShellPorts(container.documentTitle, container.announcer),
+                    viewModels = container.viewModels,
                 )
             }
         }

@@ -43,6 +43,18 @@
     <string name="banner_session_expired">Sua sessão expirou. Entre novamente para continuar.</string>
     <string name="banner_account_created">Conta criada. Entre com seu e-mail e senha.</string>
 
+    <!-- Registration and login (US1) -->
+    <string name="field_name">Nome</string>
+    <string name="field_email">E-mail</string>
+    <string name="field_password">Senha</string>
+    <string name="password_hint">Use pelo menos 8 caracteres.</string>
+    <string name="register_submit">Criar conta</string>
+    <string name="register_has_account">Já tem uma conta?</string>
+    <string name="login_submit">Entrar</string>
+    <string name="login_no_account">Ainda não tem uma conta?</string>
+    <string name="link_login">Entrar</string>
+    <string name="link_register">Criar conta</string>
+
     <!-- Errors (contracts/error-messages.md, FR-040/FR-041) -->
     <string name="error_validation_summary">Revise os campos destacados.</string>
     <string name="error_invalid_amount">Informe um valor maior que zero, com no máximo 2 casas decimais.</string>

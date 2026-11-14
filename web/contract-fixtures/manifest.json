@@ -2,6 +2,22 @@
   "contract": "specs/001-bitcoin-investment-api/contracts/openapi.yaml",
   "fixtures": [
     {
+      "file": "success/accounts-201.json",
+      "method": "POST",
+      "path": "/accounts",
+      "status": 201,
+      "scenario": "register-ok@POST /accounts",
+      "realScenario": "registerAccount"
+    },
+    {
+      "file": "success/auth-login-200.json",
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200,
+      "scenario": "login-ok@POST /auth/login",
+      "realScenario": "loginOk"
+    },
+    {
       "file": "problem/VALIDATION_ERROR.json",
       "method": "POST",
       "path": "/accounts",

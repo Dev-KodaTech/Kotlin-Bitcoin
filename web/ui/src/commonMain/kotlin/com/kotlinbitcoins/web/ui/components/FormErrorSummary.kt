@@ -12,14 +12,18 @@ import com.kotlinbitcoins.web.ui.resources.Res
 import com.kotlinbitcoins.web.ui.resources.error_validation_summary
 import org.jetbrains.compose.resources.stringResource
 
-/** "Revise os campos destacados." with one item per error; each item moves the focus to its field. */
+/**
+ * "Revise os campos destacados." with one item per error; each item moves the focus to its field. [otherMessages]
+ * are errors of the API for fields that are not in the form: listed as text.
+ */
 @Composable
 fun FormErrorSummary(
     errors: List<FormFieldError>,
     modifier: Modifier = Modifier,
     focusOnShow: Boolean = false,
+    otherMessages: List<String> = emptyList(),
 ) {
-    if (errors.isEmpty()) return
+    if (errors.isEmpty() && otherMessages.isEmpty()) return
     Column(modifier = modifier) {
         FocusOnArrival(focusOnShow) { arrivalModifier ->
             Text(
@@ -36,6 +40,9 @@ fun FormErrorSummary(
             ) {
                 Text(error.message)
             }
+        }
+        otherMessages.forEach { message ->
+            Text(text = message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

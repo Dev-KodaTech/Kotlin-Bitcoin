@@ -6,14 +6,19 @@ import com.kotlinbitcoins.web.data.browser.BrowserSessionStorage
 import com.kotlinbitcoins.web.data.browser.DocumentVisibility
 import com.kotlinbitcoins.web.data.browser.DomAnnouncer
 import com.kotlinbitcoins.web.data.browser.MediaPreferences
+import com.kotlinbitcoins.web.data.gateway.HttpAuthGateway
 import com.kotlinbitcoins.web.data.http.ApiCall
 import com.kotlinbitcoins.web.data.http.HttpClientFactory
 import com.kotlinbitcoins.web.data.time.SystemClock
+import com.kotlinbitcoins.web.state.account.LoginViewModel
+import com.kotlinbitcoins.web.state.account.RegisterViewModel
 import com.kotlinbitcoins.web.state.port.Announcer
+import com.kotlinbitcoins.web.state.port.AuthGateway
 import com.kotlinbitcoins.web.state.port.DocumentTitle
 import com.kotlinbitcoins.web.state.port.PageVisibility
 import com.kotlinbitcoins.web.state.port.UserPreferences
 import com.kotlinbitcoins.web.state.session.SessionManager
+import com.kotlinbitcoins.web.ui.shell.AppViewModels
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 
@@ -38,6 +43,14 @@ class AppContainer {
     val pageVisibility: PageVisibility = DocumentVisibility()
     val userPreferences: UserPreferences = MediaPreferences()
     val documentTitle: DocumentTitle = BrowserDocumentTitle()
+
+    private val authGateway: AuthGateway = HttpAuthGateway(apiCall)
+
+    val viewModels =
+        AppViewModels(
+            register = { RegisterViewModel(authGateway, sessionManager) },
+            login = { returnTo, banner -> LoginViewModel(authGateway, sessionManager, returnTo, banner) },
+        )
 
     fun close() {
         tabChannel.close()

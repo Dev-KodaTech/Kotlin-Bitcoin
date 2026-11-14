@@ -36,6 +36,11 @@ class WebClientFixturesContractTest : ApplicationTestBase() {
     /** Scenarios named by `realScenario` in the manifest; each one starts from the clean state of the base class. */
     private val realScenarios: Map<String, () -> ResultActionsDsl> =
         mapOf(
+            "registerAccount" to { postJson("/api/v1/accounts", account(email = ANA_EMAIL)) },
+            "loginOk" to {
+                api.register("Ana", ANA_EMAIL)
+                api.login(ANA_EMAIL)
+            },
             "registerInvalidEmail" to { postJson("/api/v1/accounts", account(email = "ana-sem-arroba")) },
             "registerDuplicateEmail" to {
                 api.register("Ana", ANA_EMAIL)

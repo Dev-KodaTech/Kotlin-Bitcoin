@@ -14,8 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,7 +23,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kotlinbitcoins.web.core.navigation.AppRoute
-import com.kotlinbitcoins.web.state.port.DocumentTitle
 import com.kotlinbitcoins.web.state.session.LoginBanner
 import com.kotlinbitcoins.web.state.session.SessionEvent
 import com.kotlinbitcoins.web.state.session.SessionGate
@@ -43,34 +40,37 @@ import org.jetbrains.compose.resources.stringResource
  * change, on every session state change and on every [SessionEvent]; `document.title` per destination; focus on the
  * h1 of each page (PageHeading). Destinations of user stories not implemented yet show a placeholder.
  *
- * Screens receive their ViewModel factories through parameters added by each user story; :ui never knows :data.
+ * Screens receive their ViewModels from [viewModels], built by :app; :ui never knows :data.
  */
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     startRoute: AppRoute,
     sessionManager: SessionManager,
-    documentTitle: DocumentTitle,
+    ports: ShellPorts,
+    viewModels: AppViewModels,
     modifier: Modifier = Modifier,
 ) {
     val sessionState by sessionManager.state.collectAsState()
     val entry by navController.currentBackStackEntryAsState()
     val currentRoute = entry?.toAppRoute()
-    val latestRoute by rememberUpdatedState(currentRoute)
-    var loginBanner by remember { mutableStateOf<LoginBanner?>(null) }
+    val loginBanner = remember { mutableStateOf<LoginBanner?>(null) }
 
     // Guard on destination and session changes: a route the gate does not allow is replaced in the history.
+    // The live entry: a session event may have navigated since this composition (e.g. logout → login).
     LaunchedEffect(currentRoute, sessionState) {
-        val route = currentRoute ?: return@LaunchedEffect
+        val route = navController.currentBackStackEntry?.toAppRoute() ?: return@LaunchedEffect
         val allowed = SessionGate.resolve(route, sessionState)
         if (allowed != null && allowed != route) navController.replace(allowed)
     }
 
     // Session events: expiry and logout clear the back stack, so "back" never shows protected data (US1-7).
+    // The live entry (not the last composed one): the guard above may have navigated already.
     LaunchedEffect(sessionManager) {
         sessionManager.events.collect { event ->
-            val redirect = SessionGate.onEvent(event, latestRoute ?: return@collect) ?: return@collect
-            loginBanner = redirect.banner
+            val current = navController.currentBackStackEntry?.toAppRoute() ?: return@collect
+            val redirect = SessionGate.onEvent(event, current) ?: return@collect
+            loginBanner.value = redirect.banner
             if (event == SessionEvent.LoggedIn) {
                 navController.replace(redirect.route)
             } else {
@@ -80,7 +80,7 @@ fun AppNavHost(
     }
 
     val title = currentRoute?.let { stringResource(Res.string.page_title_format, it.pageName()) }
-    LaunchedEffect(title) { title?.let(documentTitle::set) }
+    LaunchedEffect(title) { title?.let(ports.documentTitle::set) }
 
     val reducedMotion = LocalReducedMotion.current
     Surface(modifier = modifier.fillMaxSize()) {
@@ -92,10 +92,11 @@ fun AppNavHost(
             popEnterTransition = { if (reducedMotion) EnterTransition.None else fadeIn() },
             popExitTransition = { if (reducedMotion) ExitTransition.None else fadeOut() },
         ) {
-            publicDestination<AppRoute.Login>(sessionManager.state) { route ->
-                PlaceholderScreen(route.pageName(), banner = loginBanner)
-            }
-            publicDestination<AppRoute.Register>(sessionManager.state) { route -> PlaceholderScreen(route.pageName()) }
+            accountDestinations(
+                sessionState = sessionManager.state,
+                viewModels = viewModels,
+                navigator = AccountNavigator(navController, ports.announcer, loginBanner),
+            )
 
             val shell = Shell(navController, onLogout = sessionManager::logout)
             protectedDestination<AppRoute.Dashboard>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
@@ -120,7 +121,8 @@ private class Shell(
 }
 
 /** Replaces the current entry (no new history entry): gate redirects and login → return destination. */
-private fun NavHostController.replace(route: AppRoute) {
+internal fun NavHostController.replace(route: AppRoute) {
+    if (currentBackStackEntry?.toAppRoute() == route) return
     val currentId = currentBackStackEntry?.destination?.id
     navigate(route) {
         if (currentId != null) popUpTo(currentId) { inclusive = true }
@@ -129,7 +131,7 @@ private fun NavHostController.replace(route: AppRoute) {
 }
 
 // The graph is built once, so destinations receive the session as a flow, never as a captured value.
-private inline fun <reified R : AppRoute> NavGraphBuilder.publicDestination(
+internal inline fun <reified R : AppRoute> NavGraphBuilder.publicDestination(
     sessionState: StateFlow<SessionState>,
     crossinline content: @Composable (R) -> Unit,
 ) {
@@ -159,7 +161,7 @@ private inline fun <reified R : AppRoute> NavGraphBuilder.protectedDestination(
  * only "Carregando…" exists, so no protected content ever reaches the accessibility mirror.
  */
 @Composable
-private fun Guarded(
+internal fun Guarded(
     route: AppRoute,
     sessionState: StateFlow<SessionState>,
     content: @Composable () -> Unit,
