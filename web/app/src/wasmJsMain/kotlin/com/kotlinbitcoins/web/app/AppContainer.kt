@@ -17,6 +17,7 @@ import com.kotlinbitcoins.web.data.time.SystemClock
 import com.kotlinbitcoins.web.state.account.LoginViewModel
 import com.kotlinbitcoins.web.state.account.RegisterViewModel
 import com.kotlinbitcoins.web.state.dashboard.DashboardViewModel
+import com.kotlinbitcoins.web.state.deposit.DepositViewModel
 import com.kotlinbitcoins.web.state.port.AccountGateway
 import com.kotlinbitcoins.web.state.port.Announcer
 import com.kotlinbitcoins.web.state.port.AuthGateway
@@ -74,6 +75,7 @@ class AppContainer {
                     texts = texts,
                 )
             },
+            deposit = { texts -> DepositViewModel(accountGateway, announcer, texts) },
         )
 
     fun close() {

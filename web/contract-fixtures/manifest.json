@@ -113,6 +113,14 @@
       "realScenario": "balanceWithoutToken"
     },
     {
+      "file": "success/me-deposits-201.json",
+      "method": "POST",
+      "path": "/me/deposits",
+      "status": 201,
+      "scenario": "deposit-ok@POST /me/deposits",
+      "realScenario": "depositOk"
+    },
+    {
       "file": "problem/INVALID_AMOUNT.json",
       "method": "POST",
       "path": "/me/deposits",

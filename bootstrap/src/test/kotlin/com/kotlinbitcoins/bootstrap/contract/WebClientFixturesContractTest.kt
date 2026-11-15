@@ -81,6 +81,11 @@ class WebClientFixturesContractTest : ApplicationTestBase() {
                 quoteSourceDown()
                 api.get("/api/v1/me/investments", ana)
             },
+            "depositOk" to {
+                val ana = api.register("Ana", ANA_EMAIL)
+                api.depositOk(ana, "50.00")
+                api.deposit(ana, "100.00")
+            },
             "depositWithoutToken" to { postJson("/api/v1/me/deposits", """{"amount":"10.00"}""") },
             "depositZero" to { api.deposit(api.register("Ana", ANA_EMAIL), "0") },
             "quoteSourceDown" to {

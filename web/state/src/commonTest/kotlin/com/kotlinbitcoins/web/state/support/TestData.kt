@@ -1,6 +1,7 @@
 package com.kotlinbitcoins.web.state.support
 
 import com.kotlinbitcoins.web.core.error.Outcome
+import com.kotlinbitcoins.web.core.model.DepositResult
 import com.kotlinbitcoins.web.core.model.InvestmentPosition
 import com.kotlinbitcoins.web.core.model.Position
 import com.kotlinbitcoins.web.core.model.Quote
@@ -50,4 +51,16 @@ fun position(
                     currentValue = money("100.00"),
                 )
             },
+    )
+
+fun depositResult(
+    amount: String = "100.00",
+    balance: String = "150.00",
+    at: String = "2026-11-09T08:10:00-03:00",
+): DepositResult =
+    DepositResult(
+        transactionId = "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+        amount = money(amount),
+        balance = money(balance),
+        occurredAt = ApiInstant.parseApi(at).successValue(),
     )

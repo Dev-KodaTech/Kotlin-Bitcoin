@@ -48,6 +48,7 @@ abstract class E2eBase {
     protected fun <T> withPage(
         browserName: String,
         viewport: Viewport = Viewports.DESKTOP,
+        hasTouch: Boolean = false,
         prepare: (BrowserContext) -> Unit = {},
         block: AppPage.() -> T,
     ): T {
@@ -57,6 +58,7 @@ abstract class E2eBase {
                     .NewContextOptions()
                     .setViewportSize(viewport.width, viewport.height)
                     .setDeviceScaleFactor(viewport.deviceScaleFactor)
+                    .setHasTouch(hasTouch)
                     .setLocale("pt-BR")
                     .setTimezoneId("America/New_York"),
             )

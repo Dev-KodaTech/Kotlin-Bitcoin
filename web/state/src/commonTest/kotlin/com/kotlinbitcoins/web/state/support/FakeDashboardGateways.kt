@@ -1,7 +1,9 @@
 package com.kotlinbitcoins.web.state.support
 
 import com.kotlinbitcoins.web.core.error.ApiError
+import com.kotlinbitcoins.web.core.error.OperationError
 import com.kotlinbitcoins.web.core.error.Outcome
+import com.kotlinbitcoins.web.core.model.DepositResult
 import com.kotlinbitcoins.web.core.model.Position
 import com.kotlinbitcoins.web.core.model.Profile
 import com.kotlinbitcoins.web.core.model.Quote
@@ -11,7 +13,10 @@ import com.kotlinbitcoins.web.state.port.InvestmentGateway
 import com.kotlinbitcoins.web.state.port.ProfileGateway
 import com.kotlinbitcoins.web.state.port.QuoteGateway
 
-/** The four read gateways of the dashboard, answering with mutable results and counting the calls. */
+/**
+ * The four read gateways of the dashboard and the deposit of [AccountGateway], answering with mutable results and
+ * recording the calls.
+ */
 class FakeDashboardGateways :
     ProfileGateway,
     AccountGateway,
@@ -21,6 +26,10 @@ class FakeDashboardGateways :
     var balanceResult: Outcome<ApiError, Money> = Outcome.Success(money("1234.56"))
     var quoteResult: Outcome<ApiError, Quote> = Outcome.Success(quote())
     var positionResult: Outcome<ApiError, Position> = Outcome.Success(position(total = "704.00", investments = 3))
+    var depositResult: Outcome<OperationError, DepositResult> = Outcome.Success(depositResult())
+
+    /** Amounts received by [deposit], in order. */
+    val deposits = mutableListOf<Money>()
 
     var profileCalls = 0
         private set
@@ -34,6 +43,9 @@ class FakeDashboardGateways :
     override suspend fun profile(): Outcome<ApiError, Profile> = profileResult.also { profileCalls++ }
 
     override suspend fun balance(): Outcome<ApiError, Money> = balanceResult.also { balanceCalls++ }
+
+    override suspend fun deposit(amount: Money): Outcome<OperationError, DepositResult> =
+        depositResult.also { deposits += amount }
 
     override suspend fun current(): Outcome<ApiError, Quote> = quoteResult.also { quoteCalls++ }
 
