@@ -1,6 +1,7 @@
 package com.kotlinbitcoins.api.account
 
 import com.kotlinbitcoins.api.format.ApiFormats
+import com.kotlinbitcoins.application.account.Profile
 import com.kotlinbitcoins.application.account.RegisteredAccount
 import com.kotlinbitcoins.application.port.AccessToken
 import io.swagger.v3.oas.annotations.media.Schema
@@ -71,5 +72,15 @@ data class LoginResponse(
         private const val BEARER = "Bearer"
 
         fun of(token: AccessToken) = LoginResponse(token.value, BEARER, token.expiresInSeconds)
+    }
+}
+
+/** Body of `GET /me` (FR-036): name and e-mail only, never the id, the balance or the password hash. */
+data class ProfileResponse(
+    val name: String,
+    val email: String,
+) {
+    companion object {
+        fun of(profile: Profile) = ProfileResponse(name = profile.name, email = profile.email.value)
     }
 }

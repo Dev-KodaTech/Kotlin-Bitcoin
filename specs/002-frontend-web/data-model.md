@@ -31,7 +31,7 @@ Produzidos pelos mapeadores de `:data` a partir dos DTOs. Os campos são os do c
 
 | Modelo | Campos | Fonte |
 |--------|--------|-------|
-| `Profile` | `name: String`, `email: String`, `firstName` (derivado: primeira palavra de `name.trim()`; vazio → sem nome) | **`GET /me`: pendente de emenda na 001** ([contracts/api-amendment-get-me.md](./contracts/api-amendment-get-me.md)) |
+| `Profile` | `name: String`, `email: String`, `firstName` (derivado: primeira palavra de `name.trim()`; vazio → sem nome) | `GET /me` (emenda aplicada na 001, FR-036) ([contracts/api-amendment-get-me.md](./contracts/api-amendment-get-me.md)) |
 | `Balance` | `balance: Money` | `GET /me/balance` |
 | `Quote` | `buyPrice: QuotePrice`, `sellPrice: QuotePrice`, `quotedAt: ApiInstant` | `GET /quotes/current` |
 | `Position` | `quote: Quote`, `totalCurrentValue: Money`, `investments: List<InvestmentPosition>` (ordem da API, FR-019) | `GET /me/investments` |

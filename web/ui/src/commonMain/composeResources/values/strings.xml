@@ -84,10 +84,22 @@
 
     <!-- Quote (FR-013) -->
     <string name="quote_title">Cotação do bitcoin</string>
-    <string name="quote_buy">Compra</string>
-    <string name="quote_sell">Venda</string>
+    <string name="quote_buy">Cotação de compra</string>
+    <string name="quote_sell">Cotação de venda</string>
     <string name="quote_at">Atualizada em %1$s %2$s</string>
     <string name="quote_unavailable">Cotação indisponível no momento</string>
+
+    <!-- Dashboard (US2) -->
+    <string name="dashboard_greeting_named">Olá, %1$s</string>
+    <string name="dashboard_greeting_anonymous">Olá!</string>
+    <string name="dashboard_balance">Saldo</string>
+    <string name="dashboard_position_total">Valor atual dos investimentos</string>
+    <string name="dashboard_depends_on_quote">Depende da cotação</string>
+    <string name="dashboard_no_investments">Você ainda não tem investimentos. Faça sua primeira compra.</string>
+    <string name="dashboard_shortcuts">Atalhos</string>
+    <string name="dashboard_shortcut_deposit">Depositar</string>
+    <string name="dashboard_shortcut_purchase">Comprar</string>
+    <string name="dashboard_shortcut_redemption">Resgatar</string>
 
     <!-- Announcements (FR-047, FR-012) -->
     <string name="announce_quote_unavailable">Cotação indisponível no momento</string>

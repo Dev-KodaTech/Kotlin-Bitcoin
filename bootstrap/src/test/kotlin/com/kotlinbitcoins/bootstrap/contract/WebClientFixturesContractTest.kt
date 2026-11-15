@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.post
 import org.yaml.snakeyaml.Yaml
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Duration
 
 /**
  * The JSON fixtures the web client tests with (`web/contract-fixtures`, listed in its `manifest.json`) must follow the
@@ -51,7 +52,35 @@ class WebClientFixturesContractTest : ApplicationTestBase() {
                 api.register("Ana", ANA_EMAIL)
                 api.login(ANA_EMAIL, "senha-errada-123")
             },
+            "profile" to { api.get("/api/v1/me", api.register("Maria Souza", ANA_EMAIL)) },
+            "profileWithoutToken" to { mockMvc.get("/api/v1/me") },
+            "balanceAfterDeposit" to {
+                val ana = api.register("Ana", ANA_EMAIL)
+                api.depositOk(ana, "1234.56")
+                api.get("/api/v1/me/balance", ana)
+            },
             "balanceWithoutToken" to { mockMvc.get("/api/v1/me/balance") },
+            "quoteOk" to {
+                stubQuote(buy = "400000.00", sell = "401000.00")
+                api.get("/api/v1/quotes/current", api.register("Ana", ANA_EMAIL))
+            },
+            "positionAfterPurchase" to {
+                stubQuote(buy = "400000.00", sell = "400000.00")
+                val ana = api.register("Ana", ANA_EMAIL)
+                api.depositOk(ana, "1000.00")
+                api.purchaseOk(ana, "400.00")
+                clock.advance(Duration.ofSeconds(QUOTE_CACHE_SECONDS))
+                api.get("/api/v1/me/investments", ana)
+            },
+            "positionWithoutInvestments" to {
+                stubQuote(buy = "400000.00", sell = "400000.00")
+                api.get("/api/v1/me/investments", api.register("Ana", ANA_EMAIL))
+            },
+            "positionQuoteSourceDown" to {
+                val ana = api.register("Ana", ANA_EMAIL)
+                quoteSourceDown()
+                api.get("/api/v1/me/investments", ana)
+            },
             "depositWithoutToken" to { postJson("/api/v1/me/deposits", """{"amount":"10.00"}""") },
             "depositZero" to { api.deposit(api.register("Ana", ANA_EMAIL), "0") },
             "quoteSourceDown" to {
@@ -166,6 +195,9 @@ class WebClientFixturesContractTest : ApplicationTestBase() {
 
     private companion object {
         const val ANA_EMAIL = "ana@example.com"
+
+        /** Past the quote cache, so the position reads the stubbed source again. */
+        const val QUOTE_CACHE_SECONDS = 11L
     }
 }
 

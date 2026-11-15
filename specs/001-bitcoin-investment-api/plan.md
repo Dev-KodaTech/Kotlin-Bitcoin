@@ -28,7 +28,7 @@ Detalhes e alternativas: [research.md](./research.md). Modelo: [data-model.md](.
 
 **Constraints**: precisão exata (R$ em centavos `NUMERIC(19,2)`, BTC em satoshis `BIGINT`, cotação `NUMERIC(19,8)`); cotação com no máximo 60 s; atomicidade e segurança sob concorrência por conta; instantes em UTC no banco e America/Sao_Paulo na saída; nenhum segredo no código.
 
-**Scale/Scope**: 10 user stories, 11 endpoints, 6 tabelas, 2 jobs agendados + 1 relay. Volume esperado de aplicação de estudo/demonstração; o desenho stateless permite mais réplicas sem mudança de código.
+**Scale/Scope**: 10 user stories, 12 endpoints (inclui `GET /me`, emenda FR-036), 6 tabelas, 2 jobs agendados + 1 relay. Volume esperado de aplicação de estudo/demonstração; o desenho stateless permite mais réplicas sem mudança de código.
 
 ## Constitution Check
 

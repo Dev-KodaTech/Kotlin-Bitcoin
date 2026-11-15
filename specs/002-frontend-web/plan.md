@@ -12,7 +12,7 @@ O código fica num build Gradle separado em `web/`, com seis módulos que tornam
 
 **Risco principal**: o alvo web do Compose está em **Beta**, com acessibilidade inicial, e WCAG 2.1 AA é MUST. Por isso a implementação começa por um **spike go/no-go de acessibilidade** ([research W-00](./research.md#w-00-gate-de-acessibilidade--spike-go-no-go-obrigatório-bloqueia-a-implementação)) com critérios explícitos e uma alternativa registrada (Compose HTML sobre Kotlin/JS).
 
-**Pendência bloqueante externa**: o contrato da 001 **ainda não contém `GET /me`** (FR-005), apesar de o pedido indicá-lo como emendado. Verificado em 2026-11-11 nos branches `frontend`, `main` e `bitcoin/api`. A proposta de delta está em [contracts/api-amendment-get-me.md](./contracts/api-amendment-get-me.md) e MUST ser aplicada na origem (001) antes da entrega da saudação com nome (US2). O restante não depende dela.
+**Pendência bloqueante externa (resolvida em 2026-11-15, T122–T126)**: o contrato da 001 não continha `GET /me` (FR-005), apesar de o pedido indicá-lo como emendado. Verificado em 2026-11-11 nos branches `frontend`, `main` e `bitcoin/api`. A proposta de delta está em [contracts/api-amendment-get-me.md](./contracts/api-amendment-get-me.md) e MUST ser aplicada na origem (001) antes da entrega da saudação com nome (US2). O restante não depende dela.
 
 Detalhes: [research.md](./research.md) · Modelo: [data-model.md](./data-model.md) · Contratos de UI/teste: [contracts/](./contracts/) · Validação: [quickstart.md](./quickstart.md)
 
@@ -34,7 +34,7 @@ Detalhes: [research.md](./research.md) · Modelo: [data-model.md](./data-model.m
 
 **Constraints**: precisão exata sem `Double`/`Float` para valores (FR-038; detekt), fuso de Brasília independentemente do dispositivo (FR-037), token nunca em URL/cookie/log (FR-008), WCAG 2.1 AA (FR-046), 320–1920 px e zoom 200% sem rolagem horizontal (FR-044), envio único por confirmação (FR-043), nenhum texto fora do pt-BR (FR-048), CSP sem `unsafe-inline`/`unsafe-eval` (só `'wasm-unsafe-eval'`).
 
-**Scale/Scope**: 8 user stories, 9 rotas, 9 ViewModels, 12 operações da API (11 existentes + `GET /me` pendente), 12 códigos de erro, 6 módulos Gradle.
+**Scale/Scope**: 8 user stories, 9 rotas, 9 ViewModels, 12 operações da API (11 originais + `GET /me`, emenda aplicada), 12 códigos de erro, 6 módulos Gradle.
 
 ## Constitution Check
 
@@ -104,7 +104,7 @@ specs/002-frontend-web/
 │   ├── ui-routes.md                 # rotas, fragmentos, títulos, retorno pós-login
 │   ├── error-messages.md            # code → mensagem/comportamento (FR-040/041)
 │   ├── fixtures-manifest.md         # formato e verificações das fixtures de consumidor
-│   └── api-amendment-get-me.md      # delta PENDENTE a aplicar na 001 (FR-005)
+│   └── api-amendment-get-me.md      # emenda APLICADA na 001 (FR-005 → FR-036 da 001)
 ├── checklists/
 │   └── requirements.md
 └── tasks.md                         # Phase 2 (/speckit-tasks — ainda não criado)

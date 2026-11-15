@@ -99,7 +99,9 @@ fun AppNavHost(
             )
 
             val shell = Shell(navController, onLogout = sessionManager::logout)
-            protectedDestination<AppRoute.Dashboard>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
+            protectedDestination<AppRoute.Dashboard>(sessionManager.state, shell) {
+                DashboardDestination(viewModels, onNavigate = shell::navigate)
+            }
             protectedDestination<AppRoute.Deposit>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
             protectedDestination<AppRoute.Purchase>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
             protectedDestination<AppRoute.Investments>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
@@ -111,7 +113,7 @@ fun AppNavHost(
 }
 
 /** Navigation callbacks of the adaptive scaffold. */
-private class Shell(
+internal class Shell(
     val navController: NavHostController,
     val onLogout: () -> Unit,
 ) {

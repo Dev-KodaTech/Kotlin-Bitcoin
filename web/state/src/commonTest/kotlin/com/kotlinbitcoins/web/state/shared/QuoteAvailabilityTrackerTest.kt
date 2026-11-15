@@ -13,9 +13,25 @@ class QuoteAvailabilityTrackerTest {
     private val tracker =
         QuoteAvailabilityTracker(
             announcer = announcer,
-            unavailableText = "Cotação indisponível no momento",
-            restoredText = "Cotação restabelecida",
+            unavailableText = { "Cotação indisponível no momento" },
+            restoredText = { "Cotação restabelecida" },
         )
+
+    @Test
+    fun theTextsAreReadWhenAnnouncedNotWhenCreated() {
+        // On the web the string resources load asynchronously: the first composition sees "" (regression of T137).
+        var unavailable = ""
+        val late = QuoteAvailabilityTracker(announcer, unavailableText = { unavailable }, restoredText = { "" })
+        late.onQuoteState(QuoteState.Available(quote()))
+        unavailable = "Cotação indisponível no momento"
+
+        late.onQuoteState(QuoteState.Unavailable)
+
+        assertEquals(
+            listOf<FakeAnnouncer.Announcement>(Polite("Cotação indisponível no momento")),
+            announcer.announcements,
+        )
+    }
 
     @Test
     fun nothingOnTheFirstAvailableLoadNorOnRepeatedCycles() {

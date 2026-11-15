@@ -2,6 +2,8 @@ package com.kotlinbitcoins.web.ui.shell
 
 import com.kotlinbitcoins.web.state.account.LoginViewModel
 import com.kotlinbitcoins.web.state.account.RegisterViewModel
+import com.kotlinbitcoins.web.state.dashboard.DashboardTexts
+import com.kotlinbitcoins.web.state.dashboard.DashboardViewModel
 import com.kotlinbitcoins.web.state.session.LoginBanner
 
 /**
@@ -11,4 +13,6 @@ import com.kotlinbitcoins.web.state.session.LoginBanner
 class AppViewModels(
     val register: () -> RegisterViewModel,
     val login: (returnTo: String?, banner: LoginBanner?) -> LoginViewModel,
+    /** The announced texts come from the string resources of :ui, read when announced. */
+    val dashboard: (texts: () -> DashboardTexts) -> DashboardViewModel,
 )

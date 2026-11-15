@@ -50,6 +50,61 @@
       "realScenario": "loginWrongPassword"
     },
     {
+      "file": "success/me-200.json",
+      "method": "GET",
+      "path": "/me",
+      "status": 200,
+      "scenario": "profile-ok@GET /me",
+      "realScenario": "profile"
+    },
+    {
+      "file": "success/me-balance-200.json",
+      "method": "GET",
+      "path": "/me/balance",
+      "status": 200,
+      "scenario": "balance-ok@GET /me/balance",
+      "realScenario": "balanceAfterDeposit"
+    },
+    {
+      "file": "success/quotes-current-200.json",
+      "method": "GET",
+      "path": "/quotes/current",
+      "status": 200,
+      "scenario": "quote-ok@GET /quotes/current",
+      "realScenario": "quoteOk"
+    },
+    {
+      "file": "success/quotes-current-200-8-decimals.json",
+      "method": "GET",
+      "path": "/quotes/current",
+      "status": 200,
+      "scenario": "quote-8-decimals@GET /quotes/current"
+    },
+    {
+      "file": "success/me-investments-200.json",
+      "method": "GET",
+      "path": "/me/investments",
+      "status": 200,
+      "scenario": "position-ok@GET /me/investments",
+      "realScenario": "positionAfterPurchase"
+    },
+    {
+      "file": "success/me-investments-200-empty.json",
+      "method": "GET",
+      "path": "/me/investments",
+      "status": 200,
+      "scenario": "position-empty@GET /me/investments",
+      "realScenario": "positionWithoutInvestments"
+    },
+    {
+      "file": "problem/UNAUTHORIZED.json",
+      "method": "GET",
+      "path": "/me",
+      "status": 401,
+      "scenario": "unauthorized@GET /me",
+      "realScenario": "profileWithoutToken"
+    },
+    {
       "file": "problem/UNAUTHORIZED.json",
       "method": "GET",
       "path": "/me/balance",
@@ -151,7 +206,8 @@
       "method": "GET",
       "path": "/me/investments",
       "status": 503,
-      "scenario": "quote-unavailable@GET /me/investments"
+      "scenario": "quote-unavailable@GET /me/investments",
+      "realScenario": "positionQuoteSourceDown"
     },
     {
       "file": "problem/SERVICE_UNAVAILABLE.json",
