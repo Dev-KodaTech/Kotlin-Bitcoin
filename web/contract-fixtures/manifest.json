@@ -166,6 +166,14 @@
       "scenario": "unauthorized@GET /quotes/history"
     },
     {
+      "file": "success/me-purchases-201.json",
+      "method": "POST",
+      "path": "/me/purchases",
+      "status": 201,
+      "scenario": "purchase-ok@POST /me/purchases",
+      "realScenario": "purchaseAfterDeposit"
+    },
+    {
       "file": "problem/INVALID_AMOUNT.json",
       "method": "POST",
       "path": "/me/purchases",

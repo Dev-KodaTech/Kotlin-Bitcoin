@@ -111,8 +111,34 @@
     <!-- Title suffix of the result step (contracts/ui-routes.md): "Depósito realizado · …" -->
     <string name="page_deposit_succeeded">Depósito realizado</string>
 
+    <!-- Estimate (FR-015, FR-023): always labeled "Estimativa" -->
+    <string name="estimate_value">Estimativa: %1$s</string>
+    <string name="estimate_sell_quote">Cotação de venda usada</string>
+    <string name="estimate_quote_at">Cotação de %1$s %2$s</string>
+
+    <!-- Purchase (US4) -->
+    <string name="purchase_amount">Valor a investir</string>
+    <string name="purchase_review">Revisar compra</string>
+    <string name="purchase_confirm">Confirmar compra</string>
+    <string name="purchase_edit">Alterar valor</string>
+    <string name="purchase_estimate_notice">Valor estimado. A quantidade final usa a cotação do momento da compra.</string>
+    <string name="purchase_below_one_satoshi">O valor provavelmente é pequeno demais para comprar a menor fração de bitcoin (0,00000001 BTC).</string>
+    <string name="purchase_invested">Valor investido</string>
+    <string name="purchase_btc">BTC comprado</string>
+    <string name="purchase_quote_used">Cotação utilizada</string>
+    <string name="purchase_result_title">Compra realizada</string>
+    <string name="purchase_available_balance">Saldo disponível</string>
+    <string name="purchase_purchased_at">Data e hora</string>
+    <string name="purchase_new_balance">Novo saldo</string>
+    <string name="purchase_new">Nova compra</string>
+    <string name="purchase_deposit">Depositar</string>
+    <!-- Title suffixes of the review and result steps (contracts/ui-routes.md): "Revisar compra · …" -->
+    <string name="page_purchase_review">Revisar compra</string>
+    <string name="page_purchase_succeeded">Compra realizada</string>
+
     <!-- Announcements (FR-047, FR-012) -->
     <string name="announce_deposit_succeeded">Depósito realizado</string>
+    <string name="announce_purchase_succeeded">Compra realizada</string>
     <string name="announce_quote_unavailable">Cotação indisponível no momento</string>
     <string name="announce_quote_restored">Cotação restabelecida</string>
     <string name="announce_refresh_paused">Atualização automática pausada</string>

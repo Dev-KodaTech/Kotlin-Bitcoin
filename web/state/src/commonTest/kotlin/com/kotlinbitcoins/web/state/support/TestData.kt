@@ -4,6 +4,7 @@ import com.kotlinbitcoins.web.core.error.Outcome
 import com.kotlinbitcoins.web.core.model.DepositResult
 import com.kotlinbitcoins.web.core.model.InvestmentPosition
 import com.kotlinbitcoins.web.core.model.Position
+import com.kotlinbitcoins.web.core.model.PurchaseResult
 import com.kotlinbitcoins.web.core.model.Quote
 import com.kotlinbitcoins.web.core.money.BtcAmount
 import com.kotlinbitcoins.web.core.money.Money
@@ -63,4 +64,21 @@ fun depositResult(
         amount = money(amount),
         balance = money(balance),
         occurredAt = ApiInstant.parseApi(at).successValue(),
+    )
+
+fun purchaseResult(
+    amount: String = "400.00",
+    btc: String = "0.00100000",
+    quote: String = "400000.00",
+    balance: String = "600.00",
+    at: String = "2026-11-09T08:10:00-03:00",
+): PurchaseResult =
+    PurchaseResult(
+        investmentId = "0b6f5c1e-2a3d-4e5f-8a9b-1c2d3e4f5a01",
+        transactionId = "9a1f0c2e-3b4d-4c5e-8f6a-7b8c9d0e1f2a",
+        amount = money(amount),
+        btcAmount = BtcAmount.parseApi(btc).successValue(),
+        quote = QuotePrice.parseApi(quote).successValue(),
+        purchasedAt = ApiInstant.parseApi(at).successValue(),
+        balance = money(balance),
     )

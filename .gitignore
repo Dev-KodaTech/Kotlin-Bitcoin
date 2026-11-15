@@ -1,6 +1,7 @@
 # Gradle / build
 build/
 .gradle/
+.kotlin/
 !gradle/wrapper/gradle-wrapper.jar
 out/
 *.class

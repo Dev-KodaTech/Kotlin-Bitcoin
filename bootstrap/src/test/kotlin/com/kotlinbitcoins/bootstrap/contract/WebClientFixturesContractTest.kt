@@ -93,6 +93,12 @@ class WebClientFixturesContractTest : ApplicationTestBase() {
                 quoteSourceDown()
                 api.get("/api/v1/quotes/current", ana)
             },
+            "purchaseAfterDeposit" to {
+                stubQuote(buy = "400000.00", sell = "400000.00")
+                val ana = api.register("Ana", ANA_EMAIL)
+                api.depositOk(ana, "1000.00")
+                api.purchase(ana, "400.00")
+            },
             "purchaseBelowOneSatoshi" to {
                 stubQuote(buy = "2000000.00", sell = "2000000.00")
                 val ana = api.register("Ana", ANA_EMAIL)

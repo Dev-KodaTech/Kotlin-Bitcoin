@@ -27,6 +27,7 @@ import com.kotlinbitcoins.web.state.port.PageVisibility
 import com.kotlinbitcoins.web.state.port.ProfileGateway
 import com.kotlinbitcoins.web.state.port.QuoteGateway
 import com.kotlinbitcoins.web.state.port.UserPreferences
+import com.kotlinbitcoins.web.state.purchase.PurchaseViewModel
 import com.kotlinbitcoins.web.state.session.SessionManager
 import com.kotlinbitcoins.web.ui.shell.AppViewModels
 import kotlinx.coroutines.MainScope
@@ -76,6 +77,16 @@ class AppContainer {
                 )
             },
             deposit = { texts -> DepositViewModel(accountGateway, announcer, texts) },
+            purchase = { texts ->
+                PurchaseViewModel(
+                    accountGateway = accountGateway,
+                    quoteGateway = quoteGateway,
+                    investmentGateway = investmentGateway,
+                    pageVisibility = pageVisibility,
+                    announcer = announcer,
+                    texts = texts,
+                )
+            },
         )
 
     fun close() {
