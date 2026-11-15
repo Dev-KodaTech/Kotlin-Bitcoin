@@ -108,7 +108,9 @@ fun AppNavHost(
             protectedDestination<AppRoute.Purchase>(sessionManager.state, shell) {
                 PurchaseDestination(viewModels, ports, onNavigate = shell::navigate)
             }
-            protectedDestination<AppRoute.Investments>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
+            protectedDestination<AppRoute.Investments>(sessionManager.state, shell) {
+                InvestmentsDestination(viewModels, onNavigate = shell::navigate)
+            }
             protectedDestination<AppRoute.Redemption>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
             protectedDestination<AppRoute.Statement>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
             protectedDestination<AppRoute.Market>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }

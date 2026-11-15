@@ -24,6 +24,18 @@ class ThemeContrastTest {
         }
     }
 
+    /** VariationBadge writes the value in the rise/fall color, on the page and inside cards (US5). */
+    @Test
+    fun riseAndFallTextReachFourAndAHalfToOne() {
+        themes.forEach { (name, colors) ->
+            val (scheme, extended) = colors
+            listOf("surface" to scheme.surface, "card" to scheme.surfaceContainerHighest).forEach { (bgName, bg) ->
+                assertContrast(extended.success, bg, TEXT_MINIMUM, "$name: alta/$bgName")
+                assertContrast(extended.decline, bg, TEXT_MINIMUM, "$name: queda/$bgName")
+            }
+        }
+    }
+
     @Test
     fun nonTextColorsReachThreeToOne() {
         themes.forEach { (name, colors) ->

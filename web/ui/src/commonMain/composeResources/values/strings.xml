@@ -136,6 +136,25 @@
     <string name="page_purchase_review">Revisar compra</string>
     <string name="page_purchase_succeeded">Compra realizada</string>
 
+    <!-- Investments (US5) -->
+    <string name="investments_purchased_at">Data da compra</string>
+    <string name="investments_invested">Valor investido</string>
+    <string name="investments_purchase_quote">Cotação na compra</string>
+    <string name="investments_variation">Variação</string>
+    <string name="investments_current_value">Valor bruto atual</string>
+    <string name="investments_total">Valor atual total</string>
+    <string name="investments_reference_quote">Cotação de referência</string>
+    <string name="investments_list">Investimentos ativos</string>
+    <string name="investments_empty">Você não tem investimentos ativos.</string>
+    <string name="investments_buy">Comprar bitcoin</string>
+    <!-- Full sentence of a card, read at once (W-14): date, Brasília, invested, purchase quote, variation, current value -->
+    <string name="investments_card_description">Investimento de %1$s %2$s: valor investido %3$s, cotação na compra %4$s, variação %5$s, valor bruto atual %6$s</string>
+
+    <!-- Variation (FR-020): symbol and text besides the color -->
+    <string name="variation_up">alta</string>
+    <string name="variation_down">queda</string>
+    <string name="variation_flat">sem variação</string>
+
     <!-- Announcements (FR-047, FR-012) -->
     <string name="announce_deposit_succeeded">Depósito realizado</string>
     <string name="announce_purchase_succeeded">Compra realizada</string>

@@ -18,6 +18,7 @@ import com.kotlinbitcoins.web.state.account.LoginViewModel
 import com.kotlinbitcoins.web.state.account.RegisterViewModel
 import com.kotlinbitcoins.web.state.dashboard.DashboardViewModel
 import com.kotlinbitcoins.web.state.deposit.DepositViewModel
+import com.kotlinbitcoins.web.state.investments.InvestmentsViewModel
 import com.kotlinbitcoins.web.state.port.AccountGateway
 import com.kotlinbitcoins.web.state.port.Announcer
 import com.kotlinbitcoins.web.state.port.AuthGateway
@@ -81,6 +82,14 @@ class AppContainer {
                 PurchaseViewModel(
                     accountGateway = accountGateway,
                     quoteGateway = quoteGateway,
+                    investmentGateway = investmentGateway,
+                    pageVisibility = pageVisibility,
+                    announcer = announcer,
+                    texts = texts,
+                )
+            },
+            investments = { texts ->
+                InvestmentsViewModel(
                     investmentGateway = investmentGateway,
                     pageVisibility = pageVisibility,
                     announcer = announcer,

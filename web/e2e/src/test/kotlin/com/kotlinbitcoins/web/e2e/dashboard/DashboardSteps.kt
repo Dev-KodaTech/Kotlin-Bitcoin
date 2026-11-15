@@ -72,6 +72,26 @@ fun Page.routeProblem(
     }
 }
 
+/** Answers every request matching [glob] with the success fixture [name] (web/contract-fixtures/success). */
+fun Page.routeFixture(
+    glob: String,
+    name: String,
+    status: Int = HTTP_OK,
+) {
+    val body = Files.readString(fixturesDir().resolve("success/$name"))
+    route(glob) { route: Route ->
+        route.fulfill(
+            Route
+                .FulfillOptions()
+                .setStatus(status)
+                .setContentType("application/json")
+                .setBody(body),
+        )
+    }
+}
+
+private const val HTTP_OK = 200
+
 /** web/contract-fixtures, found by walking up from the working directory. */
 private fun fixturesDir(): Path {
     var directory: Path? = Path.of("").toAbsolutePath()
