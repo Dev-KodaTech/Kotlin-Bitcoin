@@ -285,6 +285,22 @@
       "scenario": "service-unavailable@POST /me/redemptions"
     },
     {
+      "file": "success/me-statement-200.json",
+      "method": "GET",
+      "path": "/me/statement",
+      "status": 200,
+      "scenario": "statement-ok@GET /me/statement",
+      "realScenario": "statementAfterRedemption"
+    },
+    {
+      "file": "success/me-statement-200-empty.json",
+      "method": "GET",
+      "path": "/me/statement",
+      "status": 200,
+      "scenario": "statement-empty@GET /me/statement",
+      "realScenario": "statementWithoutEntries"
+    },
+    {
       "file": "problem/UNAUTHORIZED.json",
       "method": "GET",
       "path": "/me/statement",

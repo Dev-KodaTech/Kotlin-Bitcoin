@@ -134,6 +134,19 @@ class WebClientFixturesContractTest : ApplicationTestBase() {
                 api.purchaseOk(ana, "100.00")
                 api.redeem(ana, "100.01")
             },
+            "statementAfterRedemption" to {
+                stubQuote(buy = "400000.00", sell = "400000.00")
+                val ana = api.register("Ana", ANA_EMAIL)
+                api.depositOk(ana, "1000.00")
+                api.purchaseOk(ana, "400.00")
+                api.purchaseOk(ana, "200.00")
+                // Two REDEMPTION lines and one REINVESTMENT with the same requestId, after a DEPOSIT and PURCHASEs.
+                api.redeemOk(ana, "500.00")
+                api.get("/api/v1/me/statement", ana)
+            },
+            "statementWithoutEntries" to {
+                api.get("/api/v1/me/statement?from=2026-10-01&to=2026-10-01", api.register("Ana", ANA_EMAIL))
+            },
             "statementInvalidRange" to {
                 api.get("/api/v1/me/statement?from=2026-11-10&to=2026-11-01", api.register("Ana", ANA_EMAIL))
             },

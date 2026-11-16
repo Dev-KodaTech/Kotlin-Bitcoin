@@ -32,7 +32,7 @@ As etapas internas (revisão, resultado, erro) **não** têm rota própria (W-04
 
 ## Histórico do navegador
 
-- Navegar entre destinos cria entradas de histórico. Voltar/avançar restaura rota e filtro (via `bindToBrowserNavigation`).
+- Navegar entre destinos cria entradas de histórico. Voltar/avançar restaura rota e filtro (via `HashRouter` do `:app`; research W-04). Só uma entrada nova no topo cria entrada de histórico; toda substituição do back stack usa `history.replaceState`.
 - Aplicar ou limpar filtro do extrato **substitui** a entrada atual (o filtro aplicado pode ser compartilhado/recarregado sem encher o histórico).
 - Login → `returnTo`/`Dashboard` substitui a entrada do login (voltar não retorna ao formulário de login).
 - "Sair" limpa o back stack do app. Uma entrada antiga do navegador que aponte para rota protegida passa pela guarda (regra 4).

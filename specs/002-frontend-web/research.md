@@ -217,6 +217,11 @@ Grafo: `ui → state → core`, `data → state → core`, `app → {ui, data, s
 
 **Resultado do spike (T020/T021)**: o binding funciona nos 3 motores (voltar, avançar, recarregar e parâmetro no fragmento), e a leitura de `window.location.hash` na inicialização resolve a rota inicial. Limitação: um hash alterado no mesmo documento (link interno `#/…` ou edição na barra) não troca de tela (L9 em W-00 Resultado). O `:app` deve tratar `hashchange`.
 
+**Troca do binding pelo roteador próprio (2026-11-15, Phase 10)**: no E2E do extrato, o `bindToBrowserNavigation` fez `pushState` mesmo quando a entrada do NavController foi **substituída** (filtro aplicado, login → destino, redirecionamentos da guarda). Com isso, "voltar" depois de filtrar ia ao extrato sem filtro, contrariando [contracts/ui-routes.md](./contracts/ui-routes.md). Então se aplicou a mitigação acima: o `:app` passou a usar o `HashRouter` (`app/.../HashRouter.kt`), e as decisões ficaram puras e testadas em `HistorySync` (`:core/navigation`).
+- Back stack → URL: só uma entrada nova no topo faz `history.pushState`. Qualquer outra mudança faz `history.replaceState`, inclusive a primeira rota, cujo fragmento vira canônico.
+- URL → back stack: `hashchange` (voltar/avançar, link `#/…`, barra de endereço; `pushState`/`replaceState` não o disparam). Se a rota for a entrada abaixo do topo, o app faz `popBackStack`. Se for qualquer outra, navega até ela, e essa resposta só substitui a URL. Isso também resolve a L9.
+- `:ui` e `:state` não mudaram. A rota inicial continua vindo de `AppRoute.parse(location.hash)`.
+
 **Alternatives considered**: rotas por caminho (`/extrato`), descartado porque o binding da CMP usa fragmento e o fallback SPA do nginx precisaria cobrir toda rota (continua configurado por segurança, W-15). `returnTo` em `sessionStorage`, descartado por não sobreviver a uma aba nova e não ser visível/testável na URL. Navigation 3, descartado porque ainda não tem binding de navegador equivalente documentado e não é o pedido.
 
 ---

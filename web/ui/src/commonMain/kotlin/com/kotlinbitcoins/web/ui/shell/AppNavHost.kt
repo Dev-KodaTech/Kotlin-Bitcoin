@@ -130,7 +130,9 @@ private fun NavGraphBuilder.appDestinations(
     protectedDestination<AppRoute.Redemption>(sessionState, shell) {
         RedemptionDestination(viewModels, ports, onNavigate = shell::navigate)
     }
-    protectedDestination<AppRoute.Statement>(sessionState, shell) { PlaceholderScreen(it.pageName()) }
+    protectedDestination<AppRoute.Statement>(sessionState, shell) { route ->
+        StatementDestination(viewModels, route, onReplace = shell.navController::replace)
+    }
     protectedDestination<AppRoute.Market>(sessionState, shell) { PlaceholderScreen(it.pageName()) }
 }
 

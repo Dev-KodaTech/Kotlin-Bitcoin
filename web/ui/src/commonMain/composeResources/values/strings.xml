@@ -186,6 +186,32 @@
     <string name="page_redemption_review">Revisar resgate</string>
     <string name="page_redemption_succeeded">Resgate realizado</string>
 
+    <!-- Statement (US7, FR-026..FR-030) -->
+    <string name="statement_period">Período: %1$s a %2$s</string>
+    <string name="statement_filter">Filtrar por período</string>
+    <string name="statement_from">Data inicial</string>
+    <string name="statement_to">Data final</string>
+    <string name="statement_date_hint">dd/mm/aaaa</string>
+    <string name="statement_apply">Aplicar filtro</string>
+    <string name="statement_clear">Limpar filtro</string>
+    <string name="statement_entries">Lançamentos</string>
+    <string name="statement_type_deposit">Depósito</string>
+    <string name="statement_type_purchase">Compra</string>
+    <string name="statement_type_redemption">Resgate</string>
+    <string name="statement_type_reinvestment">Reinvestimento</string>
+    <string name="statement_group_title">Resgate — total %1$s</string>
+    <string name="statement_no_balance_change">não altera o saldo</string>
+    <string name="statement_amount">Valor</string>
+    <string name="statement_btc">BTC</string>
+    <string name="statement_quote">Cotação</string>
+    <string name="statement_occurred_at">Data e hora</string>
+    <string name="statement_empty">Nenhum lançamento no período de %1$s a %2$s.</string>
+    <!-- One line, read at once: type, amount, date/time, Brasília; then the optional parts below -->
+    <string name="statement_entry_description">%1$s de %2$s em %3$s %4$s</string>
+    <string name="statement_entry_btc_description">, %1$s, cotação %2$s</string>
+    <!-- One redemption group, read at once: title, date/time, Brasília, lines -->
+    <string name="statement_group_description">%1$s, em %2$s %3$s. Linhas: %4$s</string>
+
     <!-- Variation (FR-020): symbol and text besides the color -->
     <string name="variation_up">alta</string>
     <string name="variation_down">queda</string>

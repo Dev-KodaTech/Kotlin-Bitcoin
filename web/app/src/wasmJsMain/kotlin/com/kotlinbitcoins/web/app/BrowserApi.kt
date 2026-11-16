@@ -12,6 +12,12 @@ internal fun locationHash(): String = js("window.location.hash")
 
 internal fun onHashChange(handler: () -> Unit): Unit = js("{ window.addEventListener('hashchange', () => handler()); }")
 
+/** Adds a history entry with [fragment] ("#/…"); fires neither `hashchange` nor `popstate`. */
+internal fun historyPush(fragment: String): Unit = js("window.history.pushState(null, '', fragment)")
+
+/** Replaces the current history entry with [fragment]; fires neither `hashchange` nor `popstate`. */
+internal fun historyReplace(fragment: String): Unit = js("window.history.replaceState(null, '', fragment)")
+
 /** `pagehide` that is not entering the back/forward cache: the page is really going away. */
 internal fun onPageUnload(handler: () -> Unit): Unit =
     js("{ window.addEventListener('pagehide', (event) => { if (!event.persisted) handler(); }); }")

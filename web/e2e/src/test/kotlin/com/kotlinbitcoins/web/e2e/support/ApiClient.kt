@@ -47,6 +47,11 @@ class ApiClient(
         amount: String,
     ): Response = post("/me/purchases", """{"amount":${json(amount)}}""", token)
 
+    fun redeem(
+        token: String,
+        amount: String,
+    ): Response = post("/me/redemptions", """{"amount":${json(amount)}}""", token)
+
     fun statement(
         token: String,
         query: String = "",

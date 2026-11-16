@@ -11,6 +11,7 @@ import com.kotlinbitcoins.web.data.gateway.HttpAuthGateway
 import com.kotlinbitcoins.web.data.gateway.HttpInvestmentGateway
 import com.kotlinbitcoins.web.data.gateway.HttpProfileGateway
 import com.kotlinbitcoins.web.data.gateway.HttpQuoteGateway
+import com.kotlinbitcoins.web.data.gateway.HttpStatementGateway
 import com.kotlinbitcoins.web.data.http.ApiCall
 import com.kotlinbitcoins.web.data.http.HttpClientFactory
 import com.kotlinbitcoins.web.data.time.SystemClock
@@ -27,10 +28,12 @@ import com.kotlinbitcoins.web.state.port.InvestmentGateway
 import com.kotlinbitcoins.web.state.port.PageVisibility
 import com.kotlinbitcoins.web.state.port.ProfileGateway
 import com.kotlinbitcoins.web.state.port.QuoteGateway
+import com.kotlinbitcoins.web.state.port.StatementGateway
 import com.kotlinbitcoins.web.state.port.UserPreferences
 import com.kotlinbitcoins.web.state.purchase.PurchaseViewModel
 import com.kotlinbitcoins.web.state.redemption.RedemptionViewModel
 import com.kotlinbitcoins.web.state.session.SessionManager
+import com.kotlinbitcoins.web.state.statement.StatementViewModel
 import com.kotlinbitcoins.web.ui.shell.AppViewModels
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -62,6 +65,7 @@ class AppContainer {
     private val accountGateway: AccountGateway = HttpAccountGateway(apiCall)
     private val quoteGateway: QuoteGateway = HttpQuoteGateway(apiCall)
     private val investmentGateway: InvestmentGateway = HttpInvestmentGateway(apiCall)
+    private val statementGateway: StatementGateway = HttpStatementGateway(apiCall)
 
     val viewModels =
         AppViewModels(
@@ -105,6 +109,7 @@ class AppContainer {
                     texts = texts,
                 )
             },
+            statement = { route -> StatementViewModel(statementGateway, route) },
         )
 
     fun close() {

@@ -2,6 +2,8 @@ package com.kotlinbitcoins.web.e2e.auth
 
 import com.kotlinbitcoins.web.e2e.support.Axe
 import com.kotlinbitcoins.web.e2e.support.E2eBase
+import com.microsoft.playwright.Page
+import com.microsoft.playwright.options.AriaRole
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -127,13 +129,24 @@ class RegisterAndLoginE2ETest : E2eBase() {
             waitForLogin()
             login(email)
             waitForDashboard()
+            // A protected entry in the history: login → dashboard replaced the login, so this one is pushed.
+            ui.click(
+                page
+                    .getByRole(
+                        AriaRole.BUTTON,
+                        Page.GetByRoleOptions().setName("Meus investimentos").setExact(true),
+                    ).first(),
+            )
+            ui.waitForHash("#/investimentos")
 
+            // "Sair" replaces the current entry; the dashboard entry below it is still in the browser history.
             logout()
             assertThat(storedToken()).isNull()
             assertThat(ui.hash()).isEqualTo("#/entrar")
 
             page.goBack()
             page.waitForTimeout(SETTLE_MS)
+            // #/painel without a session goes through the gate (ui-routes, rule 4): the login, no account data.
             waitForLogin()
             assertThat(headingCount("Painel")).isZero()
             assertThat(page.title()).isEqualTo(LOGIN_TITLE)

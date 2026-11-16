@@ -30,7 +30,8 @@ fun FormTextField(
     onValueChange: (String) -> Unit,
     label: String,
     error: String?,
-    autofill: ContentType,
+    /** Null for fields with no autofill meaning (e.g. the dates of the statement filter). */
+    autofill: ContentType?,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Next,
@@ -62,7 +63,7 @@ fun FormTextField(
                 .fillMaxWidth()
                 .focusRequester(focusRequester)
                 .semantics {
-                    contentType = autofill
+                    if (autofill != null) contentType = autofill
                     if (error != null) error(error)
                 }.accessibleField(label, error),
     )
