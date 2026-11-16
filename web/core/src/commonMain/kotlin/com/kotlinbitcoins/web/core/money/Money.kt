@@ -13,6 +13,9 @@ class Money private constructor(
     /** "R$ 1.234,56", with a non-breaking space after the symbol (FR-036). */
     fun format(): String = BRL_PREFIX + PtBrNumberFormat.format(plain)
 
+    /** Text for the amount field, as [com.kotlinbitcoins.web.core.format.AmountInputParser] reads it: "1.234,56". */
+    fun toInputString(): String = PtBrNumberFormat.format(plain)
+
     /** Exact sum, used only for display totals (FR-029). */
     operator fun plus(other: Money): Money = Money(DecimalSupport.add(plain, other.plain, SCALE))
 

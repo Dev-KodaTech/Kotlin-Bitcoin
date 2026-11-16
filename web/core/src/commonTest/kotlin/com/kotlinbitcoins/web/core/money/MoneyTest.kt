@@ -39,6 +39,14 @@ class MoneyTest {
     }
 
     @Test
+    fun `the input text is pt-BR without the symbol and the parser reads it back`() {
+        listOf("800.00" to "800,00", "1234567.89" to "1.234.567,89", "0.01" to "0,01").forEach { (raw, input) ->
+            assertEquals(input, money(raw).toInputString())
+            assertEquals(money(raw), AmountInputParser.parse(input).successValue())
+        }
+    }
+
+    @Test
     fun `plus is exact`() {
         assertEquals(money("0.30"), money("0.10") + money("0.20"))
         assertEquals(money("99999999999.99"), money("99999999999.98") + money("0.01"))

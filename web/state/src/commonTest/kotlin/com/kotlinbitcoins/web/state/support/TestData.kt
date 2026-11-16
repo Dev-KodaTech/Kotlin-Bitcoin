@@ -3,9 +3,12 @@ package com.kotlinbitcoins.web.state.support
 import com.kotlinbitcoins.web.core.error.Outcome
 import com.kotlinbitcoins.web.core.model.DepositResult
 import com.kotlinbitcoins.web.core.model.InvestmentPosition
+import com.kotlinbitcoins.web.core.model.Liquidation
 import com.kotlinbitcoins.web.core.model.Position
 import com.kotlinbitcoins.web.core.model.PurchaseResult
 import com.kotlinbitcoins.web.core.model.Quote
+import com.kotlinbitcoins.web.core.model.RedemptionResult
+import com.kotlinbitcoins.web.core.model.Reinvestment
 import com.kotlinbitcoins.web.core.money.BtcAmount
 import com.kotlinbitcoins.web.core.money.Money
 import com.kotlinbitcoins.web.core.money.QuotePrice
@@ -81,4 +84,36 @@ fun purchaseResult(
         quote = QuotePrice.parseApi(quote).successValue(),
         purchasedAt = ApiInstant.parseApi(at).successValue(),
         balance = money(balance),
+    )
+
+/** A redemption of R$ 500,00 that liquidates one investment in total and one in part, with [withReinvestment]. */
+fun redemptionResult(
+    amount: String = "500.00",
+    balance: String = "900.00",
+    withReinvestment: Boolean = true,
+): RedemptionResult =
+    RedemptionResult(
+        requestId = "5c3e1a2b-4d5f-4a6b-8c7d-9e0f1a2b3c4d",
+        amount = money(amount),
+        btcSold = BtcAmount.parseApi("0.00125000").successValue(),
+        quote = QuotePrice.parseApi("400000.00").successValue(),
+        balance = money(balance),
+        occurredAt = ApiInstant.parseApi("2026-11-09T09:00:00-03:00").successValue(),
+        liquidations =
+            listOf(
+                Liquidation("investment-0", money("400.00"), BtcAmount.parseApi("0.00100000").successValue(), false),
+                Liquidation("investment-1", money("100.00"), BtcAmount.parseApi("0.00025000").successValue(), true),
+            ),
+        reinvestment =
+            if (withReinvestment) {
+                Reinvestment(
+                    investmentId = "investment-2",
+                    btcAmount = BtcAmount.parseApi("0.00025000").successValue(),
+                    investedAmount = money("100.00"),
+                    purchaseQuote = QuotePrice.parseApi("400000.00").successValue(),
+                    purchasedAt = ApiInstant.parseApi("2026-11-09T08:20:00-03:00").successValue(),
+                )
+            } else {
+                null
+            },
     )

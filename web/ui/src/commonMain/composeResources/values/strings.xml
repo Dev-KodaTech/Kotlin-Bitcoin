@@ -150,6 +150,42 @@
     <!-- Full sentence of a card, read at once (W-14): date, Brasília, invested, purchase quote, variation, current value -->
     <string name="investments_card_description">Investimento de %1$s %2$s: valor investido %3$s, cotação na compra %4$s, variação %5$s, valor bruto atual %6$s</string>
 
+    <!-- Redemption (US6) -->
+    <string name="estimate_buy_quote">Cotação de compra usada</string>
+    <string name="redemption_available">Disponível para resgate: %1$s</string>
+    <string name="redemption_available_notice">Valor estimado que muda com a cotação.</string>
+    <string name="redemption_available_quote">Baseado na cotação de compra de %1$s</string>
+    <string name="redemption_empty">Você não tem investimentos para resgatar.</string>
+    <string name="redemption_buy">Comprar bitcoin</string>
+    <string name="redemption_amount">Valor a resgatar</string>
+    <string name="redemption_redeem_all">Resgatar tudo</string>
+    <string name="redemption_review">Revisar resgate</string>
+    <string name="redemption_confirm">Confirmar resgate</string>
+    <string name="redemption_edit">Alterar valor</string>
+    <string name="redemption_estimate_notice">Valor estimado. A quantidade final usa a cotação do momento do resgate.</string>
+    <string name="redemption_redeem_all_warning">Se a cotação cair antes da confirmação, o valor pode ficar acima do disponível.</string>
+    <string name="redemption_redeemed">Valor resgatado</string>
+    <string name="redemption_btc_sold">BTC vendido</string>
+    <string name="redemption_quote_used">Cotação utilizada</string>
+    <string name="redemption_occurred_at">Data e hora</string>
+    <string name="redemption_new_balance">Novo saldo</string>
+    <string name="redemption_liquidations">Investimentos liquidados</string>
+    <string name="redemption_liquidation_total">Total</string>
+    <string name="redemption_liquidation_partial">Parcial</string>
+    <!-- One liquidation, read at once: kind (Total/Parcial), amount, BTC -->
+    <string name="redemption_liquidation_description">Liquidação %1$s: %2$s, %3$s</string>
+    <string name="redemption_reinvestment">Reinvestimento</string>
+    <string name="redemption_reinvestment_explanation">O BTC que sobrou do investimento parcialmente resgatado continua investido, com a cotação e a data da compra original.</string>
+    <string name="redemption_reinvestment_btc">BTC residual</string>
+    <string name="redemption_reinvestment_invested">Valor investido</string>
+    <string name="redemption_reinvestment_quote">Cotação original</string>
+    <string name="redemption_reinvestment_purchased_at">Data da compra original</string>
+    <string name="redemption_result_title">Resgate realizado</string>
+    <string name="redemption_new">Novo resgate</string>
+    <!-- Title suffixes of the review and result steps (contracts/ui-routes.md): "Revisar resgate · …" -->
+    <string name="page_redemption_review">Revisar resgate</string>
+    <string name="page_redemption_succeeded">Resgate realizado</string>
+
     <!-- Variation (FR-020): symbol and text besides the color -->
     <string name="variation_up">alta</string>
     <string name="variation_down">queda</string>
@@ -158,6 +194,7 @@
     <!-- Announcements (FR-047, FR-012) -->
     <string name="announce_deposit_succeeded">Depósito realizado</string>
     <string name="announce_purchase_succeeded">Compra realizada</string>
+    <string name="announce_redemption_succeeded">Resgate realizado</string>
     <string name="announce_quote_unavailable">Cotação indisponível no momento</string>
     <string name="announce_quote_restored">Cotação restabelecida</string>
     <string name="announce_refresh_paused">Atualização automática pausada</string>

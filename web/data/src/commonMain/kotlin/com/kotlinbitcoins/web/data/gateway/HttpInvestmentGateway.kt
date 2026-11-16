@@ -7,6 +7,7 @@ import com.kotlinbitcoins.web.core.error.flatMap
 import com.kotlinbitcoins.web.core.error.map
 import com.kotlinbitcoins.web.core.model.Position
 import com.kotlinbitcoins.web.core.model.PurchaseResult
+import com.kotlinbitcoins.web.core.model.RedemptionResult
 import com.kotlinbitcoins.web.core.money.BtcAmount
 import com.kotlinbitcoins.web.core.money.Money
 import com.kotlinbitcoins.web.core.money.QuotePrice
@@ -14,8 +15,10 @@ import com.kotlinbitcoins.web.core.time.ApiInstant
 import com.kotlinbitcoins.web.data.dto.AmountRequestDto
 import com.kotlinbitcoins.web.data.dto.PositionDto
 import com.kotlinbitcoins.web.data.dto.PurchaseResponseDto
+import com.kotlinbitcoins.web.data.dto.RedemptionResponseDto
 import com.kotlinbitcoins.web.data.http.ApiCall
 import com.kotlinbitcoins.web.data.mapper.PositionMapper
+import com.kotlinbitcoins.web.data.mapper.RedemptionMapper
 import com.kotlinbitcoins.web.state.port.InvestmentGateway
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
@@ -23,7 +26,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 
-/** [InvestmentGateway] over `GET /me/investments` and `POST /me/purchases`. Values are shown as received. */
+/**
+ * [InvestmentGateway] over `GET /me/investments`, `POST /me/purchases` and `POST /me/redemptions`. Values are shown as
+ * received.
+ */
 class HttpInvestmentGateway(
     private val apiCall: ApiCall,
 ) : InvestmentGateway {
@@ -37,6 +43,14 @@ class HttpInvestmentGateway(
         apiCall.financial(PurchaseResponseDto.serializer(), ::toPurchaseResult) {
             method = HttpMethod.Post
             url("me/purchases")
+            contentType(ContentType.Application.Json)
+            setBody(AmountRequestDto(amount.toApiString()))
+        }
+
+    override suspend fun redeem(amount: Money): Outcome<OperationError, RedemptionResult> =
+        apiCall.financial(RedemptionResponseDto.serializer(), RedemptionMapper::toRedemptionResult) {
+            method = HttpMethod.Post
+            url("me/redemptions")
             contentType(ContentType.Application.Json)
             setBody(AmountRequestDto(amount.toApiString()))
         }

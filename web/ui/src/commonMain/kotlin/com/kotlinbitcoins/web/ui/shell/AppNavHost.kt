@@ -98,24 +98,40 @@ fun AppNavHost(
                 navigator = AccountNavigator(navController, ports.announcer, loginBanner),
             )
 
-            val shell = Shell(navController, onLogout = sessionManager::logout)
-            protectedDestination<AppRoute.Dashboard>(sessionManager.state, shell) {
-                DashboardDestination(viewModels, onNavigate = shell::navigate)
-            }
-            protectedDestination<AppRoute.Deposit>(sessionManager.state, shell) {
-                DepositDestination(viewModels, ports, onNavigate = shell::navigate)
-            }
-            protectedDestination<AppRoute.Purchase>(sessionManager.state, shell) {
-                PurchaseDestination(viewModels, ports, onNavigate = shell::navigate)
-            }
-            protectedDestination<AppRoute.Investments>(sessionManager.state, shell) {
-                InvestmentsDestination(viewModels, onNavigate = shell::navigate)
-            }
-            protectedDestination<AppRoute.Redemption>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
-            protectedDestination<AppRoute.Statement>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
-            protectedDestination<AppRoute.Market>(sessionManager.state, shell) { PlaceholderScreen(it.pageName()) }
+            appDestinations(
+                sessionState = sessionManager.state,
+                shell = Shell(navController, onLogout = sessionManager::logout),
+                viewModels = viewModels,
+                ports = ports,
+            )
         }
     }
+}
+
+/** The destinations behind the session, inside the adaptive scaffold of [shell]. */
+private fun NavGraphBuilder.appDestinations(
+    sessionState: StateFlow<SessionState>,
+    shell: Shell,
+    viewModels: AppViewModels,
+    ports: ShellPorts,
+) {
+    protectedDestination<AppRoute.Dashboard>(sessionState, shell) {
+        DashboardDestination(viewModels, onNavigate = shell::navigate)
+    }
+    protectedDestination<AppRoute.Deposit>(sessionState, shell) {
+        DepositDestination(viewModels, ports, onNavigate = shell::navigate)
+    }
+    protectedDestination<AppRoute.Purchase>(sessionState, shell) {
+        PurchaseDestination(viewModels, ports, onNavigate = shell::navigate)
+    }
+    protectedDestination<AppRoute.Investments>(sessionState, shell) {
+        InvestmentsDestination(viewModels, onNavigate = shell::navigate)
+    }
+    protectedDestination<AppRoute.Redemption>(sessionState, shell) {
+        RedemptionDestination(viewModels, ports, onNavigate = shell::navigate)
+    }
+    protectedDestination<AppRoute.Statement>(sessionState, shell) { PlaceholderScreen(it.pageName()) }
+    protectedDestination<AppRoute.Market>(sessionState, shell) { PlaceholderScreen(it.pageName()) }
 }
 
 /** Navigation callbacks of the adaptive scaffold. */

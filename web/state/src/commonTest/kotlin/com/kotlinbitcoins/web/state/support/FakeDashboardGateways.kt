@@ -8,6 +8,7 @@ import com.kotlinbitcoins.web.core.model.Position
 import com.kotlinbitcoins.web.core.model.Profile
 import com.kotlinbitcoins.web.core.model.PurchaseResult
 import com.kotlinbitcoins.web.core.model.Quote
+import com.kotlinbitcoins.web.core.model.RedemptionResult
 import com.kotlinbitcoins.web.core.money.Money
 import com.kotlinbitcoins.web.state.port.AccountGateway
 import com.kotlinbitcoins.web.state.port.InvestmentGateway
@@ -15,8 +16,8 @@ import com.kotlinbitcoins.web.state.port.ProfileGateway
 import com.kotlinbitcoins.web.state.port.QuoteGateway
 
 /**
- * The four read gateways of the dashboard, the deposit of [AccountGateway] and the purchase of [InvestmentGateway],
- * answering with mutable results and recording the calls.
+ * The four read gateways of the dashboard, the deposit of [AccountGateway] and the purchase and redemption of
+ * [InvestmentGateway], answering with mutable results and recording the calls.
  */
 class FakeDashboardGateways :
     ProfileGateway,
@@ -29,12 +30,16 @@ class FakeDashboardGateways :
     var positionResult: Outcome<ApiError, Position> = Outcome.Success(position(total = "704.00", investments = 3))
     var depositResult: Outcome<OperationError, DepositResult> = Outcome.Success(depositResult())
     var purchaseResult: Outcome<OperationError, PurchaseResult> = Outcome.Success(purchaseResult())
+    var redemptionResult: Outcome<OperationError, RedemptionResult> = Outcome.Success(redemptionResult())
 
     /** Amounts received by [deposit], in order. */
     val deposits = mutableListOf<Money>()
 
     /** Amounts received by [purchase], in order. */
     val purchases = mutableListOf<Money>()
+
+    /** Amounts received by [redeem], in order. */
+    val redemptions = mutableListOf<Money>()
 
     var profileCalls = 0
         private set
@@ -58,4 +63,7 @@ class FakeDashboardGateways :
 
     override suspend fun purchase(amount: Money): Outcome<OperationError, PurchaseResult> =
         purchaseResult.also { purchases += amount }
+
+    override suspend fun redeem(amount: Money): Outcome<OperationError, RedemptionResult> =
+        redemptionResult.also { redemptions += amount }
 }

@@ -233,6 +233,22 @@
       "scenario": "service-unavailable@GET /me/investments"
     },
     {
+      "file": "success/me-redemptions-201-partial.json",
+      "method": "POST",
+      "path": "/me/redemptions",
+      "status": 201,
+      "scenario": "redemption-partial@POST /me/redemptions",
+      "realScenario": "redemptionPartial"
+    },
+    {
+      "file": "success/me-redemptions-201-full.json",
+      "method": "POST",
+      "path": "/me/redemptions",
+      "status": 201,
+      "scenario": "redemption-full@POST /me/redemptions",
+      "realScenario": "redemptionFull"
+    },
+    {
       "file": "problem/INVALID_AMOUNT.json",
       "method": "POST",
       "path": "/me/redemptions",

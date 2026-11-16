@@ -111,6 +111,22 @@ class WebClientFixturesContractTest : ApplicationTestBase() {
                 api.depositOk(ana, "100.00")
                 api.purchase(ana, "100.01")
             },
+            "redemptionPartial" to {
+                stubQuote(buy = "400000.00", sell = "400000.00")
+                val ana = api.register("Ana", ANA_EMAIL)
+                api.depositOk(ana, "1000.00")
+                api.purchaseOk(ana, "400.00")
+                api.purchaseOk(ana, "200.00")
+                // 500.00 liquidates the first investment (400.00) and 100.00 of the second: a reinvestment remains.
+                api.redeem(ana, "500.00")
+            },
+            "redemptionFull" to {
+                stubQuote(buy = "400000.00", sell = "400000.00")
+                val ana = api.register("Ana", ANA_EMAIL)
+                api.depositOk(ana, "1000.00")
+                api.purchaseOk(ana, "400.00")
+                api.redeem(ana, "400.00")
+            },
             "redemptionAboveAvailable" to {
                 stubQuote(buy = "400000.00", sell = "400000.00")
                 val ana = api.register("Ana", ANA_EMAIL)

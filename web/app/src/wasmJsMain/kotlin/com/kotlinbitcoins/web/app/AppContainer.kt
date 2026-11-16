@@ -29,6 +29,7 @@ import com.kotlinbitcoins.web.state.port.ProfileGateway
 import com.kotlinbitcoins.web.state.port.QuoteGateway
 import com.kotlinbitcoins.web.state.port.UserPreferences
 import com.kotlinbitcoins.web.state.purchase.PurchaseViewModel
+import com.kotlinbitcoins.web.state.redemption.RedemptionViewModel
 import com.kotlinbitcoins.web.state.session.SessionManager
 import com.kotlinbitcoins.web.ui.shell.AppViewModels
 import kotlinx.coroutines.MainScope
@@ -90,6 +91,14 @@ class AppContainer {
             },
             investments = { texts ->
                 InvestmentsViewModel(
+                    investmentGateway = investmentGateway,
+                    pageVisibility = pageVisibility,
+                    announcer = announcer,
+                    texts = texts,
+                )
+            },
+            redemption = { texts ->
+                RedemptionViewModel(
                     investmentGateway = investmentGateway,
                     pageVisibility = pageVisibility,
                     announcer = announcer,

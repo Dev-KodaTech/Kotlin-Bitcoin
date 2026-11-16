@@ -10,6 +10,8 @@ import com.kotlinbitcoins.web.state.investments.InvestmentsTexts
 import com.kotlinbitcoins.web.state.investments.InvestmentsViewModel
 import com.kotlinbitcoins.web.state.purchase.PurchaseTexts
 import com.kotlinbitcoins.web.state.purchase.PurchaseViewModel
+import com.kotlinbitcoins.web.state.redemption.RedemptionTexts
+import com.kotlinbitcoins.web.state.redemption.RedemptionViewModel
 import com.kotlinbitcoins.web.state.session.LoginBanner
 
 /**
@@ -24,4 +26,5 @@ class AppViewModels(
     val deposit: (texts: () -> DepositTexts) -> DepositViewModel,
     val purchase: (texts: () -> PurchaseTexts) -> PurchaseViewModel,
     val investments: (texts: () -> InvestmentsTexts) -> InvestmentsViewModel,
+    val redemption: (texts: () -> RedemptionTexts) -> RedemptionViewModel,
 )
