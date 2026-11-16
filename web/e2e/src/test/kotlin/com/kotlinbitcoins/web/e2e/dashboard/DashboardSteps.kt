@@ -93,7 +93,7 @@ fun Page.routeFixture(
 private const val HTTP_OK = 200
 
 /** web/contract-fixtures, found by walking up from the working directory. */
-private fun fixturesDir(): Path {
+internal fun fixturesDir(): Path {
     var directory: Path? = Path.of("").toAbsolutePath()
     while (directory != null) {
         val candidate = directory.resolve("contract-fixtures")

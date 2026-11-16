@@ -24,7 +24,6 @@
     <string name="processing">Processando…</string>
     <string name="brasilia_time">(horário de Brasília)</string>
     <string name="estimate_label">Estimativa</string>
-    <string name="under_construction">Esta página estará disponível em breve.</string>
     <string name="currency_prefix">R$</string>
 
     <!-- Page names: h1 and document.title (contracts/ui-routes.md) -->
@@ -231,4 +230,27 @@
     <string name="auto_refresh_paused">Atualização automática: pausada</string>
     <string name="auto_refresh_state_active">ativa</string>
     <string name="auto_refresh_state_paused">pausada</string>
+
+    <!-- Mercado (US8, FR-031..FR-035) -->
+    <string name="market_volume_title">Volume de hoje (%1$s)</string>
+    <string name="market_bought">BTC comprados</string>
+    <string name="market_sold">BTC vendidos</string>
+    <string name="market_buy_price">Preço de compra</string>
+    <string name="market_sell_price">Preço de venda</string>
+    <string name="market_chart_title">Últimas 24 horas (horário de Brasília)</string>
+    <string name="market_legend_buy_style">linha contínua com círculos</string>
+    <string name="market_legend_sell_style">linha tracejada com quadrados</string>
+    <string name="market_show_table">Ver dados em tabela</string>
+    <string name="market_hide_table">Ocultar tabela</string>
+    <string name="market_table_time">Horário</string>
+    <string name="market_no_record">sem registro</string>
+    <!-- One table row, read at once: date/time, then the prices or "sem registro" -->
+    <string name="market_row_description">%1$s: %2$s</string>
+    <string name="market_row_prices">compra %1$s, venda %2$s</string>
+    <!-- Textual alternative of the chart (FR-034): title, then one sentence per series -->
+    <string name="market_summary">Gráfico de preços das últimas 24 horas (horário de Brasília). %1$s %2$s</string>
+    <string name="market_series_summary">%1$s: mínimo %2$s, máximo %3$s, último %4$s às %5$s.</string>
+    <string name="market_empty">Sem dados de cotação nas últimas 24 horas.</string>
+    <string name="market_refresh">Atualizar</string>
+    <string name="market_refreshing">Atualizando…</string>
 </resources>

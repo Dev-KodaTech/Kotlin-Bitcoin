@@ -35,6 +35,26 @@ internal object DecimalSupport {
     }
 
     /**
+     * `min + (max − min) × step ÷ steps`, truncated (FLOOR) to [scale] decimals: the intermediate marks of the price
+     * axis of the chart (W-13). Exact decimal arithmetic, never floating point.
+     */
+    fun interpolateFloor(
+        min: String,
+        max: String,
+        step: Int,
+        steps: Int,
+        scale: Int,
+    ): String {
+        val mode = DecimalMode(DIVISION_PRECISION, RoundingMode.FLOOR, scale.toLong())
+        val offset =
+            decimal(max)
+                .subtract(decimal(min))
+                .multiply(BigDecimal.fromInt(step))
+                .divide(BigDecimal.fromInt(steps), mode)
+        return withScale(decimal(min).add(offset).toPlainString(), scale)
+    }
+
+    /**
      * Rewrites a plain decimal with exactly [scale] decimals and a canonical integer part. Extra decimals are
      * truncated, which never happens for the exact values of the value objects.
      */

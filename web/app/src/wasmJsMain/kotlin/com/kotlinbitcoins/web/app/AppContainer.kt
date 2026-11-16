@@ -9,6 +9,7 @@ import com.kotlinbitcoins.web.data.browser.MediaPreferences
 import com.kotlinbitcoins.web.data.gateway.HttpAccountGateway
 import com.kotlinbitcoins.web.data.gateway.HttpAuthGateway
 import com.kotlinbitcoins.web.data.gateway.HttpInvestmentGateway
+import com.kotlinbitcoins.web.data.gateway.HttpMarketGateway
 import com.kotlinbitcoins.web.data.gateway.HttpProfileGateway
 import com.kotlinbitcoins.web.data.gateway.HttpQuoteGateway
 import com.kotlinbitcoins.web.data.gateway.HttpStatementGateway
@@ -20,11 +21,13 @@ import com.kotlinbitcoins.web.state.account.RegisterViewModel
 import com.kotlinbitcoins.web.state.dashboard.DashboardViewModel
 import com.kotlinbitcoins.web.state.deposit.DepositViewModel
 import com.kotlinbitcoins.web.state.investments.InvestmentsViewModel
+import com.kotlinbitcoins.web.state.market.MarketViewModel
 import com.kotlinbitcoins.web.state.port.AccountGateway
 import com.kotlinbitcoins.web.state.port.Announcer
 import com.kotlinbitcoins.web.state.port.AuthGateway
 import com.kotlinbitcoins.web.state.port.DocumentTitle
 import com.kotlinbitcoins.web.state.port.InvestmentGateway
+import com.kotlinbitcoins.web.state.port.MarketGateway
 import com.kotlinbitcoins.web.state.port.PageVisibility
 import com.kotlinbitcoins.web.state.port.ProfileGateway
 import com.kotlinbitcoins.web.state.port.QuoteGateway
@@ -66,6 +69,7 @@ class AppContainer {
     private val quoteGateway: QuoteGateway = HttpQuoteGateway(apiCall)
     private val investmentGateway: InvestmentGateway = HttpInvestmentGateway(apiCall)
     private val statementGateway: StatementGateway = HttpStatementGateway(apiCall)
+    private val marketGateway: MarketGateway = HttpMarketGateway(apiCall)
 
     val viewModels =
         AppViewModels(
@@ -110,6 +114,7 @@ class AppContainer {
                 )
             },
             statement = { route -> StatementViewModel(statementGateway, route) },
+            market = { MarketViewModel(marketGateway, quoteGateway) },
         )
 
     fun close() {

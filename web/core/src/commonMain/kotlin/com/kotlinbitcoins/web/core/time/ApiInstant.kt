@@ -18,6 +18,9 @@ class ApiInstant private constructor(
     /** "09/11/2026 08:10:00", for the quote instant. */
     fun formatWithSeconds(): String = BrasiliaTime.DATE_TIME_WITH_SECONDS.format(toBrasilia())
 
+    /** "08:10", for the chart axis and its textual summary (the date is given by the context). */
+    fun formatTime(): String = BrasiliaTime.TIME.format(toBrasilia().time)
+
     override fun compareTo(other: ApiInstant): Int = instant.compareTo(other.instant)
 
     override fun equals(other: Any?): Boolean = other is ApiInstant && other.instant == instant

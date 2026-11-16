@@ -8,6 +8,7 @@ import com.kotlinbitcoins.web.core.model.Position
 import com.kotlinbitcoins.web.core.model.Profile
 import com.kotlinbitcoins.web.core.model.PurchaseResult
 import com.kotlinbitcoins.web.core.model.Quote
+import com.kotlinbitcoins.web.core.model.QuoteHistory
 import com.kotlinbitcoins.web.core.model.RedemptionResult
 import com.kotlinbitcoins.web.core.money.Money
 import com.kotlinbitcoins.web.state.port.AccountGateway
@@ -58,6 +59,8 @@ class FakeDashboardGateways :
         depositResult.also { deposits += amount }
 
     override suspend fun current(): Outcome<ApiError, Quote> = quoteResult.also { quoteCalls++ }
+
+    override suspend fun history(): Outcome<ApiError, QuoteHistory> = Outcome.Success(QuoteHistory(emptyList()))
 
     override suspend fun position(): Outcome<ApiError, Position> = positionResult.also { positionCalls++ }
 

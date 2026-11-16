@@ -29,6 +29,10 @@ tasks.register<Test>("e2eTest") {
     systemProperty("e2e.baseUrl", findProperty("baseUrl") ?: "http://localhost:8081")
     systemProperty("e2e.apiUrl", findProperty("apiUrl") ?: "http://localhost:8081/api/v1")
     systemProperty("e2e.browsers", findProperty("browsers") ?: "chromium,firefox,webkit")
+    // Screenshot references (W-13 chart): -PupdateSnapshots=true writes them instead of comparing.
+    systemProperty("e2e.updateSnapshots", findProperty("updateSnapshots") ?: "false")
+    val snapshotsDir = layout.projectDirectory.dir("src/test/resources/snapshots")
+    systemProperty("e2e.snapshotsDir", snapshotsDir.asFile.path)
     // The result depends on the external stack, never on the inputs alone.
     outputs.upToDateWhen { false }
 }

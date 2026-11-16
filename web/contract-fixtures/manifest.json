@@ -321,6 +321,29 @@
       "path": "/market/daily-volume",
       "status": 401,
       "scenario": "unauthorized@GET /market/daily-volume"
+    },
+    {
+      "file": "success/market-daily-volume-200.json",
+      "method": "GET",
+      "path": "/market/daily-volume",
+      "status": 200,
+      "scenario": "daily-volume-ok@GET /market/daily-volume",
+      "realScenario": "dailyVolume"
+    },
+    {
+      "file": "success/quotes-history-200-with-gap.json",
+      "method": "GET",
+      "path": "/quotes/history",
+      "status": 200,
+      "scenario": "history-with-gap@GET /quotes/history",
+      "realScenario": "quoteHistory"
+    },
+    {
+      "file": "success/quotes-history-200-empty.json",
+      "method": "GET",
+      "path": "/quotes/history",
+      "status": 200,
+      "scenario": "history-empty@GET /quotes/history"
     }
   ]
 }

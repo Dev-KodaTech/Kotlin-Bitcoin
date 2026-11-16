@@ -38,7 +38,7 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * Navigation of the app (W-04): one destination per [AppRoute], guarded by [SessionGate] on every destination
  * change, on every session state change and on every [SessionEvent]; `document.title` per destination; focus on the
- * h1 of each page (PageHeading). Destinations of user stories not implemented yet show a placeholder.
+ * h1 of each page (PageHeading).
  *
  * Screens receive their ViewModels from [viewModels], built by :app; :ui never knows :data.
  */
@@ -133,7 +133,7 @@ private fun NavGraphBuilder.appDestinations(
     protectedDestination<AppRoute.Statement>(sessionState, shell) { route ->
         StatementDestination(viewModels, route, onReplace = shell.navController::replace)
     }
-    protectedDestination<AppRoute.Market>(sessionState, shell) { PlaceholderScreen(it.pageName()) }
+    protectedDestination<AppRoute.Market>(sessionState, shell) { MarketDestination(viewModels) }
 }
 
 /** Navigation callbacks of the adaptive scaffold. */

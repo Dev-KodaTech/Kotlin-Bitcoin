@@ -2,6 +2,7 @@ package com.kotlinbitcoins.web.core.time
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
@@ -24,6 +25,14 @@ object BrasiliaTime {
             monthNumber()
             char('/')
             year()
+        }
+
+    /** HH:mm */
+    internal val TIME =
+        LocalTime.Format {
+            hour()
+            char(':')
+            minute()
         }
 
     /** dd/MM/yyyy HH:mm */

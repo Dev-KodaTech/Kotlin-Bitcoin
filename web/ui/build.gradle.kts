@@ -38,6 +38,10 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
         }
+        wasmJsTest.dependencies {
+            // Named time zones for kotlinx-datetime on wasmJs (W-07): the chart marks are in Brasília time.
+            implementation(npm("@js-joda/timezone", libs.versions.jsJodaTimezone.get()))
+        }
     }
 }
 

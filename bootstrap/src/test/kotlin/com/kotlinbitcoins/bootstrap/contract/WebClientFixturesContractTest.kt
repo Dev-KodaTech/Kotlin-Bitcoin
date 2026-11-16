@@ -8,12 +8,14 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.kotlinbitcoins.bootstrap.support.ApplicationTestBase
+import com.kotlinbitcoins.infrastructure.scheduling.CaptureQuoteSnapshotJob
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.get
@@ -22,6 +24,7 @@ import org.yaml.snakeyaml.Yaml
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
+import java.time.Instant
 
 /**
  * The JSON fixtures the web client tests with (`web/contract-fixtures`, listed in its `manifest.json`) must follow the
@@ -30,6 +33,9 @@ import java.time.Duration
  * Each fixture is a dynamic test. Entries with `pendingAmendment` are skipped until the contract has the operation.
  */
 class WebClientFixturesContractTest : ApplicationTestBase() {
+    @Autowired
+    private lateinit var captureJob: CaptureQuoteSnapshotJob
+
     private val mapper = ObjectMapper()
     private val fixtures: ClientFixtures by lazy { ClientFixtures.load(mapper) }
     private val contract: OpenApiContract by lazy { OpenApiContract(fixtures.contractFile, mapper) }
@@ -149,6 +155,27 @@ class WebClientFixturesContractTest : ApplicationTestBase() {
             },
             "statementInvalidRange" to {
                 api.get("/api/v1/me/statement?from=2026-11-10&to=2026-11-01", api.register("Ana", ANA_EMAIL))
+            },
+            "dailyVolume" to {
+                stubQuote(buy = "400000.00", sell = "400000.00")
+                val ana = api.register("Ana", ANA_EMAIL)
+                api.depositOk(ana, "1000.00")
+                api.purchaseOk(ana, "400.00")
+                api.redeemOk(ana, "200.00")
+                api.get("/api/v1/market/daily-volume", ana)
+            },
+            "quoteHistory" to {
+                // Captures in two slots with the source down in the slot between them: two points and a gap.
+                clock.set(Instant.parse("2026-11-09T11:10:00Z"))
+                stubQuote(buy = "399000.00", sell = "400000.00")
+                captureJob.run()
+                quoteSourceDown()
+                clock.set(Instant.parse("2026-11-09T11:20:00Z"))
+                captureJob.run()
+                clock.set(Instant.parse("2026-11-09T11:30:00Z"))
+                stubQuote(buy = "399500.50", sell = "400500.50")
+                captureJob.run()
+                api.get("/api/v1/quotes/history", api.register("Ana", ANA_EMAIL))
             },
         )
 

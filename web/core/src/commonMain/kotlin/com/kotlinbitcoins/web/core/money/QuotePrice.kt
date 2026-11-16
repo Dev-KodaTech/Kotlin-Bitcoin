@@ -28,6 +28,33 @@ class QuotePrice private constructor(
         private const val MIN_DECIMALS = 2
         private val API_PATTERN = Regex("""^\d+(\.\d{1,8})?$""")
 
+        /**
+         * A mark of the price axis between [min] and [max] (`step` of `steps`), truncated to 2 decimals; null when
+         * the truncation reaches zero (a price is always > 0). The ends are [min] and [max] themselves.
+         */
+        internal fun axisMark(
+            min: QuotePrice,
+            max: QuotePrice,
+            step: Int,
+            steps: Int,
+        ): QuotePrice? =
+            when (step) {
+                0 -> {
+                    min
+                }
+
+                steps -> {
+                    max
+                }
+
+                else -> {
+                    DecimalSupport
+                        .interpolateFloor(min.plain, max.plain, step, steps, MIN_DECIMALS)
+                        .takeUnless(DecimalSupport::isZero)
+                        ?.let(::QuotePrice)
+                }
+            }
+
         fun parseApi(raw: String): Outcome<ApiError, QuotePrice> {
             if (!API_PATTERN.matches(raw) || DecimalSupport.isZero(raw)) return Outcome.Failure(ApiError.Unexpected)
             val integerPart = DecimalSupport.canonicalInteger(raw.substringBefore('.'))

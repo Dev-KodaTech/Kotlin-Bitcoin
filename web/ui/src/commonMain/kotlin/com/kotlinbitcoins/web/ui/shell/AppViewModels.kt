@@ -9,6 +9,7 @@ import com.kotlinbitcoins.web.state.deposit.DepositTexts
 import com.kotlinbitcoins.web.state.deposit.DepositViewModel
 import com.kotlinbitcoins.web.state.investments.InvestmentsTexts
 import com.kotlinbitcoins.web.state.investments.InvestmentsViewModel
+import com.kotlinbitcoins.web.state.market.MarketViewModel
 import com.kotlinbitcoins.web.state.purchase.PurchaseTexts
 import com.kotlinbitcoins.web.state.purchase.PurchaseViewModel
 import com.kotlinbitcoins.web.state.redemption.RedemptionTexts
@@ -32,4 +33,5 @@ class AppViewModels(
     val redemption: (texts: () -> RedemptionTexts) -> RedemptionViewModel,
     /** The filter comes from the route (`de`/`ate`), which is the only representation of it (FR-027). */
     val statement: (route: AppRoute.Statement) -> StatementViewModel,
+    val market: () -> MarketViewModel,
 )
