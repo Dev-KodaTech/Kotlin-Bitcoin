@@ -80,6 +80,7 @@ O cliente autenticado consulta o saldo disponível em reais da sua conta.
 
 1. **Given** uma conta nova, **When** o cliente consulta o saldo, **Then** recebe R$ 0,00.
 2. **Given** depósitos, compras e resgates realizados, **When** o cliente consulta o saldo, **Then** o valor corresponde exatamente a depósitos − compras + resgates.
+3. **Given** um cliente autenticado, **When** consulta o próprio perfil, **Then** recebe apenas o nome e o e-mail da conta do token, sem identificador, saldo, senha ou qualquer dado de outro cliente (FR-036; emenda `GET /me`, pedida pela feature 002-frontend-web, FR-005 dela).
 
 ---
 
@@ -296,6 +297,7 @@ O cliente autenticado consulta os preços de compra e de venda do bitcoin nas ú
 - **FR-034**: Compras, resgates (incluindo liquidações e reinvestimentos) e depósitos MUST ser atômicos e seguros sob concorrência: ou todos os seus efeitos ocorrem, ou nenhum.
 - **FR-034a**: O fuso horário de referência do negócio MUST ser o de Brasília (America/Sao_Paulo): ele define o "dia corrente" do volume diário (00:00:00 a 23:59:59 local), o período padrão de 90 dias e os limites das datas informadas no extrato (data inicial a partir de 00:00:00 e data final até 23:59:59, horário local). Todo instante devolvido ao cliente MUST estar em ISO-8601 com deslocamento explícito (ex.: `2026-11-09T08:10:00-03:00`).
 - **FR-035**: Erros previsíveis MUST ter respostas distintas, estáveis e previsíveis, no mínimo: dados de entrada inválidos, valor inválido, e-mail já cadastrado, credenciais inválidas, token ausente ou inválido, saldo insuficiente, valor de resgate acima do disponível, intervalo de datas inválido e cotação indisponível. Respostas de erro MUST NOT expor detalhes internos.
+- **FR-036**: O sistema MUST permitir ao cliente autenticado consultar o próprio perfil (nome e e-mail da conta do token). A resposta MUST NOT conter identificador, saldo, credencial ou qualquer outro dado sensível, nem aceitar identificador de outro cliente (FR-033). Token ausente ou inválido MUST resultar em erro de autenticação (FR-006). *(Emenda `GET /me`, 2026-11-15, pedida pela 002-frontend-web.)*
 
 ### Key Entities
 

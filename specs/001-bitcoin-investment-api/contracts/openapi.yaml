@@ -65,6 +65,18 @@ paths:
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/InvalidCredentials' }
 
+  /me:
+    get:
+      tags: [Contas]
+      summary: Consultar o perfil do cliente autenticado (US3, FR-036; FR-005 da 002-frontend-web)
+      responses:
+        '200':
+          description: Nome e e-mail da conta do token, sem dados sensíveis e sem identificador de outro cliente
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProfileResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
   /me/balance:
     get:
       tags: [Saldo]
@@ -274,6 +286,12 @@ components:
       required: [amount]
       properties:
         amount: { $ref: '#/components/schemas/MoneyInput' }
+    ProfileResponse:
+      type: object
+      required: [name, email]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
     BalanceResponse:
       type: object
       required: [balance]

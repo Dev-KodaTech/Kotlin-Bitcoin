@@ -1,0 +1,9 @@
+{
+  "type": "about:blank",
+  "title": "Not Found",
+  "status": 404,
+  "code": "NOT_FOUND",
+  "detail": "Recurso não encontrado.",
+  "instance": "/api/v1/rota-inexistente",
+  "correlationId": "6e4c2a08-9b7d-4f53-a1e9-c7b5a3918f6d"
+}

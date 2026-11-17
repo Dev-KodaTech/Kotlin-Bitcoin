@@ -1,0 +1,18 @@
+# Applied on top of detekt.yml only to :ui (research.md W-06).
+# Compose uses Float freely for dimensions, weights and colors, but converting a financial value
+# (via toPlainString()) to Float is confined to the chart pixel geometry.
+# The list replaces the one of detekt.yml, so the general entries are repeated here.
+
+style:
+  ForbiddenMethodCall:
+    active: true
+    excludes: ['**/ui/chart/ChartGeometry.kt']
+    methods:
+      - reason: 'Locale-dependent formatting; use the pt-BR formatters of :core/format.'
+        value: 'kotlin.text.format'
+      - reason: 'No console output: it could leak the session token (FR-008).'
+        value: 'kotlin.io.println'
+      - reason: 'A financial value becomes Float only in ui/chart/ChartGeometry.kt (pixel geometry, W-13).'
+        value: 'kotlin.text.toFloat'
+      - reason: 'A financial value becomes Float only in ui/chart/ChartGeometry.kt (pixel geometry, W-13).'
+        value: 'kotlin.text.toDouble'

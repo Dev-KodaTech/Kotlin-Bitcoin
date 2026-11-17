@@ -1,0 +1,15 @@
+{
+  "type": "about:blank",
+  "title": "Bad Request",
+  "status": 400,
+  "code": "VALIDATION_ERROR",
+  "detail": "Dados de entrada inválidos.",
+  "instance": "/api/v1/accounts",
+  "correlationId": "5b0e9c1a-3f2d-4c8e-9a71-2d4f6b8e0c13",
+  "errors": [
+    {
+      "field": "email",
+      "message": "E-mail em formato inválido."
+    }
+  ]
+}

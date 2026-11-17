@@ -1,0 +1,17 @@
+{
+  "requestId": "6d4f2b3c-5e6a-4b7c-9d8e-0f1a2b3c4d5e",
+  "amount": "400.00",
+  "btcSold": "0.00100000",
+  "quote": "400000.00",
+  "balance": "1000.00",
+  "occurredAt": "2026-11-09T09:00:00-03:00",
+  "liquidations": [
+    {
+      "investmentId": "0b6f5c1e-2a3d-4e5f-8a9b-1c2d3e4f5a01",
+      "amount": "400.00",
+      "btcAmount": "0.00100000",
+      "isPartial": false
+    }
+  ],
+  "reinvestment": null
+}

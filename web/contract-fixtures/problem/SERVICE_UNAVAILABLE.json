@@ -1,0 +1,9 @@
+{
+  "type": "about:blank",
+  "title": "Service Unavailable",
+  "status": 503,
+  "code": "SERVICE_UNAVAILABLE",
+  "detail": "Serviço temporariamente indisponível. Tente novamente em instantes.",
+  "instance": "/api/v1/me/purchases",
+  "correlationId": "a3c5e7f9-1b3d-4f57-89ab-cdef01234567"
+}

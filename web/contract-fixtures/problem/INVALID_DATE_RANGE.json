@@ -1,0 +1,9 @@
+{
+  "type": "about:blank",
+  "title": "Unprocessable Content",
+  "status": 422,
+  "code": "INVALID_DATE_RANGE",
+  "detail": "Intervalo de datas inválido.",
+  "instance": "/api/v1/me/statement",
+  "correlationId": "c1e3a5b7-d9f1-4b3d-95e7-a9c1e3f5b7d9"
+}

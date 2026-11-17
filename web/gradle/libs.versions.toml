@@ -1,0 +1,70 @@
+# Versions fixed by specs/002-frontend-web/research.md W-01. Exact versions only, no ranges.
+[versions]
+kotlin = "2.4.21"
+compose-multiplatform = "1.12.2"
+compose-material3 = "1.9.0"
+navigation-compose = "2.10.0"
+lifecycle = "2.11.0"
+ktor = "3.6.1"
+kotlinx-serialization = "1.13.0"
+kotlinx-coroutines = "1.11.0"
+kotlinx-datetime = "0.8.0"
+bignum = "0.3.10"
+playwright = "1.64.0"
+axe-core-playwright = "4.14.0"
+# npm package that gives kotlinx-datetime the named time zones on wasmJs (W-07).
+jsJodaTimezone = "3.2.1"
+
+# Same as the API build (gradle/libs.versions.toml at the repository root).
+junit = "5.14.4"
+assertj = "3.27.7"
+ktlint-gradle = "14.2.0"
+ktlint = "1.8.0"
+detekt = "1.23.8"
+# Kotlin version that detekt 1.23.8 was compiled against; its classpath must stay on it.
+detekt-kotlin = "2.0.21"
+
+[libraries]
+# Compose Multiplatform (explicit coordinates instead of the deprecated `compose.*` accessors)
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
+lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+
+# Ktor client
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+
+# kotlinx
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+
+# Exact decimal (only inside :core/money, W-06)
+bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "bignum" }
+
+# E2E (JVM)
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+playwright = { module = "com.microsoft.playwright:playwright", version.ref = "playwright" }
+axe-core-playwright = { module = "com.deque.html.axe-core:playwright", version.ref = "axe-core-playwright" }
+
+[plugins]
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

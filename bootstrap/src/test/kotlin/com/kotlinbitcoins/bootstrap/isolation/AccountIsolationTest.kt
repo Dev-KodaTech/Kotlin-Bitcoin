@@ -36,6 +36,18 @@ class AccountIsolationTest : ApplicationTestBase() {
     }
 
     @Test
+    fun `profile shows only the name and e-mail of the owner of the token`() {
+        val anaProfile = api.json("/api/v1/me", ana)
+        val biaProfile = api.json("/api/v1/me", bia)
+
+        assertThat(anaProfile["name"].asText()).isEqualTo("Ana Souza")
+        assertThat(anaProfile["email"].asText()).isEqualTo("ana@example.com")
+        assertThat(biaProfile["name"].asText()).isEqualTo("Bia Lima")
+        assertThat(biaProfile["email"].asText()).isEqualTo("bia@example.com")
+        assertThat(anaProfile.fieldNames().asSequence().toList()).containsExactlyInAnyOrder("name", "email")
+    }
+
+    @Test
     fun `investments show only those of the owner of the token`() {
         clock.advance(Duration.ofSeconds(11))
 
@@ -82,7 +94,7 @@ class AccountIsolationTest : ApplicationTestBase() {
     fun `a token whose subject is an account that does not exist is 401 on every protected route`() {
         val ghost = UUID.randomUUID()
 
-        listOf("/api/v1/me/balance", "/api/v1/me/investments", "/api/v1/me/statement").forEach { path ->
+        listOf("/api/v1/me", "/api/v1/me/balance", "/api/v1/me/investments", "/api/v1/me/statement").forEach { path ->
             api.get(path, ghost).andExpect {
                 status { isUnauthorized() }
                 jsonPath("$.code") { value("UNAUTHORIZED") }

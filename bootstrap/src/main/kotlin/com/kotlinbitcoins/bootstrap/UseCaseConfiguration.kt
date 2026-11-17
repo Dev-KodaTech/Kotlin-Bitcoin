@@ -3,6 +3,7 @@ package com.kotlinbitcoins.bootstrap
 import com.kotlinbitcoins.application.account.AuthenticateAccount
 import com.kotlinbitcoins.application.account.DepositFunds
 import com.kotlinbitcoins.application.account.GetBalance
+import com.kotlinbitcoins.application.account.GetProfile
 import com.kotlinbitcoins.application.account.RegisterAccount
 import com.kotlinbitcoins.application.investment.GetInvestmentPosition
 import com.kotlinbitcoins.application.investment.PurchaseBitcoin
@@ -73,6 +74,11 @@ class UseCaseConfiguration {
 
     @Bean
     fun getBalance(accounts: AccountRepository): GetBalance = GetBalance(accounts)
+
+    // FR-036 — profile of the authenticated account (amendment GET /me, asked by 002-frontend-web)
+
+    @Bean
+    fun getProfile(accounts: AccountRepository): GetProfile = GetProfile(accounts)
 
     // US4 — current quote
 

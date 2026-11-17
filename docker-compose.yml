@@ -84,6 +84,20 @@ services:
       timeout: 5s
       retries: 10
 
+  # Web client (specs/002-frontend-web, research.md W-15): bundle + same-origin proxy of /api/ to the API's nginx.
+  web:
+    build: ./web
+    ports:
+      - "8081:8080"
+    depends_on:
+      nginx:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/index.html || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Local stand-in for the Mercado Bitcoin ticker (quickstart §3). Only with `--profile stub`.
   quote-stub:
     image: wiremock/wiremock:3.13.2

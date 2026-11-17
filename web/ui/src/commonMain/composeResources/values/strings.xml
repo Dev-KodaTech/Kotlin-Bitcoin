@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Every visible or announced text of the client (pt-BR, FR-048). Code stays in English. -->
+<resources>
+    <string name="app_name">Investimento em Bitcoins</string>
+
+    <!-- Navigation (FR-009) -->
+    <string name="nav_dashboard">Painel</string>
+    <string name="nav_deposit">Depositar</string>
+    <string name="nav_purchase">Comprar</string>
+    <string name="nav_investments">Meus investimentos</string>
+    <string name="nav_redemption">Resgatar</string>
+    <string name="nav_statement">Extrato</string>
+    <string name="nav_market">Mercado</string>
+    <string name="nav_logout">Sair</string>
+    <string name="nav_menu">Menu</string>
+    <string name="nav_close_menu">Fechar menu</string>
+    <string name="nav_main">Navegação principal</string>
+    <!-- L6 of W-00: the mirror does not expose the selected state, so it goes into the name. -->
+    <string name="nav_current_page">%1$s, página atual</string>
+
+    <!-- Shared -->
+    <string name="loading">Carregando…</string>
+    <string name="retry">Tentar de novo</string>
+    <string name="processing">Processando…</string>
+    <string name="brasilia_time">(horário de Brasília)</string>
+    <string name="estimate_label">Estimativa</string>
+    <string name="currency_prefix">R$</string>
+
+    <!-- Page names: h1 and document.title (contracts/ui-routes.md) -->
+    <string name="page_title_format">%1$s · Investimento em Bitcoins</string>
+    <string name="page_login">Entrar</string>
+    <string name="page_register">Criar conta</string>
+    <string name="page_dashboard">Painel</string>
+    <string name="page_deposit">Depositar</string>
+    <string name="page_purchase">Comprar bitcoin</string>
+    <string name="page_investments">Meus investimentos</string>
+    <string name="page_redemption">Resgatar</string>
+    <string name="page_statement">Extrato</string>
+    <string name="page_market">Mercado</string>
+
+    <!-- Login banners (contracts/ui-routes.md) -->
+    <string name="banner_session_expired">Sua sessão expirou. Entre novamente para continuar.</string>
+    <string name="banner_account_created">Conta criada. Entre com seu e-mail e senha.</string>
+
+    <!-- Registration and login (US1) -->
+    <string name="field_name">Nome</string>
+    <string name="field_email">E-mail</string>
+    <string name="field_password">Senha</string>
+    <string name="password_hint">Use pelo menos 8 caracteres.</string>
+    <string name="register_submit">Criar conta</string>
+    <string name="register_has_account">Já tem uma conta?</string>
+    <string name="login_submit">Entrar</string>
+    <string name="login_no_account">Ainda não tem uma conta?</string>
+    <string name="link_login">Entrar</string>
+    <string name="link_register">Criar conta</string>
+
+    <!-- Errors (contracts/error-messages.md, FR-040/FR-041) -->
+    <string name="error_validation_summary">Revise os campos destacados.</string>
+    <string name="error_invalid_amount">Informe um valor maior que zero, com no máximo 2 casas decimais.</string>
+    <string name="error_invalid_amount_satoshi">O valor também pode ser pequeno demais para comprar 1 satoshi (0,00000001 BTC).</string>
+    <string name="error_email_in_use">Este e-mail já está cadastrado.</string>
+    <string name="error_invalid_credentials">E-mail ou senha incorretos.</string>
+    <string name="error_session_expired">Sua sessão expirou. Entre novamente para continuar.</string>
+    <string name="error_insufficient_balance">Saldo insuficiente para esta compra.</string>
+    <string name="error_available_balance">Saldo disponível: %1$s</string>
+    <string name="error_redemption_exceeds">O valor solicitado é maior que o disponível para resgate.</string>
+    <string name="error_available_now">Disponível agora: %1$s</string>
+    <string name="error_invalid_date_range">Intervalo de datas inválido. A data inicial deve ser igual ou anterior à final.</string>
+    <string name="error_quote_unavailable">Cotação indisponível no momento. Tente novamente em instantes.</string>
+    <string name="error_service_unavailable">Serviço temporariamente indisponível.</string>
+    <string name="error_unexpected">Algo deu errado. Tente novamente.</string>
+    <string name="error_no_connection">Não foi possível conectar. Verifique sua internet e tente novamente.</string>
+    <string name="error_uncertain">Não foi possível confirmar se a operação foi concluída. Confira seu saldo e o extrato antes de tentar de novo.</string>
+    <string name="error_uncertain_balance_link">Ver saldo</string>
+    <string name="error_uncertain_statement_link">Ver extrato</string>
+
+    <!-- Local validations (contracts/error-messages.md, W-11) -->
+    <string name="error_name_required">Informe seu nome.</string>
+    <string name="error_name_too_long">O nome pode ter no máximo 200 caracteres.</string>
+    <string name="error_email_invalid">Informe um e-mail válido.</string>
+    <string name="error_password_too_short">A senha deve ter pelo menos 8 caracteres.</string>
+    <string name="error_password_too_long">A senha é longa demais. Use menos caracteres ou caracteres mais simples.</string>
+
+    <!-- Quote (FR-013) -->
+    <string name="quote_title">Cotação do bitcoin</string>
+    <string name="quote_buy">Cotação de compra</string>
+    <string name="quote_sell">Cotação de venda</string>
+    <string name="quote_at">Atualizada em %1$s %2$s</string>
+    <string name="quote_unavailable">Cotação indisponível no momento</string>
+
+    <!-- Dashboard (US2) -->
+    <string name="dashboard_greeting_named">Olá, %1$s</string>
+    <string name="dashboard_greeting_anonymous">Olá!</string>
+    <string name="dashboard_balance">Saldo</string>
+    <string name="dashboard_position_total">Valor atual dos investimentos</string>
+    <string name="dashboard_depends_on_quote">Depende da cotação</string>
+    <string name="dashboard_no_investments">Você ainda não tem investimentos. Faça sua primeira compra.</string>
+    <string name="dashboard_shortcuts">Atalhos</string>
+    <string name="dashboard_shortcut_deposit">Depositar</string>
+    <string name="dashboard_shortcut_purchase">Comprar</string>
+    <string name="dashboard_shortcut_redemption">Resgatar</string>
+
+    <!-- Deposit (US3) -->
+    <string name="deposit_amount">Valor do depósito</string>
+    <string name="deposit_submit">Depositar</string>
+    <string name="deposit_result_title">Depósito de %1$s realizado</string>
+    <string name="deposit_new_balance">Novo saldo</string>
+    <string name="deposit_occurred_at">Data e hora</string>
+    <string name="deposit_new">Novo depósito</string>
+    <!-- Title suffix of the result step (contracts/ui-routes.md): "Depósito realizado · …" -->
+    <string name="page_deposit_succeeded">Depósito realizado</string>
+
+    <!-- Estimate (FR-015, FR-023): always labeled "Estimativa" -->
+    <string name="estimate_value">Estimativa: %1$s</string>
+    <string name="estimate_sell_quote">Cotação de venda usada</string>
+    <string name="estimate_quote_at">Cotação de %1$s %2$s</string>
+
+    <!-- Purchase (US4) -->
+    <string name="purchase_amount">Valor a investir</string>
+    <string name="purchase_review">Revisar compra</string>
+    <string name="purchase_confirm">Confirmar compra</string>
+    <string name="purchase_edit">Alterar valor</string>
+    <string name="purchase_estimate_notice">Valor estimado. A quantidade final usa a cotação do momento da compra.</string>
+    <string name="purchase_below_one_satoshi">O valor provavelmente é pequeno demais para comprar a menor fração de bitcoin (0,00000001 BTC).</string>
+    <string name="purchase_invested">Valor investido</string>
+    <string name="purchase_btc">BTC comprado</string>
+    <string name="purchase_quote_used">Cotação utilizada</string>
+    <string name="purchase_result_title">Compra realizada</string>
+    <string name="purchase_available_balance">Saldo disponível</string>
+    <string name="purchase_purchased_at">Data e hora</string>
+    <string name="purchase_new_balance">Novo saldo</string>
+    <string name="purchase_new">Nova compra</string>
+    <string name="purchase_deposit">Depositar</string>
+    <!-- Title suffixes of the review and result steps (contracts/ui-routes.md): "Revisar compra · …" -->
+    <string name="page_purchase_review">Revisar compra</string>
+    <string name="page_purchase_succeeded">Compra realizada</string>
+
+    <!-- Investments (US5) -->
+    <string name="investments_purchased_at">Data da compra</string>
+    <string name="investments_invested">Valor investido</string>
+    <string name="investments_purchase_quote">Cotação na compra</string>
+    <string name="investments_variation">Variação</string>
+    <string name="investments_current_value">Valor bruto atual</string>
+    <string name="investments_total">Valor atual total</string>
+    <string name="investments_reference_quote">Cotação de referência</string>
+    <string name="investments_list">Investimentos ativos</string>
+    <string name="investments_empty">Você não tem investimentos ativos.</string>
+    <string name="investments_buy">Comprar bitcoin</string>
+    <!-- Full sentence of a card, read at once (W-14): date, Brasília, invested, purchase quote, variation, current value -->
+    <string name="investments_card_description">Investimento de %1$s %2$s: valor investido %3$s, cotação na compra %4$s, variação %5$s, valor bruto atual %6$s</string>
+
+    <!-- Redemption (US6) -->
+    <string name="estimate_buy_quote">Cotação de compra usada</string>
+    <string name="redemption_available">Disponível para resgate: %1$s</string>
+    <string name="redemption_available_notice">Valor estimado que muda com a cotação.</string>
+    <string name="redemption_available_quote">Baseado na cotação de compra de %1$s</string>
+    <string name="redemption_empty">Você não tem investimentos para resgatar.</string>
+    <string name="redemption_buy">Comprar bitcoin</string>
+    <string name="redemption_amount">Valor a resgatar</string>
+    <string name="redemption_redeem_all">Resgatar tudo</string>
+    <string name="redemption_review">Revisar resgate</string>
+    <string name="redemption_confirm">Confirmar resgate</string>
+    <string name="redemption_edit">Alterar valor</string>
+    <string name="redemption_estimate_notice">Valor estimado. A quantidade final usa a cotação do momento do resgate.</string>
+    <string name="redemption_redeem_all_warning">Se a cotação cair antes da confirmação, o valor pode ficar acima do disponível.</string>
+    <string name="redemption_redeemed">Valor resgatado</string>
+    <string name="redemption_btc_sold">BTC vendido</string>
+    <string name="redemption_quote_used">Cotação utilizada</string>
+    <string name="redemption_occurred_at">Data e hora</string>
+    <string name="redemption_new_balance">Novo saldo</string>
+    <string name="redemption_liquidations">Investimentos liquidados</string>
+    <string name="redemption_liquidation_total">Total</string>
+    <string name="redemption_liquidation_partial">Parcial</string>
+    <!-- One liquidation, read at once: kind (Total/Parcial), amount, BTC -->
+    <string name="redemption_liquidation_description">Liquidação %1$s: %2$s, %3$s</string>
+    <string name="redemption_reinvestment">Reinvestimento</string>
+    <string name="redemption_reinvestment_explanation">O BTC que sobrou do investimento parcialmente resgatado continua investido, com a cotação e a data da compra original.</string>
+    <string name="redemption_reinvestment_btc">BTC residual</string>
+    <string name="redemption_reinvestment_invested">Valor investido</string>
+    <string name="redemption_reinvestment_quote">Cotação original</string>
+    <string name="redemption_reinvestment_purchased_at">Data da compra original</string>
+    <string name="redemption_result_title">Resgate realizado</string>
+    <string name="redemption_new">Novo resgate</string>
+    <!-- Title suffixes of the review and result steps (contracts/ui-routes.md): "Revisar resgate · …" -->
+    <string name="page_redemption_review">Revisar resgate</string>
+    <string name="page_redemption_succeeded">Resgate realizado</string>
+
+    <!-- Statement (US7, FR-026..FR-030) -->
+    <string name="statement_period">Período: %1$s a %2$s</string>
+    <string name="statement_filter">Filtrar por período</string>
+    <string name="statement_from">Data inicial</string>
+    <string name="statement_to">Data final</string>
+    <string name="statement_date_hint">dd/mm/aaaa</string>
+    <string name="statement_apply">Aplicar filtro</string>
+    <string name="statement_clear">Limpar filtro</string>
+    <string name="statement_entries">Lançamentos</string>
+    <string name="statement_type_deposit">Depósito</string>
+    <string name="statement_type_purchase">Compra</string>
+    <string name="statement_type_redemption">Resgate</string>
+    <string name="statement_type_reinvestment">Reinvestimento</string>
+    <string name="statement_group_title">Resgate — total %1$s</string>
+    <string name="statement_no_balance_change">não altera o saldo</string>
+    <string name="statement_amount">Valor</string>
+    <string name="statement_btc">BTC</string>
+    <string name="statement_quote">Cotação</string>
+    <string name="statement_occurred_at">Data e hora</string>
+    <string name="statement_empty">Nenhum lançamento no período de %1$s a %2$s.</string>
+    <!-- One line, read at once: type, amount, date/time, Brasília; then the optional parts below -->
+    <string name="statement_entry_description">%1$s de %2$s em %3$s %4$s</string>
+    <string name="statement_entry_btc_description">, %1$s, cotação %2$s</string>
+    <!-- One redemption group, read at once: title, date/time, Brasília, lines -->
+    <string name="statement_group_description">%1$s, em %2$s %3$s. Linhas: %4$s</string>
+
+    <!-- Variation (FR-020): symbol and text besides the color -->
+    <string name="variation_up">alta</string>
+    <string name="variation_down">queda</string>
+    <string name="variation_flat">sem variação</string>
+
+    <!-- Announcements (FR-047, FR-012) -->
+    <string name="announce_deposit_succeeded">Depósito realizado</string>
+    <string name="announce_purchase_succeeded">Compra realizada</string>
+    <string name="announce_redemption_succeeded">Resgate realizado</string>
+    <string name="announce_quote_unavailable">Cotação indisponível no momento</string>
+    <string name="announce_quote_restored">Cotação restabelecida</string>
+    <string name="announce_refresh_paused">Atualização automática pausada</string>
+    <string name="announce_refresh_resumed">Atualização automática retomada</string>
+
+    <!-- Auto-refresh toggle (FR-012) -->
+    <string name="auto_refresh_active">Atualização automática: ativa</string>
+    <string name="auto_refresh_paused">Atualização automática: pausada</string>
+    <string name="auto_refresh_state_active">ativa</string>
+    <string name="auto_refresh_state_paused">pausada</string>
+
+    <!-- Mercado (US8, FR-031..FR-035) -->
+    <string name="market_volume_title">Volume de hoje (%1$s)</string>
+    <string name="market_bought">BTC comprados</string>
+    <string name="market_sold">BTC vendidos</string>
+    <string name="market_buy_price">Preço de compra</string>
+    <string name="market_sell_price">Preço de venda</string>
+    <string name="market_chart_title">Últimas 24 horas (horário de Brasília)</string>
+    <string name="market_legend_buy_style">linha contínua com círculos</string>
+    <string name="market_legend_sell_style">linha tracejada com quadrados</string>
+    <string name="market_show_table">Ver dados em tabela</string>
+    <string name="market_hide_table">Ocultar tabela</string>
+    <string name="market_table_time">Horário</string>
+    <string name="market_no_record">sem registro</string>
+    <!-- One table row, read at once: date/time, then the prices or "sem registro" -->
+    <string name="market_row_description">%1$s: %2$s</string>
+    <string name="market_row_prices">compra %1$s, venda %2$s</string>
+    <!-- Textual alternative of the chart (FR-034): title, then one sentence per series -->
+    <string name="market_summary">Gráfico de preços das últimas 24 horas (horário de Brasília). %1$s %2$s</string>
+    <string name="market_series_summary">%1$s: mínimo %2$s, máximo %3$s, último %4$s às %5$s.</string>
+    <string name="market_empty">Sem dados de cotação nas últimas 24 horas.</string>
+    <string name="market_refresh">Atualizar</string>
+    <string name="market_refreshing">Atualizando…</string>
+</resources>

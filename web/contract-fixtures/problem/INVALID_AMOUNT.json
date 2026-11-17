@@ -1,0 +1,9 @@
+{
+  "type": "about:blank",
+  "title": "Bad Request",
+  "status": 400,
+  "code": "INVALID_AMOUNT",
+  "detail": "O valor deve ser positivo e ter no máximo 2 casas decimais.",
+  "instance": "/api/v1/me/deposits",
+  "correlationId": "8c3d2e1f-6a5b-4d9c-8e7f-1a2b3c4d5e60"
+}

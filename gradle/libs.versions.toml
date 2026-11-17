@@ -17,6 +17,7 @@ wiremock = "3.13.2"
 springdoc = "2.8.17"
 logstash-logback-encoder = "8.1"
 shedlock = "6.10.0"
+swagger-request-validator = "3.0.0"
 
 [libraries]
 # Kotlin
@@ -62,6 +63,7 @@ testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter" }
 testcontainers-postgresql = { module = "org.testcontainers:postgresql" }
 testcontainers-rabbitmq = { module = "org.testcontainers:rabbitmq" }
 wiremock = { module = "org.wiremock:wiremock-standalone", version.ref = "wiremock" }
+swagger-request-validator-core = { module = "com.atlassian.oai:swagger-request-validator-core", version.ref = "swagger-request-validator" }
 
 [bundles]
 unit-test = ["junit-jupiter", "assertj-core"]

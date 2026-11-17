@@ -1,0 +1,29 @@
+{
+  "requestId": "5c3e1a2b-4d5f-4a6b-8c7d-9e0f1a2b3c4d",
+  "amount": "500.00",
+  "btcSold": "0.00125000",
+  "quote": "400000.00",
+  "balance": "900.00",
+  "occurredAt": "2026-11-09T09:00:00-03:00",
+  "liquidations": [
+    {
+      "investmentId": "0b6f5c1e-2a3d-4e5f-8a9b-1c2d3e4f5a01",
+      "amount": "400.00",
+      "btcAmount": "0.00100000",
+      "isPartial": false
+    },
+    {
+      "investmentId": "1c7a6d2f-3b4e-4f6a-9b0c-2d3e4f5a6b02",
+      "amount": "100.00",
+      "btcAmount": "0.00025000",
+      "isPartial": true
+    }
+  ],
+  "reinvestment": {
+    "investmentId": "2d8b7e3a-4c5f-4a7b-8c1d-3e4f5a6b7c03",
+    "btcAmount": "0.00025000",
+    "investedAmount": "100.00",
+    "purchaseQuote": "400000.00",
+    "purchasedAt": "2026-11-09T08:20:00-03:00"
+  }
+}

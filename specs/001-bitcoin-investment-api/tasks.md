@@ -487,6 +487,17 @@ Projeto Gradle multi-módulo (plan.md → Project Structure). Pacote raiz `com.k
 
 ---
 
+## Emenda GET /me (FR-036) — pedida pela 002-frontend-web
+
+**Origem**: `specs/002-frontend-web/tasks.md` (T122–T126) e `specs/002-frontend-web/contracts/api-amendment-get-me.md`. Rastreabilidade: as tarefas abaixo são executadas e marcadas na 002, com os IDs dela.
+
+- [X] T122 (002) Emenda na origem: FR-036 e cenário 3 da US3 em spec.md; `GET /me` e `ProfileResponse` em contracts/openapi.yaml; plan.md com 12 endpoints
+- [X] T123 (002) Teste do caso de uso em application/src/test/kotlin/com/kotlinbitcoins/application/account/GetProfileTest.kt
+- [X] T124 (002) Teste do controller em api/src/test/kotlin/com/kotlinbitcoins/api/account/ProfileControllerTest.kt, contrato em bootstrap/src/test/kotlin/com/kotlinbitcoins/bootstrap/contract/ProfileContractTest.kt e caso `GET /me` em bootstrap/src/test/kotlin/com/kotlinbitcoins/bootstrap/isolation/AccountIsolationTest.kt
+- [X] T125 (002) `GetProfile`, `ProfileController`, `ProfileResponse` e bean em UseCaseConfiguration.kt; `OpenApiConformanceTest` verde
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
