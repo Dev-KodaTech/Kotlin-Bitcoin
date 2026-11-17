@@ -59,6 +59,11 @@ jobs:
       - name: Export CHROME_BIN
         run: echo "CHROME_BIN=${{ steps.chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
 
+      # Ubuntu 23.10+ (ubuntu-latest) blocks unprivileged user namespaces with AppArmor, and Chrome aborts with
+      # "No usable sandbox!" in the Karma tests of :ui. Allowing them keeps Chrome's sandbox on.
+      - name: Allow Chrome sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
       - name: Check
         run: ./gradlew check --no-daemon
 
