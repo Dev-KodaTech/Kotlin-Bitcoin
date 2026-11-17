@@ -589,3 +589,15 @@ A spec marca US1–US4 como P1 ("junto com cadastro, painel e depósito forma o 
   3. O contexto do `docker build` do cliente é `web/` (e não a raiz), e o comando do quickstart §7 é corrigido em T099.
   4. Os E2E das stories 2–8 preparam dados pela API (`ApiClient`) e simulam falhas por `page.route` com as mesmas fixtures do consumidor, sem depender de derrubar serviços, exceto nos testes marcados `@Tag("slow")`.
   5. A emenda `GET /me` (T122–T126) toca código da 001 (`application`, `api`, `bootstrap`) e está na US2 porque só ela a exige. Ela pode ser feita por quem mantém a API, em paralelo com as Phases 1–4.
+
+---
+
+## Phase 13: Convergence
+
+- [X] T229 Substituir os ramos `else` sobre `ApiError` por `when` exaustivos (um ramo por subtipo, sem `else`) em `web/state/src/commonMain/kotlin/com/kotlinbitcoins/web/state/account/RegisterViewModel.kt` (`else -> showFeedback { copy(formError = error) }`), `web/state/src/commonMain/kotlin/com/kotlinbitcoins/web/state/investments/InvestmentsViewModel.kt` (`quoteFailure`), `web/state/src/commonMain/kotlin/com/kotlinbitcoins/web/state/purchase/PurchaseViewModel.kt` (`quoteFailure` com `if/else`) e `web/ui/src/commonMain/kotlin/com/kotlinbitcoins/web/ui/account/LoginScreen.kt` (`loginMessage`), para que um novo código de erro do contrato quebre a compilação em vez de cair num tratamento genérico; manter os testes existentes verdes per tasks: Regras transversais › Erros (Princípio III) (contradicts)
+
+---
+
+## Phase 14: Convergence
+
+- [X] T230 Concluir a correção da T229 nos pontos restantes do mesmo padrão: trocar os `if (error == ApiError.X) … else …` que classificam um `ApiError` em estado por `when` exaustivos (um ramo por subtipo, sem `else`) em `web/state/src/commonMain/kotlin/com/kotlinbitcoins/web/state/dashboard/DashboardViewModel.kt` (`quoteFailure` e `positionFailure`) e `web/state/src/commonMain/kotlin/com/kotlinbitcoins/web/state/statement/StatementViewModel.kt` (despacho de `Outcome.Failure` entre `onRangeRefused` e `onFailure`), sem mudar o comportamento e mantendo `./gradlew check` verde per tasks: Regras transversais › Erros (Princípio III) (partial)

@@ -129,7 +129,22 @@ class StatementViewModel(
             }
 
             is Outcome.Failure -> {
-                if (result.error == ApiError.InvalidDateRange) onRangeRefused(filter) else onFailure(result.error)
+                when (val error = result.error) {
+                    ApiError.InvalidDateRange -> onRangeRefused(filter)
+
+                    is ApiError.Validation,
+                    ApiError.InvalidAmount,
+                    ApiError.EmailAlreadyInUse,
+                    ApiError.InvalidCredentials,
+                    ApiError.Unauthorized,
+                    ApiError.InsufficientBalance,
+                    ApiError.RedemptionExceedsAvailable,
+                    ApiError.QuoteUnavailable,
+                    ApiError.ServiceUnavailable,
+                    ApiError.Unexpected,
+                    ApiError.NoConnection,
+                    -> onFailure(error)
+                }
             }
         }
     }

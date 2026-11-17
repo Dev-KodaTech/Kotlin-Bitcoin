@@ -173,7 +173,22 @@ class PurchaseViewModel(
     }
 
     private fun quoteFailure(error: ApiError): QuoteState =
-        if (error == ApiError.QuoteUnavailable) QuoteState.Unavailable else QuoteState.Failed(error)
+        when (error) {
+            ApiError.QuoteUnavailable -> QuoteState.Unavailable
+
+            is ApiError.Validation,
+            ApiError.InvalidAmount,
+            ApiError.EmailAlreadyInUse,
+            ApiError.InvalidCredentials,
+            ApiError.Unauthorized,
+            ApiError.InsufficientBalance,
+            ApiError.RedemptionExceedsAvailable,
+            ApiError.InvalidDateRange,
+            ApiError.ServiceUnavailable,
+            ApiError.Unexpected,
+            ApiError.NoConnection,
+            -> QuoteState.Failed(error)
+        }
 
     /** Only the review and the sending show an estimate, from the quote available now. */
     private fun estimate(

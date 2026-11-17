@@ -172,10 +172,40 @@ class DashboardViewModel(
     }
 
     private fun quoteFailure(error: ApiError): QuoteState =
-        if (error == ApiError.QuoteUnavailable) QuoteState.Unavailable else QuoteState.Failed(error)
+        when (error) {
+            ApiError.QuoteUnavailable -> QuoteState.Unavailable
+
+            is ApiError.Validation,
+            ApiError.InvalidAmount,
+            ApiError.EmailAlreadyInUse,
+            ApiError.InvalidCredentials,
+            ApiError.Unauthorized,
+            ApiError.InsufficientBalance,
+            ApiError.RedemptionExceedsAvailable,
+            ApiError.InvalidDateRange,
+            ApiError.ServiceUnavailable,
+            ApiError.Unexpected,
+            ApiError.NoConnection,
+            -> QuoteState.Failed(error)
+        }
 
     private fun positionFailure(error: ApiError): PositionTotal =
-        if (error == ApiError.QuoteUnavailable) PositionTotal.DependsOnQuote else PositionTotal.Failed(error)
+        when (error) {
+            ApiError.QuoteUnavailable -> PositionTotal.DependsOnQuote
+
+            is ApiError.Validation,
+            ApiError.InvalidAmount,
+            ApiError.EmailAlreadyInUse,
+            ApiError.InvalidCredentials,
+            ApiError.Unauthorized,
+            ApiError.InsufficientBalance,
+            ApiError.RedemptionExceedsAvailable,
+            ApiError.InvalidDateRange,
+            ApiError.ServiceUnavailable,
+            ApiError.Unexpected,
+            ApiError.NoConnection,
+            -> PositionTotal.Failed(error)
+        }
 
     private fun total(position: Position): PositionTotal =
         if (position.investments.isEmpty()) {

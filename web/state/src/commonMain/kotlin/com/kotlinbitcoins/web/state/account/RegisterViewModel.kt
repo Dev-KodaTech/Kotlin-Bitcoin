@@ -160,7 +160,17 @@ class RegisterViewModel(
                 }
             }
 
-            else -> {
+            ApiError.InvalidAmount,
+            ApiError.InvalidCredentials,
+            ApiError.Unauthorized,
+            ApiError.InsufficientBalance,
+            ApiError.RedemptionExceedsAvailable,
+            ApiError.InvalidDateRange,
+            ApiError.QuoteUnavailable,
+            ApiError.ServiceUnavailable,
+            ApiError.Unexpected,
+            ApiError.NoConnection,
+            -> {
                 showFeedback { copy(formError = error) }
             }
         }

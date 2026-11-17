@@ -111,6 +111,18 @@ class InvestmentsViewModel(
     private fun quoteFailure(error: ApiError): QuoteState =
         when (error) {
             ApiError.QuoteUnavailable -> QuoteState.Unavailable
-            else -> QuoteState.Failed(error)
+
+            is ApiError.Validation,
+            ApiError.InvalidAmount,
+            ApiError.EmailAlreadyInUse,
+            ApiError.InvalidCredentials,
+            ApiError.Unauthorized,
+            ApiError.InsufficientBalance,
+            ApiError.RedemptionExceedsAvailable,
+            ApiError.InvalidDateRange,
+            ApiError.ServiceUnavailable,
+            ApiError.Unexpected,
+            ApiError.NoConnection,
+            -> QuoteState.Failed(error)
         }
 }

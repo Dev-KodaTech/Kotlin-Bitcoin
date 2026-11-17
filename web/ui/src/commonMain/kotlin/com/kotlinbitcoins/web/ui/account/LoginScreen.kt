@@ -99,5 +99,17 @@ private fun LoginBanner.text(): String =
 private fun ApiError.loginMessage(): String =
     when (this) {
         is ApiError.Validation -> (listOf(message()) + fieldErrors.map { it.message }).joinToString(" ")
-        else -> message()
+
+        ApiError.InvalidAmount,
+        ApiError.EmailAlreadyInUse,
+        ApiError.InvalidCredentials,
+        ApiError.Unauthorized,
+        ApiError.InsufficientBalance,
+        ApiError.RedemptionExceedsAvailable,
+        ApiError.InvalidDateRange,
+        ApiError.QuoteUnavailable,
+        ApiError.ServiceUnavailable,
+        ApiError.Unexpected,
+        ApiError.NoConnection,
+        -> message()
     }
