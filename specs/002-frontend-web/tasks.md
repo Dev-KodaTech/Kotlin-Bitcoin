@@ -469,7 +469,7 @@ Build Gradle separado em `web/` (plan.md → Project Structure). Pacote raiz `co
 - [X] T225 Criar `specs/002-frontend-web/checklists/a11y-release.md` com a matriz de quickstart.md §6 e executar o checklist manual completo (NVDA, VoiceOver macOS/iOS, só teclado, zoom 200%, tema escuro, movimento reduzido) sobre o app final (SC-007)
 - [X] T226 Remover `web/spike-a11y/` e a entrada `"spike-a11y"` de `web/settings.gradle.kts`, mantendo o resultado registrado em research.md W-00
 - [X] T227 [P] Acrescentar a `README.md` (raiz) a seção "Cliente web" (como rodar com `docker compose --profile stub up`, endereço `http://localhost:8081`, `cd web && ./gradlew check`, `:e2e:e2eTest`, links para `specs/002-frontend-web/`)
-- [ ] T228 Executar `specs/002-frontend-web/quickstart.md` de ponta a ponta (§1 a §7) e corrigir divergências. Confirmar `./gradlew check` verde na raiz e em `web/` e o CI verde nos jobs `build`, `web` e `web-e2e`
+- [X] T228 Executar `specs/002-frontend-web/quickstart.md` de ponta a ponta (§1 a §7) e corrigir divergências. Confirmar `./gradlew check` verde na raiz e em `web/` e o CI verde nos jobs `build`, `web` e `web-e2e`
 
 ---
 

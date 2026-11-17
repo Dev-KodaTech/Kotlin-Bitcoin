@@ -1,13 +1,13 @@
 # Kotlin-Bitcoin
 
-API REST para investir em bitcoins com saldo fictício em reais: o cliente cria uma conta, deposita, compra e resgata BTC pela cotação do Mercado Bitcoin, acompanha a posição e consulta extrato, volume diário e histórico de cotação.
+API REST e cliente web para investir em bitcoins com saldo fictício em reais: o cliente cria uma conta, deposita, compra e resgata BTC pela cotação do Mercado Bitcoin, acompanha a posição e consulta extrato, volume diário e histórico de cotação.
 
 [![CI](https://github.com/Dev-KodaTech/Kotlin-Bitcoin/actions/workflows/ci.yml/badge.svg)](https://github.com/Dev-KodaTech/Kotlin-Bitcoin/actions/workflows/ci.yml)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.2-7F52FF?logo=kotlin&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white)
 ![JDK](https://img.shields.io/badge/JDK-21-orange)
 
-[Funcionalidades](#funcionalidades) • [Início rápido](#início-rápido) • [Endpoints](#endpoints) • [Arquitetura](#arquitetura) • [Desenvolvimento](#desenvolvimento)
+[Funcionalidades](#funcionalidades) • [Início rápido](#início-rápido) • [Endpoints](#endpoints) • [Arquitetura](#arquitetura) • [Cliente web](#cliente-web) • [Desenvolvimento](#desenvolvimento)
 
 > [!NOTE]
 > Nenhuma movimentação financeira real acontece. Depósitos e resgates só alteram o saldo interno da conta.
@@ -105,6 +105,7 @@ Prefixo `/api/v1`. O contrato completo está em [openapi.yaml](specs/001-bitcoin
 |--------|------|-----------|:----:|
 | `POST` | `/accounts` | Cadastrar conta | - |
 | `POST` | `/auth/login` | Autenticar e obter token | - |
+| `GET` | `/me` | Perfil da conta (nome e e-mail) | sim |
 | `GET` | `/me/balance` | Saldo disponível em R$ | sim |
 | `POST` | `/me/deposits` | Depositar reais | sim |
 | `GET` | `/quotes/current` | Cotação atual do BTC | sim |
@@ -162,6 +163,10 @@ cd web
 > [!NOTE]
 > Na primeira execução do E2E, instale os navegadores do Playwright: `./gradlew -q :e2e:testClasses && java -cp "$(./gradlew -q :e2e:printTestClasspath)" com.microsoft.playwright.CLI install --with-deps`.
 
+**Stack:** Kotlin 2.4 (Wasm), Compose Multiplatform 1.12, Ktor Client, nginx; testes com Playwright para Java e axe-core.
+
+Acessibilidade: o E2E verifica axe (WCAG 2.1 A/AA) em todas as telas e estados nos temas claro e escuro e todos os fluxos só com teclado. Antes de cada release, o checklist manual com leitores de tela fica em [a11y-release.md](specs/002-frontend-web/checklists/a11y-release.md).
+
 Documentação: [spec](specs/002-frontend-web/spec.md), [plano](specs/002-frontend-web/plan.md), [pesquisa](specs/002-frontend-web/research.md), [rotas de UI](specs/002-frontend-web/contracts/ui-routes.md) e [quickstart](specs/002-frontend-web/quickstart.md).
 
 ## Desenvolvimento
@@ -179,8 +184,12 @@ Os testes cobrem contrato de cada `code` de erro, isolamento entre clientes, con
 
 ## Documentação
 
+API (001):
+
 - [Especificação](specs/001-bitcoin-investment-api/spec.md)
 - [Plano de implementação](specs/001-bitcoin-investment-api/plan.md)
 - [Modelo de dados](specs/001-bitcoin-investment-api/data-model.md)
 - [Decisões de pesquisa](specs/001-bitcoin-investment-api/research.md)
 - [Quickstart](specs/001-bitcoin-investment-api/quickstart.md)
+
+Cliente web (002): [especificação](specs/002-frontend-web/spec.md), [plano](specs/002-frontend-web/plan.md), [decisões de pesquisa](specs/002-frontend-web/research.md) e [quickstart](specs/002-frontend-web/quickstart.md).
