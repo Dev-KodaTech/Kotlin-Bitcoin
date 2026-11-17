@@ -50,8 +50,8 @@ dependencyResolutionManagement {
     }
 }
 
-// The image build (web/Dockerfile) leaves e2e/ and spike-a11y/ out of the context (.dockerignore), so only the
-// modules present on disk are included.
-listOf("core", "state", "data", "ui", "app", "e2e", "spike-a11y")
+// The image build (web/Dockerfile) leaves e2e/ out of the context (.dockerignore), so only the modules present on
+// disk are included.
+listOf("core", "state", "data", "ui", "app", "e2e")
     .filter { file(it).isDirectory }
     .forEach { include(it) }

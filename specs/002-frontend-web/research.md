@@ -116,6 +116,15 @@ M2, M3 e M4 dependem de detalhes internos da CMP (`#cmp_a11y_root`, `.compose-ba
 - L9 (hash alterado no mesmo documento): o `:app` ouve `hashchange` e navega por `AppRoute.parse` quando o fragmento difere da rota atual.
 - FR-048: `TopAppBar`, `ModalNavigationDrawer` e `NavigationRail` não fizeram parte do spike; os textos internos deles são sobrescritos por `semantics`/`contentDescription` com textos de `strings.xml` na `AdaptiveScaffold` (T091) e conferidos no E2E da primeira tela que os usa.
 
+**Resultado da Phase 12 (T219/T220/T226, 2026-11-16)**, sobre o app completo:
+- **Spike removido (T226)**: `web/spike-a11y` e o `SpikeA11yE2ETest` saíram do build. Os resultados do spike ficam registrados nesta seção. O shim vive em `web/app/src/wasmJsMain/kotlin/com/kotlinbitcoins/web/app/A11yShim.kt`, e o E2E do app o protege: `a11y/AxeAllScreensE2ETest` (axe em cada tela × estado, temas claro e escuro, movimento reduzido) e `a11y/KeyboardOnlyE2ETest` (todos os fluxos só com teclado). A partir de agora, a "repetição do spike" exigida acima a cada atualização da CMP é rodar esses dois E2E.
+- **M5 (foco mantido)**: quando uma ação tira de cena o campo de texto focado (Enter envia e a tela muda, ou a revisão substitui o formulário), o `<input>` de apoio some e o foco do DOM cai em `<body>`, enquanto o Compose já moveu o próprio foco (por exemplo, para o novo h1, FR-046). O shim devolve o foco do DOM ao canvas quando o campo focado sai sem ter sido por Tab: no `focusout` sem `relatedTarget` (Chromium) ou quando o campo deixa o DOM (um `MutationObserver`, porque Firefox e WebKit não disparam `focusout` ao remover o elemento focado). Saídas por Tab ficam como na L8. Antes da M5, o `KeyboardOnlyE2ETest` registrava 5 passos com o foco em `<body>`; com ela, nenhum.
+- **L10 (nova)**: Shift+Tab a partir de um campo de texto vai para `<body>`, e o Shift+Tab seguinte volta ao mesmo campo (ciclo campo → body → campo). Não é armadilha, porque Tab para a frente sai do campo e o restante da página é alcançável. Mesma natureza da L8, aceita dentro de A1/A2 e coberta pelo item C6 do checklist da release. O E2E de teclado não sai de campo de texto para trás.
+- **Menu compacto**: Esc não fechava o `ModalNavigationDrawer`, e escolher o destino atual também não. Agora a `AdaptiveScaffold` trata Esc (`onPreviewKeyEvent`) e fecha a gaveta em qualquer escolha (verificado em `layout/ResponsiveLayoutE2ETest`, 320/375 px).
+- **CSP no E2E**: no WebKit, `page.screenshot` do Playwright injeta um `<style>` na página, mesmo com `caret: initial`, e a CSP do app o recusa. As capturas do teste de movimento usam `AppPage.screenshotOutsideCsp()`, que descarta só os relatórios gerados durante a captura.
+- **axe**: 0 violações WCAG 2.1 A/AA em todas as telas e estados (carregado, erro, carregando, vazio, revisão, resultado), nos dois esquemas de cor. Com `reducedMotion = reduce`, capturas consecutivas do estado de carregamento são idênticas (nenhuma transição ou indicador animado).
+- O checklist manual da release (SC-007) está em [checklists/a11y-release.md](./checklists/a11y-release.md).
+
 ---
 
 ## W-01 Versões e status da plataforma
@@ -389,6 +398,8 @@ A referência fica no `:app` (`main.kt`), que é a borda. Para reduzir o bundle,
 
 **Resultado da Phase 3 (T077, 2026-11-12)**: o `swagger-request-validator-core` **3.0.0 foi mantido**; não foi preciso trocar para o `com.networknt:json-schema-validator`. A 3.0.0 lê o contrato OpenAPI 3.1 e valida o corpo com o próprio `json-schema-validator` 2.0.1 da networknt (dependência transitiva). Num teste exploratório sobre o `openapi.yaml`, ela aceitou `reinvestment: null` (`type: [object, 'null']`), `investmentId: null` (`type: [string, 'null']`) e `btcAmount: null` (`oneOf` com `{type: 'null'}`). Recusou `reinvestment: 5`, objeto sem os `required`, `btcAmount: "1.0"` (`pattern`), `investmentId: "abc"` (`format: uuid`), instante fora de `date-time`, `code` fora do `enum`, `status` como string, propriedade fora do schema (`additionalProperties` é estrito por padrão) e status não documentado na operação. O validador aceita o path com ou sem o prefixo `/api/v1` de `servers`. Ajuste de build: a 3.0.0 traz `io.swagger.core.v3:swagger-core/swagger-models/swagger-annotations` 2.2.48 (sabor `javax`), com os mesmos pacotes do `swagger-core-jakarta` 2.2.47 que o springdoc usa. Por isso, o `testImplementation` em `bootstrap/build.gradle.kts` exclui esses três módulos, para que o `/v3/api-docs` dos testes continue usando só a variante jakarta (o parser do validador funciona com ela). As fixtures `NOT_FOUND` e `INTERNAL_ERROR` não têm operação/status documentado no contrato, então não entram no manifest. A verificação 1 também valida cada `problem/*.json` contra `#/components/schemas/Problem`, por meio de uma operação-sonda acrescentada só em memória a uma cópia do contrato. As fixtures Problem trazem `instance` e `correlationId`, como as respostas reais (ambos opcionais no schema). A exceção é `UNAUTHORIZED`, que não traz `instance`, porque o 401 do `AuthenticationEntryPoint` serializa o `ProblemDetail` sem passar pelo MVC. Sem isso, a verificação 4 (mesmo conjunto de chaves) falharia.
 
+**Confirmação da Phase 12 (T216/T224, 2026-11-16)**: a escolha se mantém. O `swagger-request-validator-core` 3.0.0 valida as 3.1 do contrato sem falso positivo em todas as fixtures (138 verificações). Como `additionalProperties` é estrito por padrão, uma fixture serve a uma única operação: a fixture de limites de precisão (T216) foi dividida em `limits-me-balance-200.json` e `limits-me-investments-200.json`, uma por operação. Acrescentou-se a verificação 5: toda operação do manifest tem ao menos uma fixture de sucesso (2xx).
+
 ---
 
 ## W-13 Gráfico do Mercado (Canvas próprio)
@@ -434,11 +445,38 @@ A referência fica no `:app` (`main.kt`), que é a borda. Para reduzir o bundle,
   - **Cabeçalhos de segurança**: `Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`. O `index.html` **não** tem script nem estilo inline (CSS de carregamento em arquivo). O spike verifica 0 violações de CSP no console. Se o Skiko/Compose exigir `blob:`/`data:` adicionais, acrescenta-se o mínimo e registra-se aqui.
   - `location /api/`: `proxy_pass http://nginx:8080;` (mantém `/api/v1/...`), repassando `Authorization` e `X-Correlation-Id`, com `proxy_read_timeout 30s`. Sem `access_log` de query strings sensíveis: o token vai em header e o access log padrão não registra headers (FR-008).
 - **Healthcheck**: `wget -q -O /dev/null http://127.0.0.1:8080/index.html`, com `depends_on: nginx (service_healthy)`.
-- **Orçamento de desempenho (SC-010)**: perfil de rede **"4G típico"** = 9.000 kbps de descida, 1.500 kbps de subida e 60 ms de RTT (CDP `Network.emulateNetworkConditions`). Metas: (a) navegação com o app carregado, com conteúdo ou carregamento em ≤ 1 s e dados em ≤ 3 s (p95); (b) primeira carga sem cache, com `#boot` em ≤ 1 s e app utilizável em ≤ 6 s. **Limite de tamanho do bundle**: ≤ 3,5 MB em brotli somando `*.wasm`, `*.js` e a fonte da primeira carga. A 9 Mbps, isso dá cerca de 3,1 s de download, o que deixa margem para compilar o Wasm e carregar os dados dentro de 6 s. A T222 mede e falha acima do limite. Se o limite for estourado, as alavancas em ordem são: subconjunto de fonte menor, `-Xwasm-opt`/otimização de tamanho da distribuição, remover dependências e só então rever a meta (com registro aqui).
+- **Orçamento de desempenho (SC-010)**: perfil de rede **"4G típico"** = 9.000 kbps de descida, 1.500 kbps de subida e 60 ms de RTT (CDP `Network.emulateNetworkConditions`). Metas: (a) navegação com o app carregado, com conteúdo ou carregamento em ≤ 1 s e dados em ≤ 3 s (p95); (b) primeira carga sem cache, com `#boot` em ≤ 1 s e app utilizável em ≤ 6 s. **Limite de tamanho do bundle**: ≤ 3,5 MB em brotli (revisto para 4,2 MB na Phase 12, ver abaixo) somando `*.wasm`, `*.js` e a fonte da primeira carga. A 9 Mbps, isso dá cerca de 3,1 s de download, o que deixa margem para compilar o Wasm e carregar os dados dentro de 6 s. A T222 mede e falha acima do limite. Se o limite for estourado, as alavancas em ordem são: subconjunto de fonte menor, `-Xwasm-opt`/otimização de tamanho da distribuição, remover dependências e só então rever a meta (com registro aqui).
 
 **Resultado do spike (T015/T021, 2026-11-12)**: a CSP acima, sozinha, bloqueia o `<style>` que a CMP 1.12.2 injeta no shadow root do canvas (o `<input>` de apoio do IME fica visível e a página rola). O mínimo necessário é acrescentar o hash desse estilo a `style-src`: `style-src 'self' 'sha256-2DtT88WYuzB8DiHdoLqEYkONEwxf9gqsOdTY44QuLA4='` (igual nos 3 motores; não usar `'unsafe-inline'`). O hash muda quando a CMP mudar esse estilo, e o E2E (0 violações de CSP no console) detecta isso. Com esse acréscimo, o spike roda sem violação de CSP em Chromium, Firefox e WebKit. Nada mais precisou ser liberado (`blob:`/`data:` não foram exigidos pelo Skiko).
 
 **Resultado da Phase 3 (T097/T098, 2026-11-12)**: a distribuição `:app:wasmJsBrowserDistribution` nomeia os `.wasm` só pelo hash, sem prefixo (`5549990ba6c99f9e2d05.wasm`, `658820f72b4617efb380.wasm`), e mantém `app.js` sem hash. Por isso o `nginx.conf` usa `~^/[0-9a-f]{16,}\.(wasm|js|mjs)$` para `immutable` (o padrão `\.[0-9a-f]{8,}\.` acima pressupunha um prefixo). `app.js`, `index.html`, `compat.js`, `loading.css` e `composeResources/` ficam com `no-cache`. Não foi preciso acrescentar fingerprint no build. O CSS de carregamento e as mitigações de acessibilidade do W-00 entram no `:app` (`A11yShim.kt`). O `Dockerfile` compila o `ngx_brotli` fixado no commit `53e0fb55f250f48fe80c0ddbf6c0f7103cdbaae1`, contra o fonte do nginx 1.27.5 da imagem final. Os cabeçalhos de segurança ficam em `web/docker/security-headers.conf`, incluído em cada `location`, porque um `add_header` dentro de `location` não herda os do `server`.
+
+**Confirmação da Phase 12 (T222/T224, 2026-11-16)**:
+- **Cache**: confirmado na imagem final. Os `.wasm` nomeados só pelo hash recebem `public, max-age=31536000, immutable`. `index.html`, `app.js`, `compat.js` e `composeResources/**` (fontes) recebem `no-cache`. Todos são servidos pré-comprimidos (`Content-Encoding: br`).
+- **CSP efetiva**: a do spike, sem nenhum acréscimo: `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'sha256-2DtT88WYuzB8DiHdoLqEYkONEwxf9gqsOdTY44QuLA4='; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`. Todos os E2E rodam com 0 violação de CSP no console, nos 3 motores.
+- **Tempos (Chromium, perfil "4G típico")**:
+
+  | Medida | Meta | Resultado |
+  |---|---|---|
+  | (a) p95 de conteúdo ou carregamento | ≤ 1 s | ~0,55 s |
+  | (a) p95 de dados | ≤ 3 s | ~0,56 s |
+  | (b) `first-contentful-paint` do `#boot` | ≤ 1 s | 0,16–0,18 s |
+  | (b) painel utilizável | ≤ 6 s | 4,7–4,9 s |
+
+- **Tamanho da primeira carga** (bytes como o nginx serve):
+
+  | Arquivo | brotli | gzip |
+  |---|---:|---:|
+  | Skiko (`658820f72b4617efb380.wasm`) | 2.622.336 | 3.330.884 |
+  | app (`<hash>.wasm`) | 1.213.944 | 1.632.608 |
+  | `app.js` | 107.938 | 137.478 |
+  | `compat.js` | 511 | 646 |
+  | Inter Regular/Medium/SemiBold (`.ttf`) | 72.339 | 82.771 |
+  | **Total** | **4.017.068** | **5.184.387** |
+
+  **Acima do limite de 3,5 MB** (+517 KB, ~15%). O Skiko sozinho é 2,62 MB e não depende do app. Apesar disso, os tempos ficam dentro da meta de 6 s. As alavancas, na ordem acima, seriam: (1) subconjunto das fontes (≤ 72 KB, ganho pequeno); (2) otimização de tamanho do `.wasm` do app (`-Xwasm-opt`/binaryen); (3) remover dependências pesadas do app. Nenhuma delas chega a 3,5 MB com segurança, porque o Skiko é fixo.
+
+  **Decisão (2026-11-17, responsável do projeto)**: a meta de tamanho passa a ser **≤ 4,2 MB em brotli**. O tempo utilizável medido (≤ 4,9 s no perfil "4G típico") atende SC-010, que é o requisito; o limite de tamanho só servia de aproximação dele. A T222 falha acima de 4,2 MB, o que deixa ~180 KB de folga para o app crescer antes de uma nova revisão.
 
 **Rationale**: mesma origem elimina CORS e expõe o token a menos superfícies. Imagem não-root, como a da API. Pré-compressão máxima ajuda SC-010 (o bundle Compose/Skiko pesa vários MB).
 

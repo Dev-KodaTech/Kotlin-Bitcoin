@@ -29,7 +29,7 @@ import java.time.Instant
 /**
  * The JSON fixtures the web client tests with (`web/contract-fixtures`, listed in its `manifest.json`) must follow the
  * source contract (specs/001-bitcoin-investment-api/contracts/openapi.yaml) and have the shape of the responses the
- * assembled application really gives (feature 002, research W-12, contracts/fixtures-manifest.md, checks 1 to 4).
+ * assembled application really gives (feature 002, research W-12, contracts/fixtures-manifest.md, checks 1 to 5).
  * Each fixture is a dynamic test. Entries with `pendingAmendment` are skipped until the contract has the operation.
  */
 class WebClientFixturesContractTest : ApplicationTestBase() {
@@ -243,6 +243,18 @@ class WebClientFixturesContractTest : ApplicationTestBase() {
             }
         }
 
+    @Test
+    fun `check 5 - every operation of the manifest has at least one success fixture`() {
+        val withoutSuccess =
+            fixtures.entries
+                .filter { it.pendingAmendment == null }
+                .groupBy { "${it.method} ${it.path}" }
+                .filterValues { entries -> entries.none { it.status in SUCCESS_STATUSES } }
+                .keys
+
+        assertThat(withoutSuccess).describedAs("operations with only error fixtures").isEmpty()
+    }
+
     private fun skipIfPending(entry: FixtureEntry) {
         entry.pendingAmendment?.let {
             Assumptions.abort<Unit>("${entry.file}: waiting for the contract amendment '$it'")
@@ -265,6 +277,8 @@ class WebClientFixturesContractTest : ApplicationTestBase() {
 
         /** Past the quote cache, so the position reads the stubbed source again. */
         const val QUOTE_CACHE_SECONDS = 11L
+
+        val SUCCESS_STATUSES = 200..299
     }
 }
 

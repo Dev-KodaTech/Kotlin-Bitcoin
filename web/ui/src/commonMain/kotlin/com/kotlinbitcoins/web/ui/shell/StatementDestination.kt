@@ -12,7 +12,9 @@ import com.kotlinbitcoins.web.ui.statement.StatementScreen
 /**
  * Extrato (US7) with its ViewModel, created with the route of the entry (its filter). Applying or clearing the filter
  * **replaces** the history entry with the new route (contracts/ui-routes.md), so the filter survives reload and
- * back/forward without filling the history; the new entry has its own ViewModel.
+ * back/forward without filling the history; the new entry has its own ViewModel. A filter that arrives by the URL
+ * while the statement is on screen (address bar, `#/extrato?…` link) reuses the entry (`launchSingleTop`), so the
+ * ViewModel is keyed by the route: another period is another ViewModel, which loads it.
  */
 @Composable
 internal fun StatementDestination(
@@ -20,7 +22,7 @@ internal fun StatementDestination(
     route: AppRoute.Statement,
     onReplace: (AppRoute) -> Unit,
 ) {
-    val viewModel = viewModel { viewModels.statement(route) }
+    val viewModel = viewModel(key = "statement:${route.from}:${route.to}") { viewModels.statement(route) }
     val state by viewModel.uiState.collectAsState()
     LaunchedEffect(state.navigation) {
         val target = state.navigation ?: return@LaunchedEffect

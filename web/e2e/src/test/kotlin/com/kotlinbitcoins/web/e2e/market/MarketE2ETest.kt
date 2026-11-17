@@ -54,6 +54,7 @@ class MarketE2ETest : E2eBase() {
             ui.heading("Volume de hoje (09/11/2026)").waitFor()
             page.getByText("0,00300000 BTC").waitFor()
             page.getByText("0,00050000 BTC").waitFor()
+            page.getByText("BTC comprados").first().waitFor()
             assertThat(page.getByText("BTC comprados").count()).isEqualTo(1)
             assertThat(page.getByText("BTC vendidos").count()).isEqualTo(1)
         }

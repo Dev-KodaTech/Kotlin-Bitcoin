@@ -1,0 +1,28 @@
+{
+  "quote": {
+    "buyPrice": "400000.12345678",
+    "sellPrice": "401000.00000001",
+    "quotedAt": "2026-11-09T08:10:00-03:00"
+  },
+  "totalCurrentValue": "99999999999.99",
+  "investments": [
+    {
+      "id": "0b6f5c1e-2a3d-4e5f-8a9b-1c2d3e4f5b01",
+      "purchasedAt": "2026-11-01T10:15:00-03:00",
+      "investedAmount": "0.01",
+      "purchaseQuote": "400000.12345678",
+      "btcAmount": "0.00000001",
+      "variationPercent": "-60.00",
+      "currentValue": "0.00"
+    },
+    {
+      "id": "0b6f5c1e-2a3d-4e5f-8a9b-1c2d3e4f5b02",
+      "purchasedAt": "2026-11-03T14:30:00-03:00",
+      "investedAmount": "99999999999.99",
+      "purchaseQuote": "401000.00000001",
+      "btcAmount": "249376.55860349",
+      "variationPercent": "0.00",
+      "currentValue": "99999999999.99"
+    }
+  ]
+}

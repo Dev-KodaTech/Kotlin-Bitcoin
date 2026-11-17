@@ -12,13 +12,15 @@ object Axe {
     val WCAG_TAGS = listOf("wcag2a", "wcag2aa", "wcag21a", "wcag21aa")
 
     fun assertNoViolations(page: Page) {
-        val violations =
-            AxeBuilder(page).withTags(WCAG_TAGS).analyze().violations.map { rule ->
-                "${rule.id} (${rule.impact}): ${rule.help} — " +
-                    rule.nodes.take(MAX_NODES).joinToString("; ") { it.target.toString() }
-            }
-        assertThat(violations).describedAs("axe WCAG 2.1 A/AA violations").isEmpty()
+        assertThat(violations(page)).describedAs("axe WCAG 2.1 A/AA violations").isEmpty()
     }
+
+    /** The WCAG 2.1 A/AA violations of the page, one line per rule. */
+    fun violations(page: Page): List<String> =
+        AxeBuilder(page).withTags(WCAG_TAGS).analyze().violations.map { rule ->
+            "${rule.id} (${rule.impact}): ${rule.help} — " +
+                rule.nodes.take(MAX_NODES).joinToString("; ") { it.target.toString() }
+        }
 
     private const val MAX_NODES = 5
 }

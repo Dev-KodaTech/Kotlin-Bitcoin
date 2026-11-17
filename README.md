@@ -61,6 +61,7 @@ API REST para investir em bitcoins com saldo fictício em reais: o cliente cria 
 
 | Serviço | URL |
 |---------|-----|
+| Cliente web | http://localhost:8081 |
 | API (via Nginx, 2 réplicas) | http://localhost:8080/api/v1 |
 | Swagger UI | http://localhost:8080/swagger-ui.html |
 | Mailpit (e-mails de dev) | http://localhost:8025 |
@@ -141,6 +142,28 @@ Mais detalhes em [plan.md](specs/001-bitcoin-investment-api/plan.md), [data-mode
 
 **Stack:** Kotlin 2.2, Spring Boot 3.5, PostgreSQL 16, Redis 7, RabbitMQ 3, Flyway, springdoc-openapi, Brevo (e-mail em produção).
 
+## Cliente web
+
+Aplicação web em Kotlin/Wasm com Compose Multiplatform (pt-BR, acessível e responsiva), num build Gradle próprio em [`web/`](web/). Cobre cadastro e login, painel, depósito, compra, meus investimentos, resgate, extrato e mercado, sempre consumindo a API acima.
+
+```bash
+docker compose --profile stub up -d --build   # API + stub de cotação + cliente web
+```
+
+Abra http://localhost:8081. O nginx do cliente serve o bundle e encaminha `/api/` à API na mesma origem, sem CORS. Requer um navegador com WasmGC (versões atuais de Chrome/Edge, Firefox e Safari); nos demais, a página mostra uma mensagem em pt-BR.
+
+```bash
+cd web
+./gradlew check                                   # testes de :core, :state, :data e :ui, ktlint e detekt
+./gradlew :e2e:e2eTest                            # E2E (Playwright + axe) contra a stack em http://localhost:8081
+./gradlew :e2e:e2eTest -Pbrowsers=chromium        # só um navegador
+```
+
+> [!NOTE]
+> Na primeira execução do E2E, instale os navegadores do Playwright: `./gradlew -q :e2e:testClasses && java -cp "$(./gradlew -q :e2e:printTestClasspath)" com.microsoft.playwright.CLI install --with-deps`.
+
+Documentação: [spec](specs/002-frontend-web/spec.md), [plano](specs/002-frontend-web/plan.md), [pesquisa](specs/002-frontend-web/research.md), [rotas de UI](specs/002-frontend-web/contracts/ui-routes.md) e [quickstart](specs/002-frontend-web/quickstart.md).
+
 ## Desenvolvimento
 
 ```bash
@@ -152,7 +175,7 @@ docker build -t kotlinbitcoins:local .
 > [!IMPORTANT]
 > Os testes de integração usam Testcontainers (PostgreSQL e RabbitMQ), então o Docker precisa estar rodando.
 
-Os testes cobrem contrato de cada `code` de erro, isolamento entre clientes, concorrência em compras e resgates, invariantes do ledger e mascaramento de dados sensíveis nos logs. O CI ([ci.yml](.github/workflows/ci.yml)) executa `check` e o build da imagem a cada push e pull request.
+Os testes cobrem contrato de cada `code` de erro, isolamento entre clientes, concorrência em compras e resgates, invariantes do ledger e mascaramento de dados sensíveis nos logs. O CI ([ci.yml](.github/workflows/ci.yml)) executa `check` e o build da imagem da API (`build`) e do cliente web (`web`), e os E2E do cliente sobre a stack completa (`web-e2e`), a cada push e pull request.
 
 ## Documentação
 

@@ -6,6 +6,7 @@ import com.microsoft.playwright.BrowserType
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Playwright
+import com.microsoft.playwright.options.ScreenshotCaret
 import com.microsoft.playwright.options.WaitForSelectorState
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -117,11 +118,26 @@ class AppPage(
         page.locator("#boot").waitFor(detached)
     }
 
+    /**
+     * A screenshot whose own CSP reports are left out: in WebKit, `page.screenshot` injects a `<style>` into the page
+     * (even with `caret: initial`), which the CSP of the app refuses. The reports raised during the capture go away.
+     */
+    fun screenshotOutsideCsp(): ByteArray {
+        val windowCount = (page.evaluate("() => (window.__cspViolations || []).length") as Number).toInt()
+        val consoleCount = consoleCspMessages.size
+        val png = page.screenshot(Page.ScreenshotOptions().setCaret(ScreenshotCaret.INITIAL))
+        page.waitForTimeout(CSP_REPORT_SETTLE_MS)
+        page.evaluate("n => { if (window.__cspViolations) window.__cspViolations.length = n; }", windowCount)
+        while (consoleCspMessages.size > consoleCount) consoleCspMessages.removeAt(consoleCspMessages.lastIndex)
+        return png
+    }
+
     @Suppress("UNCHECKED_CAST")
     fun cspViolations(): List<String> =
         (page.evaluate("() => window.__cspViolations || []") as List<String>) + consoleCspMessages
 
     private companion object {
         const val APP_START_TIMEOUT_MS = 30_000.0
+        const val CSP_REPORT_SETTLE_MS = 100.0
     }
 }

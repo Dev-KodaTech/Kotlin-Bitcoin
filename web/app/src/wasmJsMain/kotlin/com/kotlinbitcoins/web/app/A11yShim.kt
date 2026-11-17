@@ -16,6 +16,11 @@ import com.kotlinbitcoins.web.ui.components.FieldAccessibility
  * M4 (structure): first heading = level 1, others = 2; the canvas loses its abstract role; list children become
  *     `listitem` (a LazyColumn that also holds headings or controls loses the list role); other labelled role-less
  *     nodes become `group`.
+ * M5 (focus kept): when an action leaves a text field (e.g. Enter submits and the screen changes), its backing
+ *     `<input>` goes away and the DOM focus falls to `<body>`, while Compose already moved its own focus (e.g. to the
+ *     new h1, FR-046). The canvas gets the DOM focus back, keeping the Compose focus: on `focusout` (Chromium) or when
+ *     the focused field leaves the DOM (Firefox and WebKit fire no `focusout` then). Tab and Shift+Tab are left to
+ *     the browser (L8/L10 of W-00).
  * M1 (name of the field in the mirror) is done in :ui by `contentDescription`.
  */
 
@@ -53,7 +58,33 @@ import com.kotlinbitcoins.web.ui.components.FieldAccessibility
         const host = container.querySelector(':scope > div > div');
         if (!host || !host.shadowRoot) { requestAnimationFrame(install); return; }
         const shadow = host.shadowRoot;
-        shadow.addEventListener('focusin', (event) => apply(event.target), true);
+        const isField = (node) => !!(node && node.classList && node.classList.contains('compose-backing-field'));
+        let lastTabAt = -Infinity;
+        let focusedField = null;
+        const refocusCanvas = () => {
+            if (performance.now() - lastTabAt < 250) return;
+            requestAnimationFrame(() => {
+                const active = document.activeElement;
+                const canvas = shadow.querySelector('canvas');
+                if ((!active || active === document.body) && canvas) canvas.focus({ preventScroll: true });
+            });
+        };
+        shadow.addEventListener('focusin', (event) => {
+            focusedField = isField(event.target) ? event.target : null;
+            apply(event.target);
+        }, true);
+        shadow.addEventListener('keydown', (event) => { if (event.key === 'Tab') lastTabAt = performance.now(); }, true);
+        // Chromium fires focusout when the focused field is removed; Firefox and WebKit do not, hence the observer.
+        shadow.addEventListener('focusout', (event) => {
+            if (!isField(event.target) || event.relatedTarget) return;
+            refocusCanvas();
+        }, true);
+        new MutationObserver(() => {
+            if (focusedField && !focusedField.isConnected) {
+                focusedField = null;
+                refocusCanvas();
+            }
+        }).observe(shadow, { subtree: true, childList: true });
         const repair = () => {
             const mirror = shadow.getElementById('cmp_a11y_root');
             if (!mirror) return;

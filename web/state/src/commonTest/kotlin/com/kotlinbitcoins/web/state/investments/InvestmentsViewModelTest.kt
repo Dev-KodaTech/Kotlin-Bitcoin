@@ -118,6 +118,9 @@ class InvestmentsViewModelTest {
 
             gateways.positionResult = Outcome.Success(position(total = "704.00", investments = 3))
             viewModel.onRetry()
+
+            // "Tentar de novo" shows the loading state until the answer, as the other screens do.
+            assertEquals(Loadable.Loading, viewModel.uiState.value.position)
             runCurrent()
 
             assertIs<Loadable.Loaded<Position>>(viewModel.uiState.value.position)

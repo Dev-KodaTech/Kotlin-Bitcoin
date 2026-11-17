@@ -70,8 +70,12 @@ class InvestmentsViewModel(
         refresher.start(this.scope)
     }
 
-    /** "Tentar de novo" of the unavailable quote or of an error: the position is read again at once. */
+    /**
+     * "Tentar de novo" of the unavailable quote or of an error: the position is read again at once, with the loading
+     * state until the answer (the periodic refresh keeps the values instead).
+     */
     fun onRetry() {
+        mutableState.update { it.copy(position = Loadable.Loading) }
         this.scope.launch { refreshPosition() }
     }
 

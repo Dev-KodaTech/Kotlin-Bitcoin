@@ -113,6 +113,13 @@
       "realScenario": "balanceWithoutToken"
     },
     {
+      "file": "success/limits-me-balance-200.json",
+      "method": "GET",
+      "path": "/me/balance",
+      "status": 200,
+      "scenario": "limits@GET /me/balance"
+    },
+    {
       "file": "success/me-deposits-201.json",
       "method": "POST",
       "path": "/me/deposits",
@@ -231,6 +238,13 @@
       "path": "/me/investments",
       "status": 503,
       "scenario": "service-unavailable@GET /me/investments"
+    },
+    {
+      "file": "success/limits-me-investments-200.json",
+      "method": "GET",
+      "path": "/me/investments",
+      "status": 200,
+      "scenario": "limits@GET /me/investments"
     },
     {
       "file": "success/me-redemptions-201-partial.json",

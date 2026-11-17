@@ -36,3 +36,11 @@ tasks.register<Test>("e2eTest") {
     // The result depends on the external stack, never on the inputs alone.
     outputs.upToDateWhen { false }
 }
+
+// Classpath of the tests, for `java -cp … com.microsoft.playwright.CLI install --with-deps` in CI (T223).
+tasks.register("printTestClasspath") {
+    description = "Prints the runtime classpath of the E2E tests."
+    group = "help"
+    val classpath = sourceSets.test.get().runtimeClasspath
+    doLast { println(classpath.asPath) }
+}

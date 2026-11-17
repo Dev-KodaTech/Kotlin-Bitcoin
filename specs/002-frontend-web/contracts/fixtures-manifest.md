@@ -27,7 +27,8 @@ web/contract-fixtures/
 │   ├── me-statement-200.json            # com grupo de resgate (2 resgates + 1 reinvestimento)
 │   ├── me-statement-200-empty.json
 │   ├── market-daily-volume-200.json
-│   └── limits-200.json                  # R$ 99999999999.99 e 0.00000001 BTC (SC-002), por operação
+│   ├── limits-me-balance-200.json       # limites (SC-002): R$ 99999999999.99
+│   └── limits-me-investments-200.json   # limites (SC-002): 0.00000001 BTC e cotação com 8 casas
 └── problem/
     ├── VALIDATION_ERROR.json
     ├── INVALID_AMOUNT.json

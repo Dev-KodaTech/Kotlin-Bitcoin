@@ -82,7 +82,7 @@ cd web
 ./gradlew :e2e:e2eTest -Pbrowsers=chromium   # rápido
 ```
 
-Suítes (pacotes em `web/e2e/src/test/kotlin/.../`): `auth` (US1, retorno com filtro, destino externo recusado, multiaba, expiração via `clock` e 401 → SC-009), `operations` (US3, US4, US6, envio duplicado → SC-004, resultado incerto), `dashboard` (auto-refresh, pausa, aba oculta, SC-005, SC-006), `statement`, `market`, `layout` (320–1920 px e zoom 200% → SC-008) e `a11y` (axe em cada tela e estado → parte automatizável de SC-007). Relatórios ficam em `web/e2e/build/reports/`.
+Suítes (pacotes em `web/e2e/src/test/kotlin/.../`): `auth` (US1, retorno com filtro, destino externo recusado, multiaba, expiração via `clock` e 401 → SC-009), `operations` (US3, US4, US6, envio duplicado → SC-004, resultado incerto), `dashboard` (auto-refresh, pausa, aba oculta, SC-005, SC-006), `investments`, `statement`, `market`, `layout` (320–1920 px e zoom 200% → SC-008), `a11y` (axe em cada tela e estado nos temas claro e escuro com movimento reduzido, e todos os fluxos só com teclado → parte automatizável de SC-007), `security` (token só no `sessionStorage` e no header `Authorization` → FR-008), `performance` (perfil "4G típico" e tamanho do bundle → SC-010, só Chromium) e `smoke`. Relatórios ficam em `web/e2e/build/reports/`.
 
 ## 6. Checklist manual de acessibilidade (SC-007; antes de cada release)
 

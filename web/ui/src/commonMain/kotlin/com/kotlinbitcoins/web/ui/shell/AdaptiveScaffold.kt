@@ -32,6 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.selected
@@ -91,13 +96,21 @@ private fun CompactLayout(
     val close: () -> Unit = { scope.launch { drawerState.close() } }
     ModalNavigationDrawer(
         drawerState = drawerState,
+        // Escape closes the open menu, as any modal (the drawer of Material 3 does not handle it on the web).
+        modifier =
+            Modifier.onPreviewKeyEvent { event ->
+                val isEscape = event.key == Key.Escape && event.type == KeyEventType.KeyDown
+                if (isEscape && drawerState.isOpen) close()
+                isEscape && drawerState.isOpen
+            },
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.semantics { paneTitle = closeMenu }) {
                 DrawerItems(
                     current = current,
                     onNavigate = {
                         close()
-                        onNavigate(it)
+                        // The current page only closes the menu: navigating to it again keeps this drawer open.
+                        if (it != current) onNavigate(it)
                     },
                     onLogout = {
                         close()

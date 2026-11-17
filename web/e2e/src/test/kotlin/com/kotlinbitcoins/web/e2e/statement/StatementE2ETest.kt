@@ -192,6 +192,21 @@ class StatementE2ETest : E2eBase() {
 
     @ParameterizedTest
     @MethodSource("browsers")
+    fun `a filter typed in the address bar with the statement on screen loads its period`(browserName: String) {
+        val email = accountWithRedemption()
+        withPage(browserName, viewport = TALL) {
+            openStatement(email)
+            waitForCards(EXPECTED_CARDS)
+
+            page.evaluate("f => { location.hash = f }", "#/extrato?de=2020-01-01&ate=2020-01-02")
+
+            page.getByText("Nenhum lançamento no período de 01/01/2020 00:00 a ").first().waitFor()
+            assertThat(cards().count()).isZero()
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("browsers")
     fun `expiry with a filter returns to the statement with the same filter after login`(browserName: String) {
         val email = accountWithRedemption()
         val filtered = "#/extrato?de=${todayIso()}&ate=${todayIso()}"
