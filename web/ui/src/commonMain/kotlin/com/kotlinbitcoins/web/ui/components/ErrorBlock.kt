@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -34,7 +33,7 @@ fun ErrorBlock(
             )
         }
         if (onRetry != null) {
-            OutlinedButton(onClick = onRetry, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
+            SecondaryButton(onClick = onRetry, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
                 Text(stringResource(Res.string.retry))
             }
         }

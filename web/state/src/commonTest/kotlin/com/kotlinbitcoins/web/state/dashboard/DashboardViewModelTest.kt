@@ -3,6 +3,8 @@ package com.kotlinbitcoins.web.state.dashboard
 import com.kotlinbitcoins.web.core.error.ApiError
 import com.kotlinbitcoins.web.core.error.Outcome
 import com.kotlinbitcoins.web.core.model.Profile
+import com.kotlinbitcoins.web.core.model.QuoteHistory
+import com.kotlinbitcoins.web.core.statement.StatementFilter
 import com.kotlinbitcoins.web.state.shared.Loadable
 import com.kotlinbitcoins.web.state.shared.QuoteState
 import com.kotlinbitcoins.web.state.support.FakeAnnouncer
@@ -10,9 +12,12 @@ import com.kotlinbitcoins.web.state.support.FakeAnnouncer.Announcement
 import com.kotlinbitcoins.web.state.support.FakeAnnouncer.Announcement.Polite
 import com.kotlinbitcoins.web.state.support.FakeDashboardGateways
 import com.kotlinbitcoins.web.state.support.FakePageVisibility
+import com.kotlinbitcoins.web.state.support.FakeStatementGateway
 import com.kotlinbitcoins.web.state.support.money
 import com.kotlinbitcoins.web.state.support.position
 import com.kotlinbitcoins.web.state.support.quote
+import com.kotlinbitcoins.web.state.support.sampleHistory
+import com.kotlinbitcoins.web.state.support.statement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -32,6 +37,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class DashboardViewModelTest {
     private val gateways = FakeDashboardGateways()
+    private val statements = FakeStatementGateway()
     private val visibility = FakePageVisibility()
     private val announcer = FakeAnnouncer()
     private var texts = TEXTS
@@ -52,6 +58,7 @@ class DashboardViewModelTest {
             accountGateway = gateways,
             quoteGateway = gateways,
             investmentGateway = gateways,
+            statementGateway = statements,
             pageVisibility = visibility,
             announcer = announcer,
             texts = { texts },
@@ -266,6 +273,81 @@ class DashboardViewModelTest {
             assertEquals(QuoteState.Available(quote()), viewModel.uiState.value.quote)
             assertEquals(2, gateways.quoteCalls)
             assertEquals(2, gateways.positionCalls)
+        }
+
+    @Test
+    fun theInvestmentsFollowThePositionAndGoAwayWithAnUnavailableQuote() =
+        runTest {
+            val viewModel = viewModel()
+            assertEquals(position(total = "704.00", investments = 3).investments, viewModel.uiState.value.investments)
+
+            gateways.positionResult = Outcome.Failure(ApiError.QuoteUnavailable)
+            advance(REFRESH_MS)
+
+            assertEquals(PositionTotal.DependsOnQuote, viewModel.uiState.value.position)
+            assertTrue(
+                viewModel.uiState.value.investments
+                    .isEmpty(),
+            )
+        }
+
+    @Test
+    fun theNewestEntriesOfTheDefaultPeriodAreShown() =
+        runTest {
+            val state = viewModel().uiState.value
+
+            assertEquals(listOf<StatementFilter>(StatementFilter.Default), statements.filters)
+            assertEquals(Loadable.Loaded(statement().entries.take(4)), state.recent)
+        }
+
+    @Test
+    fun aStatementWithoutEntriesIsTheEmptyState() =
+        runTest {
+            statements.result = Outcome.Success(statement(entries = emptyList()))
+            assertEquals(Loadable.Empty, viewModel().uiState.value.recent)
+        }
+
+    @Test
+    fun theNewestEntriesFailAloneAndCanBeRetried() =
+        runTest {
+            statements.result = Outcome.Failure(ApiError.NoConnection)
+            val viewModel = viewModel()
+            assertEquals(Loadable.Failed(ApiError.NoConnection), viewModel.uiState.value.recent)
+            assertEquals(Loadable.Loaded(money("1234.56")), viewModel.uiState.value.balance)
+            statements.result = Outcome.Success(statement())
+
+            viewModel.onRetryRecent()
+            runCurrent()
+
+            assertIs<Loadable.Loaded<*>>(viewModel.uiState.value.recent)
+            assertEquals(2, statements.filters.size)
+        }
+
+    @Test
+    fun thePriceChartLoadsOnceIsEmptyWithoutPointsAndCanBeRetried() =
+        runTest {
+            gateways.historyResult = Outcome.Success(QuoteHistory(emptyList()))
+            val viewModel = viewModel()
+            assertEquals(Loadable.Empty, viewModel.uiState.value.history)
+            advance(REFRESH_MS)
+            assertEquals(1, gateways.historyCalls)
+            gateways.historyResult = Outcome.Success(sampleHistory())
+
+            viewModel.onRetryHistory()
+            runCurrent()
+
+            assertIs<Loadable.Loaded<*>>(viewModel.uiState.value.history)
+            assertEquals(2, gateways.historyCalls)
+        }
+
+    @Test
+    fun aFailedPriceChartFailsAlone() =
+        runTest {
+            gateways.historyResult = Outcome.Failure(ApiError.ServiceUnavailable)
+            val state = viewModel().uiState.value
+
+            assertEquals(Loadable.Failed(ApiError.ServiceUnavailable), state.history)
+            assertIs<QuoteState.Available>(state.quote)
         }
 
     private companion object {

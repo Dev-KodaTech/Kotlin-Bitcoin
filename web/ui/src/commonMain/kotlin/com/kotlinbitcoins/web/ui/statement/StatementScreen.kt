@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -11,9 +12,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,8 +31,13 @@ import com.kotlinbitcoins.web.state.statement.StatementUiState
 import com.kotlinbitcoins.web.ui.components.ErrorBlock
 import com.kotlinbitcoins.web.ui.components.FormTextField
 import com.kotlinbitcoins.web.ui.components.LoadingIndicator
+import com.kotlinbitcoins.web.ui.components.LocalDenseLayout
 import com.kotlinbitcoins.web.ui.components.MinTouchTarget
+import com.kotlinbitcoins.web.ui.components.PageBottomPadding
 import com.kotlinbitcoins.web.ui.components.PageHeading
+import com.kotlinbitcoins.web.ui.components.PrimaryButton
+import com.kotlinbitcoins.web.ui.components.SecondaryButton
+import com.kotlinbitcoins.web.ui.components.SectionCard
 import com.kotlinbitcoins.web.ui.components.focusOutline
 import com.kotlinbitcoins.web.ui.resources.Res
 import com.kotlinbitcoins.web.ui.resources.brasilia_time
@@ -52,7 +56,7 @@ import com.kotlinbitcoins.web.ui.shared.message
 import com.kotlinbitcoins.web.ui.theme.numeric
 import org.jetbrains.compose.resources.stringResource
 
-private val DateFieldWidth = 220.dp
+private val DateFieldWidth = 200.dp
 
 /**
  * Extrato (US7): h1, the period really queried (FR-026), the filter form with two dd/mm/aaaa fields whose invalid
@@ -67,7 +71,8 @@ fun StatementScreen(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(bottom = PageBottomPadding),
+        verticalArrangement = Arrangement.spacedBy(if (LocalDenseLayout.current) 12.dp else 16.dp),
     ) {
         item { PageHeading(stringResource(Res.string.page_statement)) }
         item { FilterForm(state, actions) }
@@ -91,12 +96,7 @@ private fun FilterForm(
     LaunchedEffect(state.filterErrorId) {
         if (state.filterErrorId != initialErrorId && state.filterError != null) fromFocus.requestFocus()
     }
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = stringResource(Res.string.statement_filter),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.semantics { heading() },
-        )
+    SectionCard(title = stringResource(Res.string.statement_filter)) {
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -129,11 +129,11 @@ private fun FilterForm(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Button(
+            PrimaryButton(
                 onClick = actions.onApplyFilter,
                 modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline(),
             ) { Text(stringResource(Res.string.statement_apply)) }
-            OutlinedButton(
+            SecondaryButton(
                 onClick = actions.onClearFilter,
                 modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline(),
             ) { Text(stringResource(Res.string.statement_clear)) }

@@ -55,6 +55,7 @@ class MarketE2ETest : E2eBase() {
             page.getByText("0,00300000 BTC").waitFor()
             page.getByText("0,00050000 BTC").waitFor()
             page.getByText("BTC comprados").first().waitFor()
+            page.getByText("BTC vendidos").first().waitFor()
             assertThat(page.getByText("BTC comprados").count()).isEqualTo(1)
             assertThat(page.getByText("BTC vendidos").count()).isEqualTo(1)
         }
@@ -83,9 +84,11 @@ class MarketE2ETest : E2eBase() {
             ui.click(ui.button("Ver dados em tabela"))
             ui.button("Ocultar tabela").waitFor()
             labelled("08/11/2026 08:20: compra R$ 398.000,00, venda R$ 399.000,00").waitFor()
-            scrollUntilVisible(labelled("09/11/2026 02:00: sem registro"))
-            assertThat(labelled("09/11/2026 01:50: compra ", prefix = true).count()).isEqualTo(1)
-            assertThat(labelled("09/11/2026 02:10: compra ", prefix = true).count()).isEqualTo(1)
+            val before = labelled("09/11/2026 01:50: compra ", prefix = true)
+            val after = labelled("09/11/2026 02:10: compra ", prefix = true)
+            scrollUntilVisible(labelled("09/11/2026 02:00: sem registro"), before, after)
+            assertThat(before.count()).isEqualTo(1)
+            assertThat(after.count()).isEqualTo(1)
             Axe.assertNoViolations(page)
         }
     }
@@ -177,14 +180,30 @@ class MarketE2ETest : E2eBase() {
         return locator.getAttribute("aria-label").orEmpty().replace(' ', ' ')
     }
 
-    private fun AppPage.scrollUntilVisible(target: Locator) {
+    /**
+     * Scrolls down until [target] is in the mirror. The list may stop with the target at an edge (the end of the
+     * table puts the gap at the top), its neighbour outside: then it moves half a screen back towards that
+     * neighbour and waits for the mirror to show [before] and [after].
+     */
+    private fun AppPage.scrollUntilVisible(
+        target: Locator,
+        before: Locator,
+        after: Locator,
+    ) {
         page.mouse().move(SCROLL_X, SCROLL_Y)
         repeat(MAX_SCROLLS) {
-            if (target.count() > 0) return
+            if (target.count() > 0) return@repeat
             page.mouse().wheel(0.0, SCROLL_STEP)
             page.waitForTimeout(SCROLL_SETTLE_MS)
         }
         assertThat(target.count()).describedAs("row reached by scrolling").isPositive()
+        when {
+            before.count() == 0 -> page.mouse().wheel(0.0, -SCROLL_STEP)
+            after.count() == 0 -> page.mouse().wheel(0.0, SCROLL_STEP)
+            else -> return
+        }
+        before.first().waitFor()
+        after.first().waitFor()
     }
 
     private fun clipOf(locator: Locator): Page.ScreenshotOptions {

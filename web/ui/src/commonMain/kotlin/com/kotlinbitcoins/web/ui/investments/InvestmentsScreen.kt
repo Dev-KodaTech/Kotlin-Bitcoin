@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -13,8 +14,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,11 +29,15 @@ import com.kotlinbitcoins.web.core.model.Position
 import com.kotlinbitcoins.web.core.navigation.AppRoute
 import com.kotlinbitcoins.web.state.investments.InvestmentsUiState
 import com.kotlinbitcoins.web.state.shared.Loadable
+import com.kotlinbitcoins.web.ui.components.AppCard
+import com.kotlinbitcoins.web.ui.components.CardPadding
 import com.kotlinbitcoins.web.ui.components.ErrorBlock
 import com.kotlinbitcoins.web.ui.components.LoadingIndicator
 import com.kotlinbitcoins.web.ui.components.MinTouchTarget
+import com.kotlinbitcoins.web.ui.components.PageBottomPadding
 import com.kotlinbitcoins.web.ui.components.PageHeading
 import com.kotlinbitcoins.web.ui.components.PauseToggle
+import com.kotlinbitcoins.web.ui.components.PrimaryButton
 import com.kotlinbitcoins.web.ui.components.VariationBadge
 import com.kotlinbitcoins.web.ui.components.focusOutline
 import com.kotlinbitcoins.web.ui.components.spokenText
@@ -55,6 +58,7 @@ import com.kotlinbitcoins.web.ui.resources.page_investments
 import com.kotlinbitcoins.web.ui.resources.quote_at
 import com.kotlinbitcoins.web.ui.resources.quote_unavailable
 import com.kotlinbitcoins.web.ui.shared.message
+import com.kotlinbitcoins.web.ui.theme.LocalExtendedColors
 import com.kotlinbitcoins.web.ui.theme.numeric
 import org.jetbrains.compose.resources.stringResource
 
@@ -74,6 +78,7 @@ fun InvestmentsScreen(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = PageBottomPadding),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item { PageHeading(stringResource(Res.string.page_investments)) }
@@ -115,14 +120,14 @@ private fun LazyListScope.positionContent(
 
 @Composable
 private fun Summary(position: Position) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    AppCard(modifier = Modifier.fillMaxWidth(), color = LocalExtendedColors.current.tint) {
+        Column(modifier = Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = stringResource(Res.string.investments_total),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.semantics { heading() },
             )
-            Text(position.totalCurrentValue.format(), style = MaterialTheme.typography.headlineSmall.numeric())
+            Text(position.totalCurrentValue.format(), style = MaterialTheme.typography.headlineMedium)
             Text(
                 text =
                     "${stringResource(Res.string.investments_reference_quote)}: ${position.quote.buyPrice.format()}",
@@ -155,7 +160,7 @@ private fun InvestmentCard(investment: InvestmentPosition) {
             investment.variationPercent.spokenText(),
             investment.currentValue.format(),
         )
-    Card(
+    AppCard(
         modifier =
             Modifier
                 .fillMaxWidth()
@@ -164,7 +169,7 @@ private fun InvestmentCard(investment: InvestmentPosition) {
                 .clearAndSetSemantics { contentDescription = description },
     ) {
         FlowRow(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(CardPadding),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -205,7 +210,7 @@ private fun valueStyle() = MaterialTheme.typography.bodyLarge.numeric()
 private fun EmptyState(onBuy: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(Res.string.investments_empty), style = MaterialTheme.typography.bodyLarge)
-        Button(onClick = onBuy, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
+        PrimaryButton(onClick = onBuy, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
             Text(stringResource(Res.string.investments_buy))
         }
     }

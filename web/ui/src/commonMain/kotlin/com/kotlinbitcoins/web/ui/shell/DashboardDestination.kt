@@ -39,6 +39,8 @@ internal fun DashboardDestination(
             DashboardActions(
                 onRetryBalance = viewModel::onRetryBalance,
                 onRetryQuote = viewModel::onRetryQuote,
+                onRetryHistory = viewModel::onRetryHistory,
+                onRetryRecent = viewModel::onRetryRecent,
                 onToggleAutoRefresh = viewModel::onToggleAutoRefresh,
                 onNavigate = onNavigate,
             ),

@@ -1,10 +1,12 @@
 package com.kotlinbitcoins.web.ui.shell
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.toRoute
 import com.kotlinbitcoins.web.core.navigation.AppRoute
+import com.kotlinbitcoins.web.ui.icons.AppIcons
 import com.kotlinbitcoins.web.ui.resources.Res
 import com.kotlinbitcoins.web.ui.resources.nav_dashboard
 import com.kotlinbitcoins.web.ui.resources.nav_deposit
@@ -29,17 +31,18 @@ import org.jetbrains.compose.resources.stringResource
 internal data class NavDestinationItem(
     val route: AppRoute,
     val label: StringResource,
+    val icon: ImageVector,
 )
 
 internal val navigationItems =
     listOf(
-        NavDestinationItem(AppRoute.Dashboard, Res.string.nav_dashboard),
-        NavDestinationItem(AppRoute.Deposit, Res.string.nav_deposit),
-        NavDestinationItem(AppRoute.Purchase, Res.string.nav_purchase),
-        NavDestinationItem(AppRoute.Investments, Res.string.nav_investments),
-        NavDestinationItem(AppRoute.Redemption, Res.string.nav_redemption),
-        NavDestinationItem(AppRoute.Statement(), Res.string.nav_statement),
-        NavDestinationItem(AppRoute.Market, Res.string.nav_market),
+        NavDestinationItem(AppRoute.Dashboard, Res.string.nav_dashboard, AppIcons.Home),
+        NavDestinationItem(AppRoute.Deposit, Res.string.nav_deposit, AppIcons.Deposit),
+        NavDestinationItem(AppRoute.Purchase, Res.string.nav_purchase, AppIcons.Purchase),
+        NavDestinationItem(AppRoute.Investments, Res.string.nav_investments, AppIcons.Investments),
+        NavDestinationItem(AppRoute.Redemption, Res.string.nav_redemption, AppIcons.Redemption),
+        NavDestinationItem(AppRoute.Statement(), Res.string.nav_statement, AppIcons.Statement),
+        NavDestinationItem(AppRoute.Market, Res.string.nav_market, AppIcons.Market),
     )
 
 /** Same menu item for every statement filter. */

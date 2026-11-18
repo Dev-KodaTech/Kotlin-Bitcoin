@@ -10,10 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,14 +35,20 @@ import com.kotlinbitcoins.web.state.shared.OperationInputError
 import com.kotlinbitcoins.web.state.shared.OperationState
 import com.kotlinbitcoins.web.state.shared.QuoteState
 import com.kotlinbitcoins.web.ui.components.AmountField
+import com.kotlinbitcoins.web.ui.components.AppCard
+import com.kotlinbitcoins.web.ui.components.CardPadding
 import com.kotlinbitcoins.web.ui.components.ErrorBlock
 import com.kotlinbitcoins.web.ui.components.EstimateCard
 import com.kotlinbitcoins.web.ui.components.EstimateDisplay
 import com.kotlinbitcoins.web.ui.components.FocusOnArrival
 import com.kotlinbitcoins.web.ui.components.LoadableBlock
 import com.kotlinbitcoins.web.ui.components.MinTouchTarget
+import com.kotlinbitcoins.web.ui.components.PageBottomPadding
 import com.kotlinbitcoins.web.ui.components.PageHeading
 import com.kotlinbitcoins.web.ui.components.PauseToggle
+import com.kotlinbitcoins.web.ui.components.PrimaryButton
+import com.kotlinbitcoins.web.ui.components.SecondaryButton
+import com.kotlinbitcoins.web.ui.components.SectionCard
 import com.kotlinbitcoins.web.ui.components.SubmitButton
 import com.kotlinbitcoins.web.ui.components.UncertainOutcomeBlock
 import com.kotlinbitcoins.web.ui.components.focusOutline
@@ -72,6 +75,7 @@ import com.kotlinbitcoins.web.ui.resources.purchase_result_title
 import com.kotlinbitcoins.web.ui.resources.purchase_review
 import com.kotlinbitcoins.web.ui.shared.ErrorContext
 import com.kotlinbitcoins.web.ui.shared.message
+import com.kotlinbitcoins.web.ui.theme.LocalExtendedColors
 import com.kotlinbitcoins.web.ui.theme.numeric
 import org.jetbrains.compose.resources.stringResource
 
@@ -93,8 +97,12 @@ fun PurchaseScreen(
     val operation = state.operation
     SideEffect { if (operation !is OperationState.Editing) leftEditing = true }
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()).widthIn(max = MaxContentWidth),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier =
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .widthIn(max = MaxContentWidth)
+                .padding(bottom = PageBottomPadding),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         PageHeading(stringResource(Res.string.page_purchase))
 
@@ -146,20 +154,22 @@ private fun PurchaseForm(
     LaunchedEffect(Unit) { if (focusOnShow) fieldFocus.requestFocus() }
 
     BalanceBlock(state.balance, actions.page.onRetryBalance)
-    AmountField(
-        value = editing.input,
-        onValueChange = actions.onAmountChange,
-        label = stringResource(Res.string.purchase_amount),
-        error = editing.inputError?.let { inputErrorMessage(it) },
-        focusRequester = fieldFocus,
-        onDone = actions.onReview,
-    )
-    SubmitButton(
-        text = stringResource(Res.string.purchase_review),
-        isSubmitting = false,
-        onClick = actions.onReview,
-        modifier = Modifier.fillMaxWidth(),
-    )
+    SectionCard {
+        AmountField(
+            value = editing.input,
+            onValueChange = actions.onAmountChange,
+            label = stringResource(Res.string.purchase_amount),
+            error = editing.inputError?.let { inputErrorMessage(it) },
+            focusRequester = fieldFocus,
+            onDone = actions.onReview,
+        )
+        SubmitButton(
+            text = stringResource(Res.string.purchase_review),
+            isSubmitting = false,
+            onClick = actions.onReview,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -192,7 +202,7 @@ private fun PurchaseReview(
             onClick = actions.onConfirm,
         )
         if (!review.isSubmitting) {
-            OutlinedButton(
+            SecondaryButton(
                 onClick = actions.onEdit,
                 modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline(),
             ) {
@@ -224,8 +234,8 @@ private fun PurchaseSucceeded(
     result: PurchaseResult,
     onNewPurchase: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             FocusOnArrival(enabled = true) { arrivalModifier ->
                 Text(
                     text = stringResource(Res.string.purchase_result_title),
@@ -243,7 +253,7 @@ private fun PurchaseSucceeded(
             ResultLine(stringResource(Res.string.purchase_new_balance), result.balance.format())
         }
     }
-    Button(onClick = onNewPurchase, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
+    PrimaryButton(onClick = onNewPurchase, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
         Text(stringResource(Res.string.purchase_new))
     }
 }
@@ -273,11 +283,11 @@ private fun PurchaseRejected(
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val buttonModifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()
         if (error == ApiError.InsufficientBalance) {
-            Button(onClick = { actions.page.onNavigate(AppRoute.Deposit) }, modifier = buttonModifier) {
+            PrimaryButton(onClick = { actions.page.onNavigate(AppRoute.Deposit) }, modifier = buttonModifier) {
                 Text(stringResource(Res.string.purchase_deposit))
             }
         }
-        OutlinedButton(onClick = actions.onEdit, modifier = buttonModifier) {
+        SecondaryButton(onClick = actions.onEdit, modifier = buttonModifier) {
             Text(stringResource(Res.string.purchase_edit))
         }
     }
@@ -288,12 +298,10 @@ private fun BalanceBlock(
     balance: Loadable<Money>,
     onRetry: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            text = stringResource(Res.string.purchase_available_balance),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.semantics { heading() },
-        )
+    SectionCard(
+        title = stringResource(Res.string.purchase_available_balance),
+        color = LocalExtendedColors.current.tint,
+    ) {
         LoadableBlock(balance, onRetry = onRetry) { value ->
             Text(value.format(), style = MaterialTheme.typography.headlineSmall.numeric())
         }

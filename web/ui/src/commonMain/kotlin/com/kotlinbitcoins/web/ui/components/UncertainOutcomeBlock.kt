@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +42,7 @@ fun UncertainOutcomeBlock(
         shape = MaterialTheme.shapes.medium,
         modifier = modifier.fillMaxWidth(),
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(modifier = Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             FocusOnArrival(enabled = true) { arrivalModifier ->
                 Text(text = message, style = MaterialTheme.typography.bodyLarge, modifier = arrivalModifier)
             }
@@ -52,10 +51,10 @@ fun UncertainOutcomeBlock(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 val buttonModifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()
-                OutlinedButton(onClick = onViewBalance, modifier = buttonModifier) {
+                SecondaryButton(onClick = onViewBalance, modifier = buttonModifier) {
                     Text(stringResource(Res.string.error_uncertain_balance_link))
                 }
-                OutlinedButton(onClick = onViewStatement, modifier = buttonModifier) {
+                SecondaryButton(onClick = onViewStatement, modifier = buttonModifier) {
                     Text(stringResource(Res.string.error_uncertain_statement_link))
                 }
             }

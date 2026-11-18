@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,10 +14,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,10 +32,17 @@ import com.kotlinbitcoins.web.core.model.DailyVolume
 import com.kotlinbitcoins.web.state.market.MarketUiState
 import com.kotlinbitcoins.web.state.shared.Loadable
 import com.kotlinbitcoins.web.ui.chart.PriceHistoryChart
+import com.kotlinbitcoins.web.ui.chart.chartSummary
+import com.kotlinbitcoins.web.ui.components.AppCard
+import com.kotlinbitcoins.web.ui.components.CardPadding
 import com.kotlinbitcoins.web.ui.components.ErrorBlock
 import com.kotlinbitcoins.web.ui.components.LoadingIndicator
 import com.kotlinbitcoins.web.ui.components.MinTouchTarget
+import com.kotlinbitcoins.web.ui.components.PageBottomPadding
 import com.kotlinbitcoins.web.ui.components.PageHeading
+import com.kotlinbitcoins.web.ui.components.SecondaryButton
+import com.kotlinbitcoins.web.ui.components.SectionCard
+import com.kotlinbitcoins.web.ui.components.SectionTitle
 import com.kotlinbitcoins.web.ui.components.focusOutline
 import com.kotlinbitcoins.web.ui.resources.Res
 import com.kotlinbitcoins.web.ui.resources.market_bought
@@ -78,6 +84,7 @@ fun MarketScreen(
     val chart = (state.history as? Loadable.Loaded<ChartData>)?.value
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = PageBottomPadding),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item { PageHeading(stringResource(Res.string.page_market)) }
@@ -94,7 +101,7 @@ private fun RefreshRow(
     onRefresh: () -> Unit,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-        OutlinedButton(onClick = onRefresh, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
+        SecondaryButton(onClick = onRefresh, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
             Text(stringResource(Res.string.market_refresh))
         }
         if (isRefreshing) {
@@ -124,8 +131,8 @@ private fun VolumeBlock(
         }
 
         is Loadable.Loaded -> {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            AppCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SectionTitle(stringResource(Res.string.market_volume_title, volume.value.date.toUserString()))
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(24.dp),
@@ -146,8 +153,7 @@ private fun ChartBlock(
     isTableVisible: Boolean,
     actions: MarketActions,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SectionTitle(stringResource(Res.string.market_chart_title))
+    SectionCard(title = stringResource(Res.string.market_chart_title)) {
         when (history) {
             Loadable.Loading -> {
                 LoadingIndicator()
@@ -163,7 +169,7 @@ private fun ChartBlock(
 
             is Loadable.Loaded -> {
                 PriceHistoryChart(history.value, chartSummary(history.value), modifier = Modifier.fillMaxWidth())
-                OutlinedButton(
+                SecondaryButton(
                     onClick = actions.onToggleTable,
                     modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline(),
                 ) {
@@ -177,29 +183,6 @@ private fun ChartBlock(
         }
     }
 }
-
-/** "Gráfico … Preço de compra: mínimo R$ …, máximo R$ …, último R$ … às 08:10. Preço de venda: …" (FR-034). */
-@Composable
-private fun chartSummary(chart: ChartData): String =
-    stringResource(
-        Res.string.market_summary,
-        seriesSummary(stringResource(Res.string.market_buy_price), chart.summary.buy),
-        seriesSummary(stringResource(Res.string.market_sell_price), chart.summary.sell),
-    )
-
-@Composable
-private fun seriesSummary(
-    name: String,
-    summary: SeriesSummary,
-): String =
-    stringResource(
-        Res.string.market_series_summary,
-        name,
-        summary.min.format(),
-        summary.max.format(),
-        summary.last.price.format(),
-        summary.last.at.formatTime(),
-    )
 
 /** Header and one row per slot; each row is read at once ("09/11/2026 02:00: sem registro"). */
 private fun LazyListScope.tableRows(chart: ChartData) {
@@ -272,11 +255,6 @@ private fun rowKey(row: TableRow): String =
             row.slotAt.instant.toString()
         }
     }
-
-@Composable
-private fun SectionTitle(text: String) {
-    Text(text = text, style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
-}
 
 @Composable
 private fun LabeledValue(

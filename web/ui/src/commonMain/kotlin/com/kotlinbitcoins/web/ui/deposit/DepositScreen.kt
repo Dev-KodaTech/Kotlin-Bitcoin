@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,10 +30,15 @@ import com.kotlinbitcoins.web.state.deposit.DepositUiState
 import com.kotlinbitcoins.web.state.shared.OperationInputError
 import com.kotlinbitcoins.web.state.shared.OperationState
 import com.kotlinbitcoins.web.ui.components.AmountField
+import com.kotlinbitcoins.web.ui.components.AppCard
+import com.kotlinbitcoins.web.ui.components.CardPadding
 import com.kotlinbitcoins.web.ui.components.ErrorBlock
 import com.kotlinbitcoins.web.ui.components.FocusOnArrival
 import com.kotlinbitcoins.web.ui.components.MinTouchTarget
+import com.kotlinbitcoins.web.ui.components.PageBottomPadding
 import com.kotlinbitcoins.web.ui.components.PageHeading
+import com.kotlinbitcoins.web.ui.components.PrimaryButton
+import com.kotlinbitcoins.web.ui.components.SectionCard
 import com.kotlinbitcoins.web.ui.components.SubmitButton
 import com.kotlinbitcoins.web.ui.components.UncertainOutcomeBlock
 import com.kotlinbitcoins.web.ui.components.focusOutline
@@ -70,8 +73,12 @@ fun DepositScreen(
         if (operation !is OperationState.Editing && operation !is OperationState.Submitting) hadOutcome = true
     }
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()).widthIn(max = MaxContentWidth),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier =
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .widthIn(max = MaxContentWidth)
+                .padding(bottom = PageBottomPadding),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         PageHeading(stringResource(Res.string.page_deposit))
 
@@ -127,21 +134,23 @@ private fun DepositForm(
     LaunchedEffect(attempt, form.inputError) { if (form.inputError != null) fieldFocus.requestFocus() }
     LaunchedEffect(Unit) { if (focusOnShow) fieldFocus.requestFocus() }
 
-    AmountField(
-        value = form.input,
-        onValueChange = actions.onAmountChange,
-        label = stringResource(Res.string.deposit_amount),
-        error = form.inputError?.let { stringResource(Res.string.error_invalid_amount) },
-        focusRequester = fieldFocus,
-        enabled = !form.isSubmitting,
-        onDone = actions.onConfirm,
-    )
-    SubmitButton(
-        text = stringResource(Res.string.deposit_submit),
-        isSubmitting = form.isSubmitting,
-        onClick = actions.onConfirm,
-        modifier = Modifier.fillMaxWidth(),
-    )
+    SectionCard {
+        AmountField(
+            value = form.input,
+            onValueChange = actions.onAmountChange,
+            label = stringResource(Res.string.deposit_amount),
+            error = form.inputError?.let { stringResource(Res.string.error_invalid_amount) },
+            focusRequester = fieldFocus,
+            enabled = !form.isSubmitting,
+            onDone = actions.onConfirm,
+        )
+        SubmitButton(
+            text = stringResource(Res.string.deposit_submit),
+            isSubmitting = form.isSubmitting,
+            onClick = actions.onConfirm,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 @Composable
@@ -149,8 +158,8 @@ private fun DepositSucceeded(
     result: DepositResult,
     onNewDeposit: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             FocusOnArrival(enabled = true) { arrivalModifier ->
                 Text(
                     text = stringResource(Res.string.deposit_result_title, result.amount.format()),
@@ -168,7 +177,7 @@ private fun DepositSucceeded(
             )
         }
     }
-    Button(onClick = onNewDeposit, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
+    PrimaryButton(onClick = onNewDeposit, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
         Text(stringResource(Res.string.deposit_new))
     }
 }

@@ -7,12 +7,15 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +25,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.kotlinbitcoins.web.core.model.Profile
 import com.kotlinbitcoins.web.core.navigation.AppRoute
 import com.kotlinbitcoins.web.state.session.LoginBanner
 import com.kotlinbitcoins.web.state.session.SessionEvent
@@ -55,6 +59,12 @@ fun AppNavHost(
     val entry by navController.currentBackStackEntryAsState()
     val currentRoute = entry?.toAppRoute()
     val loginBanner = remember { mutableStateOf<LoginBanner?>(null) }
+    // Who is signed in, for the sidebar: read once per session, never kept after it ends.
+    val activeSession = (sessionState as? SessionState.Active)?.session
+    val user =
+        produceState<Profile?>(initialValue = null, activeSession) {
+            value = if (activeSession != null) ports.profile() else null
+        }
 
     // Guard on destination and session changes: a route the gate does not allow is replaced in the history.
     // The live entry: a session event may have navigated since this composition (e.g. logout → login).
@@ -83,7 +93,7 @@ fun AppNavHost(
     LaunchedEffect(title) { title?.let(ports.documentTitle::set) }
 
     val reducedMotion = LocalReducedMotion.current
-    Surface(modifier = modifier.fillMaxSize()) {
+    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         NavHost(
             navController = navController,
             startDestination = startRoute,
@@ -100,7 +110,7 @@ fun AppNavHost(
 
             appDestinations(
                 sessionState = sessionManager.state,
-                shell = Shell(navController, onLogout = sessionManager::logout),
+                shell = Shell(navController, user, onLogout = sessionManager::logout),
                 viewModels = viewModels,
                 ports = ports,
             )
@@ -139,6 +149,8 @@ private fun NavGraphBuilder.appDestinations(
 /** Navigation callbacks of the adaptive scaffold. */
 internal class Shell(
     val navController: NavHostController,
+    /** A state, not a value: the graph is built once. */
+    val user: State<Profile?>,
     val onLogout: () -> Unit,
 ) {
     fun navigate(route: AppRoute) {
@@ -175,7 +187,12 @@ private inline fun <reified R : AppRoute> NavGraphBuilder.protectedDestination(
     composable<R> { entry ->
         val route = entry.toAppRoute() as R
         Guarded(route, sessionState) {
-            AdaptiveScaffold(current = route, onNavigate = shell::navigate, onLogout = shell.onLogout) {
+            AdaptiveScaffold(
+                current = route,
+                user = shell.user.value,
+                onNavigate = shell::navigate,
+                onLogout = shell.onLogout,
+            ) {
                 content(route)
             }
         }
