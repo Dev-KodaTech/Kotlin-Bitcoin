@@ -99,6 +99,17 @@
     <string name="dashboard_shortcut_deposit">Depositar</string>
     <string name="dashboard_shortcut_purchase">Comprar</string>
     <string name="dashboard_shortcut_redemption">Resgatar</string>
+    <string name="dashboard_recent">Últimos lançamentos</string>
+    <string name="dashboard_recent_empty">Você ainda não tem lançamentos.</string>
+    <string name="dashboard_view_investments">Ver todos</string>
+    <string name="dashboard_view_statement">Ver extrato</string>
+    <string name="dashboard_view_market">Ver mercado</string>
+    <!-- Second line of an investment: purchase date and invested amount -->
+    <string name="dashboard_investment_detail">%1$s · investido %2$s</string>
+    <!-- One investment of the dashboard, read at once: current value, invested amount, date, variation -->
+    <string name="dashboard_investment_description">Valor atual %1$s, investido %2$s em %3$s, variação %4$s</string>
+    <!-- One entry of the dashboard, read at once: type, signed amount, date/time, Brasília -->
+    <string name="dashboard_recent_description">%1$s, %2$s, %3$s %4$s</string>
 
     <!-- Deposit (US3) -->
     <string name="deposit_amount">Valor do depósito</string>

@@ -37,7 +37,7 @@ fun VariationBadge(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(variation.trend.symbol(), style = style, color = color)
+        Text(variation.trend.symbol(), style = style.numeric(), color = color)
         Text(variation.format(), style = style.numeric(), color = color)
         Text(variation.trend.text(), style = style)
     }

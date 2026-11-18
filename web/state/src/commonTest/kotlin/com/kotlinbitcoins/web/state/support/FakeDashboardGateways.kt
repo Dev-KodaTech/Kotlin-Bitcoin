@@ -28,6 +28,7 @@ class FakeDashboardGateways :
     var profileResult: Outcome<ApiError, Profile> = Outcome.Success(Profile("Maria Souza", "maria@example.com"))
     var balanceResult: Outcome<ApiError, Money> = Outcome.Success(money("1234.56"))
     var quoteResult: Outcome<ApiError, Quote> = Outcome.Success(quote())
+    var historyResult: Outcome<ApiError, QuoteHistory> = Outcome.Success(QuoteHistory(emptyList()))
     var positionResult: Outcome<ApiError, Position> = Outcome.Success(position(total = "704.00", investments = 3))
     var depositResult: Outcome<OperationError, DepositResult> = Outcome.Success(depositResult())
     var purchaseResult: Outcome<OperationError, PurchaseResult> = Outcome.Success(purchaseResult())
@@ -50,6 +51,8 @@ class FakeDashboardGateways :
         private set
     var positionCalls = 0
         private set
+    var historyCalls = 0
+        private set
 
     override suspend fun profile(): Outcome<ApiError, Profile> = profileResult.also { profileCalls++ }
 
@@ -60,7 +63,7 @@ class FakeDashboardGateways :
 
     override suspend fun current(): Outcome<ApiError, Quote> = quoteResult.also { quoteCalls++ }
 
-    override suspend fun history(): Outcome<ApiError, QuoteHistory> = Outcome.Success(QuoteHistory(emptyList()))
+    override suspend fun history(): Outcome<ApiError, QuoteHistory> = historyResult.also { historyCalls++ }
 
     override suspend fun position(): Outcome<ApiError, Position> = positionResult.also { positionCalls++ }
 

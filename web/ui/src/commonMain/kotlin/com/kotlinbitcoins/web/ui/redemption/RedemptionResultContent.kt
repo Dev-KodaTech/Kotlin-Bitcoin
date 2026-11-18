@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.kotlinbitcoins.web.core.model.Liquidation
 import com.kotlinbitcoins.web.core.model.RedemptionResult
 import com.kotlinbitcoins.web.core.model.Reinvestment
+import com.kotlinbitcoins.web.ui.components.AppCard
+import com.kotlinbitcoins.web.ui.components.CardPadding
 import com.kotlinbitcoins.web.ui.components.FocusOnArrival
 import com.kotlinbitcoins.web.ui.resources.Res
 import com.kotlinbitcoins.web.ui.resources.brasilia_time
@@ -49,8 +50,8 @@ fun RedemptionResultContent(
     result: RedemptionResult,
     modifier: Modifier = Modifier,
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             FocusOnArrival(enabled = true) { arrivalModifier ->
                 Text(
                     text = stringResource(Res.string.redemption_result_title),
@@ -74,8 +75,8 @@ fun RedemptionResultContent(
 
 @Composable
 private fun Liquidations(liquidations: List<Liquidation>) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = stringResource(Res.string.redemption_liquidations),
                 style = MaterialTheme.typography.titleMedium,
@@ -117,8 +118,8 @@ private fun LiquidationRow(liquidation: Liquidation) {
 
 @Composable
 private fun ReinvestmentSection(reinvestment: Reinvestment) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = stringResource(Res.string.redemption_reinvestment),
                 style = MaterialTheme.typography.titleMedium,

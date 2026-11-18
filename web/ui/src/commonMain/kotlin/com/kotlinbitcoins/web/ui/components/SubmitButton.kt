@@ -1,7 +1,6 @@
 package com.kotlinbitcoins.web.ui.components
 
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,7 +19,7 @@ fun SubmitButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Button(
+    PrimaryButton(
         onClick = { if (!isSubmitting) onClick() },
         enabled = !isSubmitting,
         modifier = modifier.heightIn(min = MinTouchTarget).focusOutline(),

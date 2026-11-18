@@ -29,7 +29,8 @@ class ThemeContrastTest {
     fun riseAndFallTextReachFourAndAHalfToOne() {
         themes.forEach { (name, colors) ->
             val (scheme, extended) = colors
-            listOf("surface" to scheme.surface, "card" to scheme.surfaceContainerHighest).forEach { (bgName, bg) ->
+            val backgrounds = listOf("surface" to scheme.surface, "card" to extended.card, "tint" to extended.tint)
+            backgrounds.forEach { (bgName, bg) ->
                 assertContrast(extended.success, bg, TEXT_MINIMUM, "$name: alta/$bgName")
                 assertContrast(extended.decline, bg, TEXT_MINIMUM, "$name: queda/$bgName")
             }
@@ -50,6 +51,51 @@ class ThemeContrastTest {
                     "série venda/surface" to extended.chartSell,
                 )
             nonText.forEach { (pair, color) -> assertContrast(color, scheme.surface, NON_TEXT_MINIMUM, "$name: $pair") }
+        }
+    }
+
+    /** The surfaces of the "Azul suave" look: cards, tinted blocks, the hero block and its white actions. */
+    @Test
+    fun textOnCardsTintAndHeroReachesFourAndAHalfToOne() {
+        themes.forEach { (name, colors) ->
+            val (scheme, extended) = colors
+            val pairs =
+                mapOf(
+                    "onSurface/card" to (scheme.onSurface to extended.card),
+                    "onSurfaceVariant/card" to (scheme.onSurfaceVariant to extended.card),
+                    "primary/card" to (scheme.primary to extended.card),
+                    "error/card" to (scheme.error to extended.card),
+                    "onSurface/tint" to (scheme.onSurface to extended.tint),
+                    "onSurfaceVariant/tint" to (scheme.onSurfaceVariant to extended.tint),
+                    "error/tint" to (scheme.error to extended.tint),
+                    "onSurfaceVariant/background" to (scheme.onSurfaceVariant to scheme.background),
+                    "onHero/hero" to (extended.onHero to extended.hero),
+                    "onHeroMuted/hero" to (extended.onHeroMuted to extended.hero),
+                    "onHeroAction/heroAction" to (extended.onHeroAction to extended.heroAction),
+                )
+            pairs.forEach { (pair, colorsOfPair) ->
+                assertContrast(colorsOfPair.first, colorsOfPair.second, TEXT_MINIMUM, "$name: $pair")
+            }
+        }
+    }
+
+    /** Focus rings and chart series on the surfaces where they are drawn. */
+    @Test
+    fun nonTextColorsOnCardsAndHeroReachThreeToOne() {
+        themes.forEach { (name, colors) ->
+            val (scheme, extended) = colors
+            val pairs =
+                mapOf(
+                    "foco/card" to (focusColor(scheme) to extended.card),
+                    "foco (onHero)/hero" to (extended.onHero to extended.hero),
+                    "foco (onSurface)/item atual" to (scheme.onSurface to extended.hero),
+                    "série compra/card" to (extended.chartBuy to extended.card),
+                    "série venda/card" to (extended.chartSell to extended.card),
+                    "outline/card" to (scheme.outline to extended.card),
+                )
+            pairs.forEach { (pair, colorsOfPair) ->
+                assertContrast(colorsOfPair.first, colorsOfPair.second, NON_TEXT_MINIMUM, "$name: $pair")
+            }
         }
     }
 

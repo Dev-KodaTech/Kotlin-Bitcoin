@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import com.kotlinbitcoins.web.core.model.EntryType
 import com.kotlinbitcoins.web.core.model.StatementEntry
 import com.kotlinbitcoins.web.core.statement.StatementItem
+import com.kotlinbitcoins.web.ui.components.AppCard
+import com.kotlinbitcoins.web.ui.components.CardPadding
 import com.kotlinbitcoins.web.ui.components.focusOutline
 import com.kotlinbitcoins.web.ui.resources.Res
 import com.kotlinbitcoins.web.ui.resources.brasilia_time
@@ -49,8 +50,8 @@ private val FieldMinWidth = 140.dp
 @Composable
 fun StatementEntryCard(entry: StatementItem.Single) {
     val description = entryDescription(entry.entry)
-    Card(modifier = cardModifier(description)) {
-        EntryFields(entry.entry, modifier = Modifier.padding(16.dp))
+    AppCard(modifier = cardModifier(description)) {
+        EntryFields(entry.entry, modifier = Modifier.padding(CardPadding))
     }
 }
 
@@ -70,8 +71,8 @@ fun RedemptionGroupCard(group: StatementItem.RedemptionGroup) {
             stringResource(Res.string.brasilia_time),
             lines.joinToString("; "),
         )
-    Card(modifier = cardModifier(description)) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    AppCard(modifier = cardModifier(description)) {
+        Column(modifier = Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium.numeric())
             group.entries.forEachIndexed { index, entry ->
                 if (index > 0) HorizontalDivider()

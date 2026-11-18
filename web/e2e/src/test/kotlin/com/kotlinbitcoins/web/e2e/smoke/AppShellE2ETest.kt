@@ -36,6 +36,9 @@ class AppShellE2ETest : E2eBase() {
             assertThat(page.title()).isEqualTo("Entrar · Investimento em Bitcoins")
             assertThat(page.locator("html").getAttribute("lang")).isEqualTo("pt-BR")
             assertThat(ui.hash()).startsWith("#/entrar")
+            // The buttons of the mirror get their name a moment after the heading: axe runs on the settled page.
+            ui.button("Entrar").waitFor()
+            ui.button("Criar conta").waitFor()
             Axe.assertNoViolations(page)
             NoHorizontalScroll.assertOn(page)
         }

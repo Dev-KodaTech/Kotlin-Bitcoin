@@ -1,5 +1,7 @@
 package com.kotlinbitcoins.web.app
 
+import com.kotlinbitcoins.web.core.error.Outcome
+import com.kotlinbitcoins.web.core.model.Profile
 import com.kotlinbitcoins.web.data.browser.BroadcastTabChannel
 import com.kotlinbitcoins.web.data.browser.BrowserDocumentTitle
 import com.kotlinbitcoins.web.data.browser.BrowserSessionStorage
@@ -81,6 +83,7 @@ class AppContainer {
                     accountGateway = accountGateway,
                     quoteGateway = quoteGateway,
                     investmentGateway = investmentGateway,
+                    statementGateway = statementGateway,
                     pageVisibility = pageVisibility,
                     announcer = announcer,
                     texts = texts,
@@ -116,6 +119,9 @@ class AppContainer {
             statement = { route -> StatementViewModel(statementGateway, route) },
             market = { MarketViewModel(marketGateway, quoteGateway) },
         )
+
+    /** Who is signed in, for the sidebar; null when `GET /me` fails. */
+    suspend fun profile(): Profile? = (profileGateway.profile() as? Outcome.Success)?.value
 
     fun close() {
         tabChannel.close()

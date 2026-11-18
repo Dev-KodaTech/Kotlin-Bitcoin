@@ -42,7 +42,7 @@ fun main() {
                     navController = navController,
                     startRoute = startRoute,
                     sessionManager = container.sessionManager,
-                    ports = ShellPorts(container.documentTitle, container.announcer),
+                    ports = ShellPorts(container.documentTitle, container.announcer, container::profile),
                     viewModels = container.viewModels,
                 )
             }

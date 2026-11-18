@@ -6,6 +6,8 @@ import com.kotlinbitcoins.web.core.navigation.AppRoute
 class DashboardActions(
     val onRetryBalance: () -> Unit,
     val onRetryQuote: () -> Unit,
+    val onRetryHistory: () -> Unit,
+    val onRetryRecent: () -> Unit,
     val onToggleAutoRefresh: () -> Unit,
     val onNavigate: (AppRoute) -> Unit,
 )

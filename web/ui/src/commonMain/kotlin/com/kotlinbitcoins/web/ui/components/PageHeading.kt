@@ -28,10 +28,12 @@ fun PageHeading(
     modifier: Modifier = Modifier,
     focusOnArrival: Boolean = true,
 ) {
+    val typography = MaterialTheme.typography
+    val style = if (LocalDenseLayout.current) typography.headlineSmall else typography.headlineMedium
     FocusOnArrival(focusOnArrival) { arrivalModifier ->
         Text(
             text = text,
-            style = MaterialTheme.typography.headlineMedium,
+            style = style,
             modifier = modifier.semantics { heading() }.then(arrivalModifier),
         )
     }

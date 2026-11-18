@@ -10,10 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.semantics.heading
@@ -37,14 +35,20 @@ import com.kotlinbitcoins.web.state.shared.Loadable
 import com.kotlinbitcoins.web.state.shared.OperationInputError
 import com.kotlinbitcoins.web.state.shared.OperationState
 import com.kotlinbitcoins.web.ui.components.AmountField
+import com.kotlinbitcoins.web.ui.components.AppCard
+import com.kotlinbitcoins.web.ui.components.CardPadding
 import com.kotlinbitcoins.web.ui.components.ErrorBlock
 import com.kotlinbitcoins.web.ui.components.EstimateCard
 import com.kotlinbitcoins.web.ui.components.EstimateDisplay
 import com.kotlinbitcoins.web.ui.components.FocusOnArrival
 import com.kotlinbitcoins.web.ui.components.LoadingIndicator
 import com.kotlinbitcoins.web.ui.components.MinTouchTarget
+import com.kotlinbitcoins.web.ui.components.PageBottomPadding
 import com.kotlinbitcoins.web.ui.components.PageHeading
 import com.kotlinbitcoins.web.ui.components.PauseToggle
+import com.kotlinbitcoins.web.ui.components.PrimaryButton
+import com.kotlinbitcoins.web.ui.components.SecondaryButton
+import com.kotlinbitcoins.web.ui.components.SectionCard
 import com.kotlinbitcoins.web.ui.components.SubmitButton
 import com.kotlinbitcoins.web.ui.components.UncertainOutcomeBlock
 import com.kotlinbitcoins.web.ui.components.focusOutline
@@ -70,6 +74,7 @@ import com.kotlinbitcoins.web.ui.resources.redemption_redeem_all
 import com.kotlinbitcoins.web.ui.resources.redemption_redeem_all_warning
 import com.kotlinbitcoins.web.ui.resources.redemption_review
 import com.kotlinbitcoins.web.ui.shared.message
+import com.kotlinbitcoins.web.ui.theme.LocalExtendedColors
 import com.kotlinbitcoins.web.ui.theme.numeric
 import org.jetbrains.compose.resources.stringResource
 
@@ -91,7 +96,11 @@ fun RedemptionScreen(
     val operation = state.operation
     SideEffect { if (operation !is OperationState.Editing) leftEditing = true }
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()).widthIn(max = MaxContentWidth),
+        modifier =
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .widthIn(max = MaxContentWidth)
+                .padding(bottom = PageBottomPadding),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         PageHeading(stringResource(Res.string.page_redemption))
@@ -120,7 +129,7 @@ fun RedemptionScreen(
 
             is OperationState.Succeeded -> {
                 RedemptionResultContent(operation.result)
-                Button(
+                PrimaryButton(
                     onClick = actions.onNewOperation,
                     modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline(),
                 ) {
@@ -149,8 +158,8 @@ private fun AvailableBlock(
     state: RedemptionUiState,
     page: RedemptionPageActions,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    AppCard(modifier = Modifier.fillMaxWidth(), color = LocalExtendedColors.current.tint) {
+        Column(modifier = Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             when (val available = state.available) {
                 Loadable.Loading, Loadable.Empty -> {
                     LoadingIndicator()
@@ -170,15 +179,24 @@ private fun AvailableBlock(
                     AvailableValues(available.value)
                 }
             }
+            // US6-7: R$ 0,00 with an invitation to buy; sending stays allowed (the API answers).
+            if (state.isEmpty) BuyInvitation(onBuy = { page.onNavigate(AppRoute.Purchase) })
         }
     }
-    if (state.isEmpty) {
-        // US6-7: R$ 0,00 with an invitation to buy; sending stays allowed (the API answers).
+}
+
+/** The invitation of the empty state, inside the block of the available: the text and, beside it, the shortcut. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun BuyInvitation(onBuy: () -> Unit) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
+    ) {
         Text(stringResource(Res.string.redemption_empty), style = MaterialTheme.typography.bodyLarge)
-        OutlinedButton(
-            onClick = { page.onNavigate(AppRoute.Purchase) },
-            modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline(),
-        ) {
+        SecondaryButton(onClick = onBuy, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
             Text(stringResource(Res.string.redemption_buy))
         }
     }
@@ -220,21 +238,23 @@ private fun RedemptionForm(
     LaunchedEffect(state.attempt, editing.inputError) { if (editing.inputError != null) fieldFocus.requestFocus() }
     LaunchedEffect(Unit) { if (focusOnShow) fieldFocus.requestFocus() }
 
-    AmountField(
-        value = editing.input,
-        onValueChange = actions.onAmountChange,
-        label = stringResource(Res.string.redemption_amount),
-        error = editing.inputError?.let { inputErrorMessage(it) },
-        focusRequester = fieldFocus,
-        onDone = actions.onReview,
-    )
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        SubmitButton(
-            text = stringResource(Res.string.redemption_review),
-            isSubmitting = false,
-            onClick = actions.onReview,
+    SectionCard {
+        AmountField(
+            value = editing.input,
+            onValueChange = actions.onAmountChange,
+            label = stringResource(Res.string.redemption_amount),
+            error = editing.inputError?.let { inputErrorMessage(it) },
+            focusRequester = fieldFocus,
+            onDone = actions.onReview,
         )
-        RedeemAllButton(enabled = state.canRedeemAll, onClick = actions.page.onRedeemAll)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SubmitButton(
+                text = stringResource(Res.string.redemption_review),
+                isSubmitting = false,
+                onClick = actions.onReview,
+            )
+            RedeemAllButton(enabled = state.canRedeemAll, onClick = actions.page.onRedeemAll)
+        }
     }
 }
 
@@ -266,7 +286,7 @@ private fun RedemptionReview(
             onClick = actions.onConfirm,
         )
         if (!review.isSubmitting) {
-            OutlinedButton(
+            SecondaryButton(
                 onClick = actions.onEdit,
                 modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline(),
             ) {
@@ -332,7 +352,7 @@ private fun RedemptionRejected(
     }
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (exceeds) RedeemAllButton(enabled = state.canRedeemAll, onClick = actions.page.onRedeemAll)
-        OutlinedButton(
+        SecondaryButton(
             onClick = actions.onEdit,
             modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline(),
         ) {
@@ -346,7 +366,7 @@ private fun RedeemAllButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    OutlinedButton(
+    SecondaryButton(
         onClick = onClick,
         enabled = enabled,
         modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline(),

@@ -4,14 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kotlinbitcoins.web.core.error.ApiError
 import com.kotlinbitcoins.web.core.error.Outcome
+import com.kotlinbitcoins.web.core.market.ChartData
+import com.kotlinbitcoins.web.core.market.ChartSeries
+import com.kotlinbitcoins.web.core.model.InvestmentPosition
 import com.kotlinbitcoins.web.core.model.Position
+import com.kotlinbitcoins.web.core.model.StatementEntry
 import com.kotlinbitcoins.web.core.money.Money
+import com.kotlinbitcoins.web.core.statement.StatementFilter
 import com.kotlinbitcoins.web.state.port.AccountGateway
 import com.kotlinbitcoins.web.state.port.Announcer
 import com.kotlinbitcoins.web.state.port.InvestmentGateway
 import com.kotlinbitcoins.web.state.port.PageVisibility
 import com.kotlinbitcoins.web.state.port.ProfileGateway
 import com.kotlinbitcoins.web.state.port.QuoteGateway
+import com.kotlinbitcoins.web.state.port.StatementGateway
 import com.kotlinbitcoins.web.state.shared.AutoRefresher
 import com.kotlinbitcoins.web.state.shared.Loadable
 import com.kotlinbitcoins.web.state.shared.QuoteAvailabilityTracker
@@ -61,6 +67,12 @@ data class DashboardUiState(
     val balance: Loadable<Money> = Loadable.Loading,
     val quote: QuoteState = QuoteState.Loading,
     val position: PositionTotal = PositionTotal.Loading,
+    /** The open investments behind [position], in the API order; empty while there is no position to show. */
+    val investments: List<InvestmentPosition> = emptyList(),
+    /** The 24 h price chart (`GET /quotes/history`), loaded when the page opens; empty without points. */
+    val history: Loadable<ChartData> = Loadable.Loading,
+    /** The newest entries of the statement of the default period, loaded when the page opens. */
+    val recent: Loadable<List<StatementEntry>> = Loadable.Loading,
     val isAutoRefreshPaused: Boolean = false,
 )
 
@@ -76,7 +88,8 @@ data class DashboardTexts(
 )
 
 /**
- * Dashboard (US2): profile and balance load once; quote and position refresh every ~10 s while the page is visible
+ * Dashboard (US2): profile, balance, price chart and newest statement entries load once; quote and position refresh
+ * every ~10 s while the page is visible
  * and not paused (FR-011/FR-012). Only the availability transitions of the quote and the pause/resume are announced
  * (FR-047): a periodic update changes values without changing the structure or the focus.
  */
@@ -86,6 +99,7 @@ class DashboardViewModel(
     private val accountGateway: AccountGateway,
     private val quoteGateway: QuoteGateway,
     private val investmentGateway: InvestmentGateway,
+    private val statementGateway: StatementGateway,
     pageVisibility: PageVisibility,
     private val announcer: Announcer,
     private val texts: () -> DashboardTexts,
@@ -108,6 +122,8 @@ class DashboardViewModel(
     init {
         this.scope.launch { loadProfile() }
         this.scope.launch { loadBalance() }
+        this.scope.launch { loadHistory() }
+        this.scope.launch { loadRecent() }
         refresher.start(this.scope)
     }
 
@@ -119,6 +135,18 @@ class DashboardViewModel(
     /** "Tentar de novo" of the quote or of the total: both are read again at once. */
     fun onRetryQuote() {
         this.scope.launch { refreshQuoteAndPosition() }
+    }
+
+    /** "Tentar de novo" of the price chart. */
+    fun onRetryHistory() {
+        mutableState.update { it.copy(history = Loadable.Loading) }
+        this.scope.launch { loadHistory() }
+    }
+
+    /** "Tentar de novo" of the newest statement entries. */
+    fun onRetryRecent() {
+        mutableState.update { it.copy(recent = Loadable.Loading) }
+        this.scope.launch { loadRecent() }
     }
 
     fun onToggleAutoRefresh() {
@@ -146,6 +174,30 @@ class DashboardViewModel(
         mutableState.update { it.copy(balance = balance) }
     }
 
+    private suspend fun loadHistory() {
+        val history: Loadable<ChartData> =
+            when (val result = quoteGateway.history()) {
+                is Outcome.Success -> ChartSeries.chartData(result.value)?.let { Loadable.Loaded(it) } ?: Loadable.Empty
+                is Outcome.Failure -> Loadable.Failed(result.error)
+            }
+        mutableState.update { it.copy(history = history) }
+    }
+
+    private suspend fun loadRecent() {
+        val recent: Loadable<List<StatementEntry>> =
+            when (val result = statementGateway.statement(StatementFilter.Default)) {
+                is Outcome.Success -> {
+                    val entries = result.value.entries.take(RECENT_ENTRIES)
+                    if (entries.isEmpty()) Loadable.Empty else Loadable.Loaded(entries)
+                }
+
+                is Outcome.Failure -> {
+                    Loadable.Failed(result.error)
+                }
+            }
+        mutableState.update { it.copy(recent = recent) }
+    }
+
     private suspend fun refreshQuoteAndPosition() =
         coroutineScope {
             launch { refreshQuote() }
@@ -163,12 +215,15 @@ class DashboardViewModel(
     }
 
     private suspend fun refreshPosition() {
+        val result = investmentGateway.position()
         val position =
-            when (val result = investmentGateway.position()) {
+            when (result) {
                 is Outcome.Success -> total(result.value)
                 is Outcome.Failure -> positionFailure(result.error)
             }
-        mutableState.update { it.copy(position = position) }
+        // No old values with an unavailable quote (US2-3): the list goes with the total.
+        val investments = (result as? Outcome.Success)?.value?.investments.orEmpty()
+        mutableState.update { it.copy(position = position, investments = investments) }
     }
 
     private fun quoteFailure(error: ApiError): QuoteState =
@@ -213,4 +268,9 @@ class DashboardViewModel(
         } else {
             PositionTotal.Value(position.totalCurrentValue)
         }
+
+    private companion object {
+        /** How many of the newest statement entries the dashboard shows. */
+        const val RECENT_ENTRIES = 4
+    }
 }
