@@ -10,6 +10,7 @@ import com.kotlinbitcoins.web.core.navigation.AppRoute
 import com.kotlinbitcoins.web.state.deposit.DepositTexts
 import com.kotlinbitcoins.web.state.shared.OperationState
 import com.kotlinbitcoins.web.ui.deposit.DepositActions
+import com.kotlinbitcoins.web.ui.deposit.DepositPageActions
 import com.kotlinbitcoins.web.ui.deposit.DepositScreen
 import com.kotlinbitcoins.web.ui.resources.Res
 import com.kotlinbitcoins.web.ui.resources.announce_deposit_succeeded
@@ -20,8 +21,9 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Deposit (US3) with its ViewModel, which lives as long as the back stack entry: a reload or a new visit starts from
- * an empty field (FR-043). The result step has no route of its own, so it changes `document.title` to
- * "Depósito realizado · …" (contracts/ui-routes.md) and back when a new deposit starts.
+ * an empty field (FR-043) and reads the balance and the newest deposits again. The result step has no route of its
+ * own, so it changes `document.title` to "Depósito realizado · …" (contracts/ui-routes.md) and back when a new
+ * deposit starts.
  */
 @Composable
 internal fun DepositDestination(
@@ -52,8 +54,13 @@ internal fun DepositDestination(
                 onRetry = viewModel::onRetry,
                 onEdit = viewModel::onEdit,
                 onNewOperation = viewModel::onNewOperation,
-                onNavigate = onNavigate,
-                announce = ports.announcer::assertive,
+                page =
+                    DepositPageActions(
+                        onRetryBalance = viewModel::onRetryBalance,
+                        onRetryRecentDeposits = viewModel::onRetryRecentDeposits,
+                        onNavigate = onNavigate,
+                        announce = ports.announcer::assertive,
+                    ),
             ),
     )
 }

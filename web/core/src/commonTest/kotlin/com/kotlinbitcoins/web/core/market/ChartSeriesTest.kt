@@ -11,6 +11,7 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.hours
 
 class ChartSeriesTest {
     private fun at(time: String): ApiInstant = ApiInstant.parseApi("2026-11-09T$time:00-03:00").successValue()
@@ -175,18 +176,97 @@ class ChartSeriesTest {
     }
 
     @Test
-    fun `price marks are 4, from the minimum to the maximum`() {
-        val history = QuoteHistory(listOf(point("08:00", "400000.00", "400300.00"), point("08:10", "400000.00")))
+    fun `price marks are round multiples around both series and the scale spans them`() {
+        val history = QuoteHistory(listOf(point("08:00", "400010.00", "400290.00"), point("08:10", "400000.00")))
 
-        val marks = assertNotNull(ChartSeries.chartData(history)).priceMarks
+        val data = assertNotNull(ChartSeries.chartData(history))
 
-        assertEquals(listOf("400000.00", "400100.00", "400200.00", "400300.00"), marks.map { it.toPlainString() })
+        assertEquals(
+            listOf("400000.00", "400100.00", "400200.00", "400300.00"),
+            data.priceMarks.map { it.toPlainString() },
+        )
+        assertEquals(PriceRange(price("400000.00"), price("400300.00")), data.scale)
+        assertEquals(PriceRange(price("400000.00"), price("400290.00")), data.yRange)
     }
 
     @Test
-    fun `a flat history has one price mark`() {
+    fun `a flat history is centered on a padded axis`() {
         val history = QuoteHistory(listOf(point("08:00", "400000.00"), point("08:10", "400000.00")))
 
-        assertEquals(listOf(price("400000.00")), assertNotNull(ChartSeries.chartData(history)).priceMarks)
+        val data = assertNotNull(ChartSeries.chartData(history))
+
+        assertEquals(
+            listOf("399000.00", "399500.00", "400000.00", "400500.00", "401000.00"),
+            data.priceMarks.map {
+                it.toPlainString()
+            },
+        )
+        assertEquals(PriceRange(price("399000.00"), price("401000.00")), data.scale)
+    }
+
+    @Test
+    fun `tiny prices keep 4 marks from the minimum to the maximum`() {
+        val history = QuoteHistory(listOf(point("08:00", "0.50", "5.00")))
+
+        val marks = assertNotNull(ChartSeries.chartData(history)).priceMarks
+
+        assertEquals(listOf("0.50", "2.00", "3.50", "5.00"), marks.map { it.toPlainString() })
+    }
+
+    @Test
+    fun `the summary has the change over the window and the spread of the last point`() {
+        val history =
+            QuoteHistory(
+                listOf(
+                    point("08:00", "398000.00", "399000.00"),
+                    point("08:10", "400100.00", "401100.50"),
+                ),
+            )
+
+        val summary = assertNotNull(ChartSeries.chartData(history)).summary
+
+        assertEquals("+0,52%", summary.buy.change.format())
+        assertEquals("+0,52%", summary.sell.change.format())
+        assertEquals("R\$\u00A01.000,50", summary.spread.format())
+    }
+
+    @Test
+    fun `gaps cover the start of the window and the missing slots between segments`() {
+        val history =
+            QuoteHistory(listOf(point("07:30", "1.00"), point("07:40", "1.00"), point("08:10", "1.00")))
+
+        val data = assertNotNull(ChartSeries.chartData(history))
+
+        assertEquals(
+            listOf(
+                ChartGap(data.xRange.start, at("07:30"), data.xRange.start, at("07:20")),
+                ChartGap(at("07:40"), at("08:10"), at("07:50"), at("08:00")),
+            ),
+            data.gaps,
+        )
+    }
+
+    @Test
+    fun `a full window has no gap and a coverage of 100 percent`() {
+        val start = at("08:10").instant - 24.hours
+        val points =
+            (0..144).map { slot ->
+                HistoryPoint(ApiInstant.of(start + ChartSeries.SLOT * slot), price("1.00"), price("1.00"))
+            }
+
+        val data = assertNotNull(ChartSeries.chartData(QuoteHistory(points)))
+
+        assertEquals(emptyList(), data.gaps)
+        assertEquals(ChartCoverage(145, 145), data.coverage)
+        assertEquals(100, data.coverage.percent)
+    }
+
+    @Test
+    fun `coverage counts the recorded slots of the window`() {
+        val data =
+            assertNotNull(ChartSeries.chartData(QuoteHistory(listOf(point("08:00", "1.00"), point("08:10", "1.00")))))
+
+        assertEquals(ChartCoverage(2, 145), data.coverage)
+        assertEquals(1, data.coverage.percent)
     }
 }

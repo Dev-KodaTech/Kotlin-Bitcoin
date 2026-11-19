@@ -69,6 +69,9 @@ class ThemeContrastTest {
                     "onSurfaceVariant/tint" to (scheme.onSurfaceVariant to extended.tint),
                     "error/tint" to (scheme.error to extended.tint),
                     "onSurfaceVariant/background" to (scheme.onSurfaceVariant to scheme.background),
+                    // The value tags at the end of the chart lines are written in the color of their series.
+                    "série compra (etiqueta)/card" to (extended.chartBuy to extended.card),
+                    "série venda (etiqueta)/card" to (extended.chartSell to extended.card),
                     "onHero/hero" to (extended.onHero to extended.hero),
                     "onHeroMuted/hero" to (extended.onHeroMuted to extended.hero),
                     "onHeroAction/heroAction" to (extended.onHeroAction to extended.heroAction),

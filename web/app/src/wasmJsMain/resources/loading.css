@@ -1,17 +1,26 @@
 /* Static loading screen (W-16): visible in < 1 s, before the Wasm bundle arrives (SC-010). No inline styles (CSP). */
 :root {
-    --boot-background: #fff8f5; /* surface, light scheme of ui/theme/Color.kt */
-    --boot-text: #221a14;       /* onSurface */
-    --boot-accent: #86521a;     /* primary */
-    color-scheme: light dark;
+    --boot-background: #e4ecfb; /* background, light scheme of ui/theme/Color.kt */
+    --boot-text: #14183a;       /* onBackground */
+    --boot-accent: #3d5af1;     /* primary */
+    color-scheme: light;
 }
 
+/* Dark: from the system, unless the theme switch chose light; or chosen in the switch (data-theme, set by compat.js). */
 @media (prefers-color-scheme: dark) {
-    :root {
-        --boot-background: #19120c;
-        --boot-text: #efe0d5;
-        --boot-accent: #feb876;
+    :root:not([data-theme="light"]) {
+        --boot-background: #090d1f;
+        --boot-text: #eef2ff;
+        --boot-accent: #aebbff;
+        color-scheme: dark;
     }
+}
+
+:root[data-theme="dark"] {
+    --boot-background: #090d1f;
+    --boot-text: #eef2ff;
+    --boot-accent: #aebbff;
+    color-scheme: dark;
 }
 
 html, body {

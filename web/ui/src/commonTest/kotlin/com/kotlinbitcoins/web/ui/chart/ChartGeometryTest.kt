@@ -68,6 +68,20 @@ class ChartGeometryTest {
     }
 
     @Test
+    fun `a position becomes the nearest 10 minute slot of the window`() {
+        val geometry = ChartGeometry(data, width, height)
+
+        assertEquals(at("2026-11-09T08:10:00-03:00"), geometry.slotAt(width))
+        assertEquals(at("2026-11-08T08:10:00-03:00"), geometry.slotAt(0f))
+        assertEquals(at("2026-11-08T20:10:00-03:00"), geometry.slotAt(width / 2))
+        // 1/144 of the width is one slot; a little past it still rounds to that slot.
+        assertEquals(at("2026-11-09T08:00:00-03:00"), geometry.slotAt(width - width / 144 * 1.2f))
+        // Outside the plot: the first or the last slot.
+        assertEquals(at("2026-11-09T08:10:00-03:00"), geometry.slotAt(width + 50f))
+        assertEquals(at("2026-11-08T08:10:00-03:00"), geometry.slotAt(-50f))
+    }
+
+    @Test
     fun `each segment becomes its own path and the gap is not joined`() {
         val gapped =
             chart(
@@ -95,8 +109,9 @@ class ChartGeometryTest {
         assertEquals(data.timeMarks, timeMarks.map { it.value })
         assertEquals(timeMarks.map { geometry.x(it.value) }, timeMarks.map { it.position })
 
+        // Round marks of R$ 500 from R$ 400.000 to R$ 402.000.
         val priceMarks = geometry.priceMarks()
-        assertEquals(4, priceMarks.size)
+        assertEquals(5, priceMarks.size)
         assertEquals(height, priceMarks.first().position, TOLERANCE)
         assertEquals(0f, priceMarks.last().position, TOLERANCE)
     }

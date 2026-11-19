@@ -2,6 +2,13 @@
 // External file, so it works under the CSP (no inline script). Loads app.js only when both are supported.
 (function () {
     "use strict";
+    // Theme chosen in the app (MediaPreferences, key kb.theme): the boot screen is painted in it, not in the system's.
+    try {
+        var theme = window.localStorage.getItem("kb.theme");
+        if (theme === "light" || theme === "dark") document.documentElement.setAttribute("data-theme", theme);
+    } catch (e) {
+        // Blocked storage: the boot screen follows the system.
+    }
     // (module (type (struct))) — a GC struct type.
     var gcModule = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 3, 1, 95, 0]);
     // (module (type (func)) (tag (type 0))) — an exception tag.

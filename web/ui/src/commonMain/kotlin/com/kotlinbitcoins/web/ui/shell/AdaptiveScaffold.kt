@@ -85,9 +85,10 @@ private val AvatarSize = 40.dp
 /**
  * Adaptive navigation (W-14, FR-009, FR-044) in the "Azul suave" look: the page is a rounded shell on a tinted
  * ground, with the navigation on its left. < 600 dp top bar + "Menu" + modal drawer; 600–839 dp navigation rail;
- * ≥ 840 dp permanent sidebar. The 7 destinations and "Sair" in all of them, the current one as a filled pill and
- * named "…, página atual" (L6 of W-00). [user] (name and e-mail) is shown above "Sair" once it is known. Content in
- * one column of at most 1120 dp; no horizontal scroll at page level. Texts come from strings.xml (FR-048).
+ * ≥ 840 dp permanent sidebar. The 7 destinations, the theme switch and "Sair" in all of them, the current one as a
+ * filled pill and named "…, página atual" (L6 of W-00). [user] (name and e-mail) is shown above "Sair" once it is
+ * known. Content in one column of at most 1120 dp; no horizontal scroll at page level. Texts come from strings.xml
+ * (FR-048).
  */
 @Composable
 fun AdaptiveScaffold(
@@ -157,6 +158,7 @@ private fun CompactLayout(
                         close()
                         onLogout()
                     },
+                    themeInList = true,
                 )
             }
         },
@@ -222,6 +224,7 @@ private fun MediumLayout(
                             modifier = Modifier.focusOutline().currentPage(label, isCurrent),
                         )
                     }
+                    ThemeRailSwitch()
                     NavigationRailItem(
                         selected = false,
                         onClick = onLogout,
@@ -276,7 +279,11 @@ private fun ShellSurface(
     )
 }
 
-/** Brand, the destinations (scrolling when they do not fit), the user and "Sair". No heading: the h1 is the page's. */
+/**
+ * Brand, the destinations (scrolling when they do not fit), the theme switch, the user and "Sair". No heading: the
+ * h1 is the page's. The theme switch sits above the user; in the compact menu ([themeInList]) it goes at the end of
+ * the scrolling destinations instead, so that on a short phone it never takes the room of a destination.
+ */
 @Composable
 private fun Sidebar(
     current: AppRoute,
@@ -284,6 +291,7 @@ private fun Sidebar(
     onNavigate: (AppRoute) -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
+    themeInList: Boolean = false,
 ) {
     Column(modifier = modifier.padding(horizontal = 20.dp, vertical = 24.dp)) {
         Brand()
@@ -303,8 +311,13 @@ private fun Sidebar(
                     modifier = Modifier.currentPage(label, isCurrent),
                 )
             }
+            if (themeInList) ThemeSegmentedSwitch(Modifier.padding(top = 12.dp))
         }
         Spacer(Modifier.height(12.dp))
+        if (!themeInList) {
+            ThemeSegmentedSwitch()
+            Spacer(Modifier.height(12.dp))
+        }
         if (user != null) {
             UserCard(user)
             Spacer(Modifier.height(6.dp))

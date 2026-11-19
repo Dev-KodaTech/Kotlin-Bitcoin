@@ -21,6 +21,9 @@ class ApiInstant private constructor(
     /** "08:10", for the chart axis and its textual summary (the date is given by the context). */
     fun formatTime(): String = BrasiliaTime.TIME.format(toBrasilia().time)
 
+    /** "18/11": day and month in Brasília. */
+    fun formatDayMonth(): String = BrasiliaTime.DAY_MONTH.format(toBrasilia().date)
+
     override fun compareTo(other: ApiInstant): Int = instant.compareTo(other.instant)
 
     override fun equals(other: Any?): Boolean = other is ApiInstant && other.instant == instant

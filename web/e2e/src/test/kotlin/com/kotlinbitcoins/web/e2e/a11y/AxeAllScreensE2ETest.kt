@@ -135,7 +135,7 @@ class AxeAllScreensE2ETest : E2eBase() {
             }
         }
 
-        /** The deposit reads nothing: its error and loading states are those of the submission. */
+        /** The form is what the deposit is for: its error and loading states are those of the submission. */
         fun deposit() {
             app.goTo(Screens.DEPOSIT)
             axe(Screens.DEPOSIT, "carregado")

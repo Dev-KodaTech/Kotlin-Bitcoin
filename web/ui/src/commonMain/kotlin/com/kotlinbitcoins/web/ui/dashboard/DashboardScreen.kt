@@ -1,6 +1,5 @@
 package com.kotlinbitcoins.web.ui.dashboard
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,13 +16,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,17 +39,19 @@ import com.kotlinbitcoins.web.state.dashboard.PositionTotal
 import com.kotlinbitcoins.web.state.shared.Loadable
 import com.kotlinbitcoins.web.ui.chart.PriceHistoryChart
 import com.kotlinbitcoins.web.ui.chart.chartSummary
-import com.kotlinbitcoins.web.ui.components.CardPadding
+import com.kotlinbitcoins.web.ui.components.CardHeader
+import com.kotlinbitcoins.web.ui.components.DividedRows
 import com.kotlinbitcoins.web.ui.components.ErrorBlock
+import com.kotlinbitcoins.web.ui.components.HeroOutlinedButton
 import com.kotlinbitcoins.web.ui.components.LoadableBlock
 import com.kotlinbitcoins.web.ui.components.LoadingIndicator
 import com.kotlinbitcoins.web.ui.components.MinTouchTarget
+import com.kotlinbitcoins.web.ui.components.MutedText
 import com.kotlinbitcoins.web.ui.components.PageBottomPadding
 import com.kotlinbitcoins.web.ui.components.PageHeading
 import com.kotlinbitcoins.web.ui.components.PauseToggle
 import com.kotlinbitcoins.web.ui.components.QuoteBlock
 import com.kotlinbitcoins.web.ui.components.SectionCard
-import com.kotlinbitcoins.web.ui.components.SectionTitle
 import com.kotlinbitcoins.web.ui.components.VariationBadge
 import com.kotlinbitcoins.web.ui.components.focusOutline
 import com.kotlinbitcoins.web.ui.components.spokenText
@@ -216,7 +214,7 @@ private fun SummaryBlocks(
             onRetry = actions.onRetryRecent,
             empty = { MutedText(stringResource(Res.string.dashboard_recent_empty)) },
         ) { entries ->
-            Rows(entries) { RecentEntryRow(it) }
+            DividedRows(entries) { RecentEntryRow(it) }
         }
     }
 }
@@ -308,21 +306,6 @@ private fun Shortcuts(onNavigate: (AppRoute) -> Unit) {
 }
 
 @Composable
-private fun HeroOutlinedButton(
-    text: String,
-    onClick: () -> Unit,
-) {
-    val onHero = LocalExtendedColors.current.onHero
-    OutlinedButton(
-        onClick = onClick,
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = onHero),
-        border = BorderStroke(1.5.dp, onHero),
-        shape = MaterialTheme.shapes.medium,
-        modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline(onHero),
-    ) { Text(text) }
-}
-
-@Composable
 private fun PositionTotalContent(
     position: PositionTotal,
     actions: DashboardActions,
@@ -357,43 +340,10 @@ private fun PositionTotalContent(
 private fun InvestmentsContent(state: DashboardUiState) {
     when (val position = state.position) {
         PositionTotal.Loading -> LoadingIndicator()
-        is PositionTotal.Value -> Rows(state.investments.take(MAX_INVESTMENTS)) { InvestmentRow(it) }
+        is PositionTotal.Value -> DividedRows(state.investments.take(MAX_INVESTMENTS)) { InvestmentRow(it) }
         PositionTotal.DependsOnQuote -> MutedText(stringResource(Res.string.quote_unavailable))
         is PositionTotal.NoInvestments -> MutedText(stringResource(Res.string.investments_empty))
         is PositionTotal.Failed -> MutedText(position.error.message())
-    }
-}
-
-/** Title of a card with a link to the page that has everything about it. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun CardHeader(
-    title: String,
-    link: String,
-    onLink: () -> Unit,
-) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        itemVerticalAlignment = Alignment.CenterVertically,
-    ) {
-        SectionTitle(title)
-        TextButton(onClick = onLink, modifier = Modifier.heightIn(min = MinTouchTarget).focusOutline()) {
-            Text(link)
-        }
-    }
-}
-
-@Composable
-private fun <T> Rows(
-    items: List<T>,
-    row: @Composable (T) -> Unit,
-) {
-    Column {
-        items.forEachIndexed { index, item ->
-            if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            row(item)
-        }
     }
 }
 
@@ -478,16 +428,6 @@ private fun RecentEntryRow(entry: StatementEntry) {
         }
         Text(amount, style = MaterialTheme.typography.titleSmall.numeric())
     }
-}
-
-@Composable
-private fun MutedText(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(bottom = CardPadding / 2),
-    )
 }
 
 private fun EntryType.label() =

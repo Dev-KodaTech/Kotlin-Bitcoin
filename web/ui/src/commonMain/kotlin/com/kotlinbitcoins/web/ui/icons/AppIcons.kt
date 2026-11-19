@@ -25,7 +25,15 @@ object AppIcons {
     val Play = icon("M8 5l11 7-11 7z")
     val ArrowUp = icon("M12 19V5m0 0l-6 6m6-6l6 6")
     val ArrowDown = icon("M12 5v14m0 0l-6-6m6 6l6-6")
+    val Check = icon("M5 12.5l4.5 4.5L19 7.5")
     val Reinvestment = icon("M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5")
+    val ThemeSystem = icon("M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z", "M8 21h8M12 17v4")
+    val ThemeLight =
+        icon(
+            "M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8z",
+            "M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4",
+        )
+    val ThemeDark = icon("M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z")
     val Bitcoin =
         icon(
             "M9 6h4.5a3 3 0 0 1 0 6H9zM9 12h5.5a3 3 0 0 1 0 6H9z",

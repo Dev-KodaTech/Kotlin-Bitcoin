@@ -2,9 +2,11 @@ package com.kotlinbitcoins.web.ui.chart
 
 import androidx.compose.ui.geometry.Offset
 import com.kotlinbitcoins.web.core.market.ChartData
+import com.kotlinbitcoins.web.core.market.ChartSeries
 import com.kotlinbitcoins.web.core.market.Segment
 import com.kotlinbitcoins.web.core.money.QuotePrice
 import com.kotlinbitcoins.web.core.time.ApiInstant
+import kotlin.math.roundToInt
 
 /** A mark of an axis: the exact [value] shown as text and its [position] in pixels along the axis. */
 data class AxisMark<out T>(
@@ -24,8 +26,9 @@ class ChartGeometry(
 ) {
     private val startMillis = millis(data.xRange.start)
     private val spanMillis = (millis(data.xRange.end) - startMillis).coerceAtLeast(1)
-    private val minPrice = number(data.yRange.min)
-    private val priceSpan = number(data.yRange.max) - minPrice
+    private val minPrice = number(data.scale.min)
+    private val priceSpan = number(data.scale.max) - minPrice
+    private val slots = (spanMillis / ChartSeries.SLOT.inWholeMilliseconds).toInt()
 
     /** 0 at the start of the 24 h window, [width] at its end; instants outside are clamped. */
     fun x(at: ApiInstant): Float {
@@ -33,7 +36,17 @@ class ChartGeometry(
         return (fraction.coerceIn(0.0, 1.0) * width).toFloat()
     }
 
-    /** [height] at the minimum price, 0 at the maximum; a flat chart is drawn in the middle. */
+    /**
+     * The 10 min slot nearest to [x] (pixels from the left of the plot), counted back from the end of the window:
+     * what the pointer is over. Positions outside the plot give the first or the last slot.
+     */
+    fun slotAt(x: Float): ApiInstant {
+        if (width <= 0f) return data.xRange.end
+        val fromEnd = ((1.0 - (x / width).toDouble().coerceIn(0.0, 1.0)) * slots).roundToInt()
+        return ApiInstant.of(data.xRange.end.instant - ChartSeries.SLOT * fromEnd)
+    }
+
+    /** [height] at the bottom of the axis ([ChartData.scale]), 0 at its top; a single-price axis is the middle. */
     fun y(price: QuotePrice): Float {
         if (priceSpan <= 0.0) return height / 2
         val fraction = (number(price) - minPrice) / priceSpan
