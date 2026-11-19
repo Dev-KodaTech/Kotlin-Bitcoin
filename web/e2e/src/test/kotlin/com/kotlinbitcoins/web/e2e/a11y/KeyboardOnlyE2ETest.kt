@@ -170,16 +170,20 @@ class KeyboardOnlyE2ETest : E2eBase() {
         }
 
         /**
-         * From the h1 of a protected screen, Shift+Tab walks back through the drawer ("Sair" first) and Enter opens
-         * [target]: [LOGOUT] or a destination of the menu. [controlsBefore] counts the content controls before the
-         * focused one when the focus is not on the h1.
+         * From the h1 of a protected screen, Shift+Tab walks back through the drawer ("Sair" first, then the three
+         * options of the theme switch) and Enter opens [target]: [LOGOUT] or a destination of the menu.
+         * [controlsBefore] counts the content controls before the focused one when the focus is not on the h1.
          */
         fun navigate(
             target: Any,
             controlsBefore: Int = 0,
         ) {
             val stepsBack =
-                if (target == LOGOUT) 1 else MENU_ITEMS + 1 - Screens.PROTECTED.indexOf(target as Screen)
+                if (target == LOGOUT) {
+                    1
+                } else {
+                    MENU_ITEMS + THEME_OPTIONS + 1 - Screens.PROTECTED.indexOf(target as Screen)
+                }
             // From <body> the first Shift+Tab only enters the canvas, back on the h1 (L8 of W-00).
             val entering = if (focusedTag() == "BODY") 1 else 0
             app.ui.press("Shift+Tab", times = controlsBefore + stepsBack + entering)
@@ -222,6 +226,9 @@ class KeyboardOnlyE2ETest : E2eBase() {
     private companion object {
         const val LOGOUT = "Sair"
         const val MENU_ITEMS = 7
+
+        /** The theme switch (Sistema, Claro, Escuro) sits between the destinations and "Sair". */
+        const val THEME_OPTIONS = 3
         const val TABS_TO_TABLE_BUTTON = 2
         val BRASILIA: ZoneId = ZoneId.of("America/Sao_Paulo")
 

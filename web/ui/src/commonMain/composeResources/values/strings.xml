@@ -17,6 +17,11 @@
     <string name="nav_main">Navegação principal</string>
     <!-- L6 of W-00: the mirror does not expose the selected state, so it goes into the name. -->
     <string name="nav_current_page">%1$s, página atual</string>
+    <string name="theme_label">Tema</string>
+    <string name="theme_system">Sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="theme_current">%1$s, tema atual</string>
 
     <!-- Shared -->
     <string name="loading">Carregando…</string>
@@ -114,10 +119,27 @@
     <!-- Deposit (US3) -->
     <string name="deposit_amount">Valor do depósito</string>
     <string name="deposit_submit">Depositar</string>
+    <string name="deposit_intro">Informe o valor e veja como fica o seu saldo.</string>
+    <string name="deposit_quick_amounts">Valores rápidos</string>
+    <!-- L6 of W-00: the mirror does not expose the selected state, so it goes into the name. -->
+    <string name="deposit_quick_amount_selected">%1$s, valor selecionado</string>
+    <string name="deposit_current_balance">Saldo atual</string>
+    <!-- Calculated by the client (balance + amount in the field), so always labeled "Estimativa" -->
+    <string name="deposit_balance_after">Estimativa do saldo após este depósito</string>
+    <string name="deposit_no_estimate">—</string>
+    <!-- An amount that comes into the balance: the amount in the field, a deposit of the list -->
+    <string name="deposit_plus_amount">+ %1$s</string>
+    <string name="deposit_balance_updated">Atualizado com o depósito de %1$s.</string>
+    <string name="deposit_recent">Últimos depósitos</string>
+    <!-- Not "Ver extrato": the uncertain result already has an action with that name on this page -->
+    <string name="deposit_view_statement">Ver extrato completo</string>
+    <string name="deposit_recent_empty">Você ainda não tem depósitos recentes.</string>
     <string name="deposit_result_title">Depósito de %1$s realizado</string>
+    <string name="deposit_amount_deposited">Valor depositado</string>
     <string name="deposit_new_balance">Novo saldo</string>
     <string name="deposit_occurred_at">Data e hora</string>
     <string name="deposit_new">Novo depósito</string>
+    <string name="deposit_buy">Comprar bitcoin</string>
     <!-- Title suffix of the result step (contracts/ui-routes.md): "Depósito realizado · …" -->
     <string name="page_deposit_succeeded">Depósito realizado</string>
 
@@ -262,6 +284,24 @@
     <string name="market_summary">Gráfico de preços das últimas 24 horas (horário de Brasília). %1$s %2$s</string>
     <string name="market_series_summary">%1$s: mínimo %2$s, máximo %3$s, último %4$s às %5$s.</string>
     <string name="market_empty">Sem dados de cotação nas últimas 24 horas.</string>
+    <!-- Price chart (W-13): the strip of figures above it, the marks on the canvas and the hover box -->
+    <string name="chart_change_24h">em 24 h</string>
+    <string name="chart_spread">Spread atual</string>
+    <string name="chart_spread_hint">venda − compra</string>
+    <string name="chart_coverage">Cobertura</string>
+    <string name="chart_coverage_value">%1$s das 24 h</string>
+    <string name="chart_gaps_none">nenhum período sem registro</string>
+    <string name="chart_gaps_one">1 período sem registro</string>
+    <string name="chart_gaps_many">%1$s períodos sem registro</string>
+    <string name="chart_gap_legend">Área hachurada: período sem registro de cotação</string>
+    <string name="chart_now">Agora</string>
+    <string name="chart_no_record">Sem registro</string>
+    <string name="chart_no_record_here">Sem registro neste horário</string>
+    <string name="chart_buy">Compra</string>
+    <string name="chart_sell">Venda</string>
+    <string name="chart_spread_short">Spread</string>
+    <string name="chart_equal_prices">compra = venda</string>
+    <string name="chart_flat_note">Preço estável: compra e venda em %1$s nas últimas 24 h</string>
     <string name="market_refresh">Atualizar</string>
     <string name="market_refreshing">Atualizando…</string>
 </resources>

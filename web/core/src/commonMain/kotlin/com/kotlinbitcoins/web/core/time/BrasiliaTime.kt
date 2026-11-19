@@ -27,6 +27,14 @@ object BrasiliaTime {
             year()
         }
 
+    /** dd/MM, the date under the midnight mark of the chart. */
+    internal val DAY_MONTH =
+        LocalDate.Format {
+            day()
+            char('/')
+            monthNumber()
+        }
+
     /** HH:mm */
     internal val TIME =
         LocalTime.Format {

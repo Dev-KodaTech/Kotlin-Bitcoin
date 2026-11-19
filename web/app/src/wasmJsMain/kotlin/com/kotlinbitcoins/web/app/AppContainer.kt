@@ -89,7 +89,7 @@ class AppContainer {
                     texts = texts,
                 )
             },
-            deposit = { texts -> DepositViewModel(accountGateway, announcer, texts) },
+            deposit = { texts -> DepositViewModel(accountGateway, statementGateway, announcer, texts) },
             purchase = { texts ->
                 PurchaseViewModel(
                     accountGateway = accountGateway,

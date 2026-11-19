@@ -2,7 +2,10 @@ package com.kotlinbitcoins.web.core.market
 
 import com.kotlinbitcoins.web.core.model.HistoryPoint
 import com.kotlinbitcoins.web.core.model.QuoteHistory
+import com.kotlinbitcoins.web.core.money.PriceAxis
+import com.kotlinbitcoins.web.core.money.PriceDifference
 import com.kotlinbitcoins.web.core.money.QuotePrice
+import com.kotlinbitcoins.web.core.money.VariationPercent
 import com.kotlinbitcoins.web.core.time.ApiInstant
 import com.kotlinbitcoins.web.core.time.BrasiliaTime
 import kotlinx.datetime.LocalDateTime
@@ -29,17 +32,44 @@ data class PriceRange(
     val max: QuotePrice,
 )
 
-/** Exact minimum, maximum and last value of one series (FR-034). */
+/** Exact minimum, maximum and last value of one series (FR-034), and its [change] from the first to the last point. */
 data class SeriesSummary(
     val min: QuotePrice,
     val max: QuotePrice,
     val last: ChartPoint,
+    val change: VariationPercent,
 )
 
+/** Both series and the [spread] (sell − buy) of the last point. */
 data class ChartSummary(
     val buy: SeriesSummary,
     val sell: SeriesSummary,
+    val spread: PriceDifference,
 )
+
+/**
+ * A stretch of the 24 h window without record, drawn hatched from [from] to [to] (the points around it, or the start
+ * of the window); [firstMissing] and [lastMissing] are its first and last empty slots.
+ */
+data class ChartGap(
+    val from: ApiInstant,
+    val to: ApiInstant,
+    val firstMissing: ApiInstant,
+    val lastMissing: ApiInstant,
+)
+
+/** Recorded 10 min slots out of the [totalSlots] of the 24 h window. */
+data class ChartCoverage(
+    val recordedSlots: Int,
+    val totalSlots: Int,
+) {
+    /** Whole percent, truncated: 86 for 125 of 145 slots. */
+    val percent: Int get() = recordedSlots * PERCENT / totalSlots
+
+    private companion object {
+        const val PERCENT = 100
+    }
+}
 
 /** A line of the data table: a recorded slot, or a slot without record shown as "sem registro". */
 sealed interface TableRow {
@@ -53,19 +83,23 @@ sealed interface TableRow {
 }
 
 /**
- * Everything the chart of the Mercado shows, prepared without floating point (data-model §6, W-13): the two series in
- * segments, the 24 h time range ending at the last point, the price range of both series, the axis marks (every 4 h on
- * the hour in Brasília; 4 prices from the minimum to the maximum), the textual summary and the table rows.
+ * Everything the price chart shows, prepared without floating point (data-model §6, W-13): the two series in
+ * segments, the 24 h time range ending at the last point, the price range of both series ([yRange]) and the range of
+ * the axis around it ([scale], from the first to the last of [priceMarks]: round multiples of one step), the time marks
+ * (every 4 h on the hour in Brasília), the textual summary, the table rows, the [gaps] and the [coverage].
  */
 data class ChartData(
     val buy: List<Segment>,
     val sell: List<Segment>,
     val xRange: TimeRange,
     val yRange: PriceRange,
+    val scale: PriceRange,
     val summary: ChartSummary,
     val rows: List<TableRow>,
     val timeMarks: List<ApiInstant>,
     val priceMarks: List<QuotePrice>,
+    val gaps: List<ChartGap>,
+    val coverage: ChartCoverage,
 )
 
 /** Pure preparation of the quote history for the chart; nothing is interpolated or invented. */
@@ -77,6 +111,9 @@ object ChartSeries {
     private val TIME_MARK_STEP = 4.hours
     private const val TIME_MARK_HOURS = 4
     private const val PRICE_MARK_STEPS = 3
+
+    /** The 10 min slots of the 24 h window, both ends included. */
+    private val TOTAL_SLOTS = (WINDOW.inWholeMinutes / SLOT.inWholeMinutes).toInt() + 1
 
     /** Splits the points (time order) whenever the next slot is more than 10 min after the previous one. */
     fun segments(points: List<HistoryPoint>): List<List<HistoryPoint>> {
@@ -103,15 +140,21 @@ object ChartSeries {
         val xRange = TimeRange(ApiInstant.of(end.instant - WINDOW), end)
         val all = points.flatMap { listOf(it.buyPrice, it.sellPrice) }
         val yRange = PriceRange(all.min(), all.max())
+        val priceMarks = priceMarks(yRange)
+        val last = points.last()
         return ChartData(
             buy = buy,
             sell = sell,
             xRange = xRange,
             yRange = yRange,
-            summary = ChartSummary(summary(buy), summary(sell)),
+            scale = PriceRange(priceMarks.first(), priceMarks.last()),
+            summary =
+                ChartSummary(summary(buy), summary(sell), PriceDifference.between(last.buyPrice, last.sellPrice)),
             rows = TableRows.of(points),
             timeMarks = timeMarks(xRange),
-            priceMarks = priceMarks(yRange),
+            priceMarks = priceMarks,
+            gaps = gaps(segments, xRange),
+            coverage = ChartCoverage(points.count { it.slotAt >= xRange.start }, TOTAL_SLOTS),
         )
     }
 
@@ -121,7 +164,29 @@ object ChartSeries {
             min = points.minOf { it.price },
             max = points.maxOf { it.price },
             last = points.last(),
+            change = VariationPercent.between(points.first().price, points.last().price),
         )
+    }
+
+    /** Before the first point (when it starts after the window) and between consecutive segments. */
+    private fun gaps(
+        segments: List<List<HistoryPoint>>,
+        range: TimeRange,
+    ): List<ChartGap> {
+        val first = segments.first().first().slotAt
+        val leading =
+            if (first > range.start) {
+                listOf(ChartGap(range.start, first, range.start, ApiInstant.of(first.instant - SLOT)))
+            } else {
+                emptyList()
+            }
+        val between =
+            segments.zipWithNext { before, after ->
+                val from = before.last().slotAt
+                val to = after.first().slotAt
+                ChartGap(from, to, ApiInstant.of(from.instant + SLOT), ApiInstant.of(to.instant - SLOT))
+            }
+        return leading + between
     }
 
     /** Every 4 h on the hour in Brasília (00:00, 04:00, …) inside [range]. */
@@ -137,11 +202,18 @@ object ChartSeries {
 
     private fun kotlin.time.Instant.toLocalHour(): Int = ApiInstant.of(this).toBrasilia().hour
 
-    /** 4 prices from the minimum to the maximum (one when they are equal); the inner ones truncated to 2 decimals. */
-    private fun priceMarks(range: PriceRange): List<QuotePrice> {
-        if (range.min == range.max) return listOf(range.min)
-        return (0..PRICE_MARK_STEPS).mapNotNull { QuotePrice.axisMark(range.min, range.max, it, PRICE_MARK_STEPS) }
-    }
+    /**
+     * Round marks around the range ([PriceAxis]): up to 6 multiples of one step, and 5 around a flat price. When the
+     * bottom of such an axis would not be a price (tiny values), 4 prices from the minimum to the maximum (one when
+     * they are equal), the inner ones truncated to 2 decimals.
+     */
+    private fun priceMarks(range: PriceRange): List<QuotePrice> =
+        PriceAxis.marks(range.min, range.max)
+            ?: if (range.min == range.max) {
+                listOf(range.min)
+            } else {
+                (0..PRICE_MARK_STEPS).mapNotNull { QuotePrice.axisMark(range.min, range.max, it, PRICE_MARK_STEPS) }
+            }
 }
 
 /** One row per 10 min slot from the first to the last point; a slot without point is [TableRow.Missing]. */

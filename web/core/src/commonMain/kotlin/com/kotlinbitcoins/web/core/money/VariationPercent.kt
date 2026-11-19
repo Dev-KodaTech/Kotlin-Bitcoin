@@ -40,6 +40,13 @@ class VariationPercent private constructor(
         private const val MINUS_SIGN = "−"
         private val API_PATTERN = Regex("""^-?\d+\.\d{2}$""")
 
+        /** The variation from [first] to [last], truncated toward zero to 2 decimals (the chart's 24 h change). */
+        fun between(
+            first: QuotePrice,
+            last: QuotePrice,
+        ): VariationPercent =
+            VariationPercent(DecimalSupport.percentChange(first.toPlainString(), last.toPlainString(), SCALE))
+
         fun parseApi(raw: String): Outcome<ApiError, VariationPercent> =
             if (API_PATTERN.matches(raw)) {
                 Outcome.Success(VariationPercent(DecimalSupport.withScale(raw, SCALE)))

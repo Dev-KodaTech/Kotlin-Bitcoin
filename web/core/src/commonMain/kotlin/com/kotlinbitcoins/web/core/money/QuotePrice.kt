@@ -11,10 +11,24 @@ class QuotePrice private constructor(
     fun toPlainString(): String = plain
 
     /** "R$ 400.000,12345": every received decimal, with a minimum of 2 and no rounding (FR-036). */
-    fun format(): String {
-        val decimals = plain.substringAfter('.', missingDelimiterValue = "").length
-        return BRL_PREFIX + PtBrNumberFormat.format(DecimalSupport.withScale(plain, maxOf(decimals, MIN_DECIMALS)))
-    }
+    fun format(): String = BRL_PREFIX + formatNumber()
+
+    /** "400.000,12345": [format] without the currency symbol, for the value tags of the chart (W-13). */
+    fun formatNumber(): String = PtBrNumberFormat.format(DecimalSupport.withScale(plain, displayDecimals()))
+
+    /**
+     * A mark of the price axis: "R$ 400.500" when it has no cents, else as [format]. Still exact: only zero
+     * decimals are left out.
+     */
+    fun formatAxis(): String =
+        if (plain.substringAfter('.', missingDelimiterValue = "").all { it == '0' }) {
+            BRL_PREFIX + PtBrNumberFormat.format(DecimalSupport.withScale(plain, 0))
+        } else {
+            format()
+        }
+
+    internal fun displayDecimals(): Int =
+        maxOf(plain.substringAfter('.', missingDelimiterValue = "").length, MIN_DECIMALS)
 
     override fun compareTo(other: QuotePrice): Int = DecimalSupport.compare(plain, other.plain)
 
@@ -54,6 +68,9 @@ class QuotePrice private constructor(
                         ?.let(::QuotePrice)
                 }
             }
+
+        /** A mark computed by [PriceAxis]: exact, > 0 and with at most 2 decimals. */
+        internal fun axisValue(plain: String): QuotePrice = QuotePrice(DecimalSupport.withScale(plain, MIN_DECIMALS))
 
         fun parseApi(raw: String): Outcome<ApiError, QuotePrice> {
             if (!API_PATTERN.matches(raw) || DecimalSupport.isZero(raw)) return Outcome.Failure(ApiError.Unexpected)

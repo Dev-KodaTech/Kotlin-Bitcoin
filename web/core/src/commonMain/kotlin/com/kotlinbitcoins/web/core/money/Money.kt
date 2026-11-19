@@ -16,7 +16,7 @@ class Money private constructor(
     /** Text for the amount field, as [com.kotlinbitcoins.web.core.format.AmountInputParser] reads it: "1.234,56". */
     fun toInputString(): String = PtBrNumberFormat.format(plain)
 
-    /** Exact sum, used only for display totals (FR-029). */
+    /** Exact sum, used only for display totals (FR-029) and for the labeled estimate of the deposit page. */
     operator fun plus(other: Money): Money = Money(DecimalSupport.add(plain, other.plain, SCALE))
 
     fun isZero(): Boolean = DecimalSupport.isZero(plain)
